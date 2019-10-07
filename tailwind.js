@@ -6,6 +6,7 @@ module.exports = {
       body: ['Graphik', 'sans-serif'],
     },
     extend: {
+      // colors: colors,
       colors: {
         cyan: '#9cdbff',
       },

@@ -1,73 +1,57 @@
+import { SquareState } from './SquareState';
 <template>
   <div>
-    <div class="picross select-none" ref="picross" @touchmove.prevent>
+    <div @touchmove.prevent class="picross select-none" ref="picross">
 
-      <div class="colsInfos infos" ref="colHints">
-        <div v-for="colHints in colsHints"
-             class="flex flex-1 flex-col justify-end items-center bg-gray-300">
-          <div v-for="colHint in colHints" :class="hintStyle">
-            {{colHint}}
-          </div>
-        </div>
+      <div class="colsInfos infos flex" ref="colHints">
+        <Hints :hintsModel="hintsModel" class="flex-col" v-for="(hintsModel) in columnHints"/>
       </div>
 
-      <div class="rowsInfos infos" ref="rowHints">
-        <div v-for="rowHints in rowsHints"
-             class="flex flex-1 justify-end items-center bg-gray-300">
-          <div v-for="rowHint in rowHints" :class="hintStyle">
-            {{rowHint}}
-          </div>
-        </div>
+      <div class="rowsInfos infos flex flex-col" ref="rowHints">
+        <Hints :hintsModel="hintsModel" class="flex-row" v-for="(hintsModel) in rowHints"/>
       </div>
 
-      <div ref="gameGrid" class="gameGrid w-full h-full bg-gray-300" @mouseleave="userLeave()">
-        <template v-for="(gameRow, row) in gameGrid">
-          <Square v-for="(gameSquare, col) in gameRow" :state="gameSquare" :key="`square_${col}-${row}`"
+      <div @mouseleave="userLeave()" class="gameGrid w-full h-full bg-gray-300" ref="gameGrid">
+        <template v-for="(gameRow, row) in gameGrid.states">
+          <Square :key="`square_${col}-${row}`" :state="gameSquareState"
+                  @contextmenu.native="rightClick($event)"
+
                   @mousedown.native="startPlacing({col, row}, $event)"
-                  @touchstart.native="startPlacing({col, row}, $event)"
-
                   @mouseenter.native="traceSquares({col, row}, $event)"
-                  @touchmove.native="traceSquares({col, row}, $event)"
-
-                  @contextmenu.native="preventRightClick($event)"
 
                   @mouseup.native="stopPlacing()"
+                  @touchmove.native="traceSquares({col, row}, $event)"
+
+                  @touchstart.native="startPlacing({col, row}, $event)"
+
+                  v-for="(gameSquareState, col) in gameRow"
           />
         </template>
       </div>
-
     </div>
 
     <div>{{usedBlocs}} / {{maxBlocs}}</div>
     <div>{{duration}}</div>
     <div>
-      <input type="checkbox" v-model="stateModeValue">
-      <div>activeState : {{stateModeValue}}</div>
+      <input type="checkbox" v-model="isValueMode">
     </div>
-    <button class="btn btn-blue" @click="undo()" :disabled="history.length === 0">undo</button>
-    <div style="display: grid; grid-template-columns: 1fr 1fr;">
-      <h3>debug</h3>
-      {{blabla}}
-      <!--      <div>isMouseDown : {{isMouseDown}}</div>-->
-      <!--      <div>squareFrom : {{squareFrom}}</div>-->
-      <div>shouldCalcDirection : {{shouldCalcDirection}}</div>
-      <div>mouseDirection : {{mouseDirection}}</div>
-      <!--      <div>activeState : {{activeState}}</div>-->
-      <!--      <div>eraseState : {{eraseState}}</div>-->
-      <!--      <div>testEvent : {{JSON.stringify(testEvent)}}</div>-->
-    </div>
+    <button :disabled="!history.length" @click="undo()" class="btn btn-blue">undo</button>
   </div>
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
+  import {Component, Vue} from 'vue-property-decorator';
   import Square from '@/components/Square.vue';
-  import { SquareState } from '@/components/SquareState';
-  import { SquarePosition } from '@/components/SquarePosition';
+  import Hints from '@/components/Hints.vue';
+  import {SquareState} from '@/components/SquareState';
+  import {SquarePosition} from '@/components/SquarePosition';
   import _ from 'lodash';
+  import {GameGrid} from '@/components/GameGrid';
+  import {MouseDirection} from '@/components/MouseDirection';
+  import HintsModel from '@/components/Hints.model';
 
   @Component({
-    components: {Square},
+    components: {Square, Hints},
   })
   export default class Picross extends Vue {
     private gameStarted = false;
@@ -75,24 +59,25 @@
     private timerInterval!: any;
     private duration = 0;
 
-    private maxBlocs!: number;
+    private maxBlocs = 0;
     private usedBlocs = 0;
 
-    private colsHints = [] as number[][];
-    private rowsHints = [] as number[][];
+    private columnHints = [] as HintsModel[];
+    private rowHints = [] as HintsModel[];
 
-    private gameGrid = [] as number[][];
-    private solutionGrid = [] as number[][];
+    private gameGrid!: GameGrid;
+    private solutionGrid!: GameGrid;
 
-    private history = [] as number[][][];
+    private history = [] as GameGrid[];
 
     private isMouseDown = false;
     private shouldCalcDirection = false;
     private squareFrom!: SquarePosition;
-    private mouseDirection = MouseDirection.Vertical;
-    private stateModeValue = true;
-    private activeState!: SquareState;
-    private eraseState!: boolean;
+    private tracingDirection!: MouseDirection;
+    private isValueMode = true;
+
+    private stateToUse!: SquareState;
+    private stateToClose!: SquareState;
 
     private blabla = [] as any[];
 
@@ -106,17 +91,14 @@
 
     private beforeMount() {
       this.initSolution();
-      this.initGrid();
+      this.initGameGrid();
       this.initHints();
       this.addActualToHistory();
-      this.maxBlocs = this.countSquareState(SquareState.Value, this.solutionGrid);
-
-      // debug
-      // this.gameGrid = this.solutionGrid;
+      this.maxBlocs = this.solutionGrid.countSquareState(SquareState.Value);
     }
 
     private initSolution() {
-      this.solutionGrid = [
+      this.solutionGrid = new GameGrid([
         [2, 2, 2, 2, 1, 1, 2, 2, 2, 2],
         [2, 2, 2, 2, 1, 1, 2, 2, 2, 2],
         [2, 1, 1, 1, 1, 1, 1, 1, 1, 2],
@@ -127,68 +109,20 @@
         [1, 1, 2, 1, 2, 2, 1, 2, 1, 1],
         [1, 1, 2, 1, 2, 2, 1, 2, 1, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      ];
+      ]);
     }
 
-    private initGrid() {
-      const gameGrid = [] as number[][];
-
-      for (const row of this.solutionGrid) {
-        const gameRow = [] as number[];
-        for (const square of row) {
-          gameRow.push(SquareState.Close);
-        }
-        gameGrid.push(gameRow);
-      }
-
-      this.gameGrid = gameGrid;
+    private initGameGrid() {
+      this.gameGrid = new GameGrid([]);
+      this.gameGrid.initEmpty(this.solutionGrid.cols, this.solutionGrid.rows);
     }
 
     private initHints() {
-      // Cols
-      for (const row of this.solutionGrid) {
-        const rowHints = [];
-        let iteration = false;
-        let hint = 0;
-        for (const square of row) {
-          if (square === SquareState.Value) {
-            iteration = true;
-            hint++;
-          } else {
-            if (hint > 0) {
-              rowHints.push(hint);
-              hint = 0;
-            }
-          }
-        }
-        if (hint > 0) {
-          rowHints.push(hint);
-          hint = 0;
-        }
-        this.rowsHints.push(rowHints);
+      for (let col = 0; col < this.solutionGrid.cols; col++) {
+        this.columnHints.push(new HintsModel(this.solutionGrid.getColumn(col)));
       }
-
-      // Rows
-      for (let col = 0; col < this.solutionGrid[0].length; col++) {
-        const colHints = [];
-        let iteration = false;
-        let hint = 0;
-        for (const row of this.solutionGrid) {
-          if (row[col] === SquareState.Value) {
-            iteration = true;
-            hint++;
-          } else {
-            if (hint > 0) {
-              colHints.push(hint);
-              hint = 0;
-            }
-          }
-        }
-        if (hint > 0) {
-          colHints.push(hint);
-          hint = 0;
-        }
-        this.colsHints.push(colHints);
+      for (let row = 0; row < this.solutionGrid.rows; row++) {
+        this.rowHints.push(new HintsModel(this.solutionGrid.getRow(row)));
       }
     }
 
@@ -210,8 +144,8 @@
 
     private mounted() {
       const $gameGrid = this.$refs.gameGrid as HTMLElement;
-      const cols = this.gameGrid[0].length;
-      const rows = this.gameGrid.length;
+      const cols = this.gameGrid.cols;
+      const rows = this.gameGrid.rows;
 
       $gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
       $gameGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
@@ -224,14 +158,13 @@
     }
 
     private startPlacing(position: SquarePosition, event: MouseEvent | TouchEvent) {
-      this.blabla.push('start');
-
-      if (event instanceof MouseEvent && !this.isLeftClick(event)) {
+      if (!this.isLeftClick(event)) { // todo bloque mobile
         return;
       }
 
       this.isMouseDown = true;
       this.squareFrom = position;
+      this.shouldCalcDirection = true;
 
       this.prepareActiveState(position);
       this.addActualToHistory();
@@ -239,67 +172,56 @@
       if (!this.gameStarted) {
         this.startGame();
       }
+
+      this.traceSquares(position, event);
     }
 
     private stopPlacing() {
       this.blabla.push('stop');
       this.isMouseDown = false;
-      this.usedBlocs = this.countSquareState(SquareState.Value, this.gameGrid);
+      this.usedBlocs = this.gameGrid.countSquareState(SquareState.Value);
     }
 
     private traceSquares(position: SquarePosition, event: MouseEvent | TouchEvent) {
-      // debug
-      if (this.blabla[this.blabla.length - 1] === 'write') {
-        this.blabla.push(2);
-      } else if (typeof this.blabla[this.blabla.length - 1] === 'number') {
-        this.blabla[this.blabla.length - 1]++;
-      } else {
-        this.blabla.push('write');
-      }
-
       if (!this.isMouseDown) {
         return;
       }
 
-      if (event instanceof TouchEvent) {
-      this.blabla.push(event.changedTouches[0].pageX);
+      if (this.shouldCalcDirection && !_.isEqual(position, this.squareFrom)) {
+        this.tracingDirection = position.col !== this.squareFrom.col
+          ? MouseDirection.Horizontal : MouseDirection.Vertical;
+        this.shouldCalcDirection = false;
       }
 
-      this.blabla.push(position);
-
-      this.mouseDirection = position.col !== this.squareFrom.col ? MouseDirection.Horizontal : MouseDirection.Vertical;
-      this.shouldCalcDirection = false;
-
-      this.changeState(position);
+      this.changeStates(position);
     }
 
-    /**
-     *
-     * @param event
-     * @return true if left clic
-     * @throws Error Not valid clic (molet or other)
-     */
-    private isLeftClick(event: MouseEvent): boolean {
-      return event.button === 0;
+    private isLeftClick(event: MouseEvent | TouchEvent): boolean {
+      return event instanceof MouseEvent && event.button === 0;
     }
 
     private prepareActiveState(position: SquarePosition) {
-      const stateAction = this.stateModeValue ? SquareState.Value : SquareState.Empty;
-      const actualState = this.gameGrid[position.row][position.col];
+      const stateAction = this.isValueMode ? SquareState.Value : SquareState.Empty;
+      const actualGridState = this.gameGrid.getState(position);
 
-      this.activeState = (actualState === SquareState.Close || actualState !== stateAction)
-        ? stateAction : SquareState.Close;
-      this.eraseState = actualState !== SquareState.Close;
+      if (actualGridState === SquareState.Close) {
+        this.stateToUse = stateAction;
+        this.stateToClose = SquareState.Close;
+      } else {
+        this.stateToUse = actualGridState === stateAction ? SquareState.Close : stateAction;
+        this.stateToClose = actualGridState;
+      }
+
     }
 
-    private changeState(to: SquarePosition) {
+    private changeStates(to: SquarePosition) {
       const inlineTo = {} as SquarePosition;
 
       let length = 0;
       let colCoef = 0; // Coefficient === 0, -1 or 1, used to factorise gameGrid browsing
       let rowCoef = 0; // Coefficient === 0, -1 or 1, used to factorise gameGrid browsing
 
-      if (this.mouseDirection === MouseDirection.Horizontal) {
+      if (this.tracingDirection === MouseDirection.Horizontal) {
         inlineTo.row = this.squareFrom.row;
         inlineTo.col = to.col;
 
@@ -321,11 +243,15 @@
         } as SquarePosition;
 
         // If Set close state or Actual square is close or first is the square --> use the activated State
-        if (this.activeState === SquareState.Close
-          || this.eraseState
-          || this.gameGrid[actualPosition.row][actualPosition.col] === SquareState.Close
-          || i === 0) {
-          this.$set(this.gameGrid[actualPosition.row], actualPosition.col, this.activeState);
+        const actualGridState = this.gameGrid.getState(actualPosition);
+        if ((this.stateToUse !== SquareState.Close && actualGridState === SquareState.Close)
+          || (this.stateToUse === SquareState.Close && actualGridState === this.stateToClose)
+          || (actualGridState !== SquareState.Close
+            && actualGridState !== this.stateToUse
+            && actualGridState === this.stateToClose
+          )
+        ) {
+          this.gameGrid.setState(actualPosition, this.stateToUse);
         }
         this.verifyHints(actualPosition);
       }
@@ -334,62 +260,47 @@
     }
 
     private verifyHints(position: SquarePosition) {
-      return true;
+      this.columnHints[position.col].verify(this.gameGrid.getColumn(position.col));
+      this.rowHints[position.row].verify(this.gameGrid.getRow(position.row));
     }
 
 
     private verifyWin() {
-      try {
-        for (let row = 0; row < this.gameGrid.length; row++) {
-          for (let col = 0; col < this.gameGrid[0].length; col++) {
-            if (this.solutionGrid[row][col] === SquareState.Value && this.gameGrid[row][col] !== SquareState.Value) {
-              throw new Error('Not win');
-            }
-          }
+      for (const hints of this.columnHints) {
+        if (!hints.valid) {
+          return;
         }
-      } catch (e) {
-        return false;
+      }
+
+      for (const hints of this.rowHints) {
+        if (!hints.valid) {
+          return;
+        }
       }
 
       alert('win');
-      return true;
     }
 
-    private countSquareState(state: SquareState, grid: number[][]) {
-      let counter = 0;
-      for (const row of grid) {
-        for (const square of row) {
-          if (square === state) {
-            counter++;
-          }
-        }
-      }
-      return counter;
-    }
-
-    private preventRightClick(event: MouseEvent) {
+    private rightClick(event: MouseEvent) {
+      this.isValueMode = !this.isValueMode;
       event.preventDefault();
     }
 
     private undo() {
       if (this.history.length === 1) {
-        this.gameGrid = _.cloneDeep(this.history[0]);
+        this.gameGrid.initEmpty(this.gameGrid.cols, this.gameGrid.rows);
       } else {
-        this.gameGrid = this.history.pop() as number[][];
+        this.gameGrid = this.history.pop() as GameGrid;
       }
-      this.usedBlocs = this.countSquareState(SquareState.Value, this.gameGrid);
+      this.usedBlocs = this.gameGrid.countSquareState(SquareState.Value);
     }
 
     private addActualToHistory() {
       this.history.push(_.cloneDeep(this.gameGrid));
     }
-
   }
 
-  enum MouseDirection {
-    Vertical,
-    Horizontal,
-  }
+
 </script>
 
 <style>

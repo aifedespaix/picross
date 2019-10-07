@@ -1,7 +1,5 @@
 <template>
-  <div :class="getSquareClass(state)" class="flex justify-center items-center">
-    {{state}}
-  </div>
+  <div :class="getSquareClass(state)" class="flex justify-center items-center"></div>
 </template>
 
 <script lang="ts">
