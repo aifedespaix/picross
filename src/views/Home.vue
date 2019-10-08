@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home flex justify-center">
     <Picross />
   </div>
 </template>

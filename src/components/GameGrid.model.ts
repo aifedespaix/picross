@@ -1,8 +1,7 @@
 import {SquarePosition} from '@/components/SquarePosition';
 import {SquareState} from '@/components/SquareState';
-import {Vue} from 'vue-property-decorator';
 
-export class GameGrid {
+export class GameGridModel {
 
   public states = [] as number[][];
 
@@ -52,8 +51,7 @@ export class GameGrid {
 
   public setState(position: SquarePosition, state: SquareState) {
     if (position.col < this.cols && position.row < this.rows) {
-      // this.states[position.row][position.col] = state;
-      Vue.set(this.states[position.row], position.col, state);
+      this.states[position.row][position.col] = state;
     }
   }
 
