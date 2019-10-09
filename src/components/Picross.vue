@@ -318,7 +318,7 @@
 <style>
   .picross-container {
     width: 100vmin;
-    max-width: calc(100vh - 200px);
+    max-width: calc(100vh - 16rem);
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto 1fr;
@@ -328,7 +328,7 @@
     touch-action: none;
     width: 100%;
     height: 100vmin;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 16rem);
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: auto 1fr;

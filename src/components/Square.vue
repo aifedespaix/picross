@@ -4,7 +4,7 @@
        @pointerenter="pointerEnter($event)"
        @pointermove="pointerMove"
        @pointerup="stopPlacing($event)"
-       class="flex justify-center items-center border border-gray-100"
+       class="square flex justify-center items-center border border-gray-100"
   ></div>
 </template>
 
@@ -19,6 +19,9 @@
 
     @Prop() private state!: SquareState;
     @Prop() private position!: SquarePosition;
+
+    private audioEmpty!: HTMLAudioElement;
+
     private isChromeMobile!: boolean;
 
     /**
@@ -27,6 +30,16 @@
     private beforeMount() {
       const userAgent = navigator.userAgent.toLowerCase();
       this.isChromeMobile = userAgent.indexOf('chrome') > -1 && userAgent.indexOf('mobile') > -1;
+      this.loadAudio();
+    }
+
+    private loadAudio() {
+      try {
+        // this.audioEmpty = new Audio('../assets/audio/empty.mp3');
+        // this.audioEmpty.play();
+      } catch (e) {
+        // console.log(e);
+      }
     }
 
     private getBgClass() {
@@ -82,3 +95,9 @@
 
   }
 </script>
+
+<style>
+  .square {
+    transition: all .3s;
+  }
+</style>
