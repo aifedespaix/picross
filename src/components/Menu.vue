@@ -22,8 +22,8 @@
 
     private beforeCreate() {
       this.items = [
-        {to: '/', name: 'Home'} as Item,
-        {to: '/about', name: 'About'} as Item,
+        {to: '/', name: 'Picross'} as Item,
+        {to: '/about', name: 'À Propos'} as Item,
       ];
     }
   }

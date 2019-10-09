@@ -1,16 +1,38 @@
 <template>
-  <div class="flex flex-col justify-center items-center picross-container">
+  <div class="picross-container">
+
+    <div class="flex justify-between items-center w-full p-4">
+      <button :disabled="!history.length" @click="undo()"
+              class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
+        <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path fill="#2a4365" d="M14 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-2-9c-4.97 0-9 4.03-9 9H0l4 4 4-4H5c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.44C8.04 20.3 9.94 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
+        </svg>
+      </button>
+      <button :disabled="!history.length" @click="undo()"
+              class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
+        <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path fill="#2a4365" d="M14 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-2-9c-4.97 0-9 4.03-9 9H0l4 4 4-4H5c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.44C8.04 20.3 9.94 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
+        </svg>
+      </button>
+    </div>
+
     <div @touchmove.prevent class="picross select-none" ref="picross">
+      <div class="flex flex-col justify-center h-10 text-center">
+        <span class="" v-if="gameStarted">{{Math.round(duration / 10)}}</span>
+        <span class="" v-if="gameStarted">{{usedBlocs}} / {{maxBlocs}}</span>
+      </div>
 
       <div class="colsInfos infos flex" ref="colHints">
-        <Hints :hintsModel="hintsModel" class="flex-col" v-for="(hintsModel, key) in columnHints" :key="key"/>
+        <Hints :hintsModel="hintsModel" :key="key" class="flex-col" v-for="(hintsModel, key) in columnHints"/>
       </div>
 
       <div class="rowsInfos infos flex flex-col" ref="rowHints">
-        <Hints :hintsModel="hintsModel" class="flex-row" v-for="(hintsModel, key) in rowHints" :key="key"/>
+        <Hints :hintsModel="hintsModel" :key="key" class="flex-row" v-for="(hintsModel, key) in rowHints"/>
       </div>
 
-      <div @contextmenu="rightClick($event)" class="gameGrid w-full h-full bg-gray-300" ref="gameGrid">
+      <div @contextmenu="rightClick($event)" class="gameGrid w-full h-full" ref="gameGrid">
         <template v-for="(gameRow, row) in gameGrid.states">
           <Square :data-col="col" :data-row="row" :key="`square_${col}-${row}`"
                   :position="{col, row}" :state="gameSquareState"
@@ -18,7 +40,6 @@
                   @startPlacing="startPlacing"
                   @stopPlacing="stopPlacing"
                   @traceSquares="traceSquares"
-
                   v-for="(gameSquareState, col) in gameRow"
           />
         </template>
@@ -26,15 +47,7 @@
     </div>
 
     <div class="flex justify-around items-center w-full">
-      <button :disabled="!history.length" @click="undo()" class="btn btn-blue">undo</button>
-      <div>{{usedBlocs}} / {{maxBlocs}}</div>
-      <div>{{duration}}</div>
-      <ToggleButton class="w-4 h-4" v-model.isActive="isValueMode"/>
-      {{isValueMode}}
-    </div>
-    {{isMouseDown}}
-    <div class="w-full overflow-auto" style="display: grid;grid-template-columns: repeat(6, 1fr);grid-auto-rows: 1fr;">
-      <div v-for="bla in blabla">{{bla}}</div>
+      <ToggleButton v-model.isActive="isValueMode"/>
     </div>
 
   </div>
@@ -306,10 +319,13 @@
   .picross-container {
     width: 100vmin;
     max-width: calc(100vh - 200px);
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto 1fr;
   }
 
   .picross {
-    /*touch-action: none;*/
+    touch-action: none;
     width: 100%;
     height: 100vmin;
     max-height: calc(100vh - 200px);
@@ -331,7 +347,7 @@
   .gameGrid {
     grid-area: gameInfos;
     display: grid;
-    grid-gap: 2px;
+    /*grid-gap: 2px;*/
   }
 
   .infos {
@@ -344,11 +360,11 @@
   }
 
   .btn-blue {
-    @apply bg-blue-500 text-white;
+    @apply bg-gray-300 text-white;
   }
 
   .btn-blue:hover {
-    @apply bg-blue-700;
+    @apply bg-gray-400 text-white;
   }
 
   .btn-blue:disabled {

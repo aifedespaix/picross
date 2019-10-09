@@ -4,9 +4,8 @@
        @pointerenter="pointerEnter($event)"
        @pointermove="pointerMove"
        @pointerup="stopPlacing($event)"
-       class="flex justify-center items-center"
-  >{{z}}
-  </div>
+       class="flex justify-center items-center border border-gray-100"
+  ></div>
 </template>
 
 <script lang="ts">
@@ -20,13 +19,21 @@
 
     @Prop() private state!: SquareState;
     @Prop() private position!: SquarePosition;
-    private z = '' as any;
+    private isChromeMobile!: boolean;
+
+    /**
+     * todo : passer en "mounted" ? Doit être appelé avant l'event pointerenter/pointermove
+     */
+    private beforeMount() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      this.isChromeMobile = userAgent.indexOf('chrome') > -1 && userAgent.indexOf('mobile') > -1;
+    }
 
     private getBgClass() {
       return {
         'bg-white': this.state === SquareState.Close,
         'bg-gray-400': this.state === SquareState.Empty,
-        'bg-gray-600': this.state === SquareState.Value,
+        'bg-blue-900': this.state === SquareState.Value,
       };
     }
 
@@ -41,22 +48,18 @@
     }
 
     private pointerEnter(event: PointerEvent) {
-      if (this.isMouse(event)) {
+      if (!this.isChromeMobile) {
         this.$emit('traceSquares', this.position);
       }
     }
 
     /**
-     * CES FILS DE PUTE DE POINTER EVENT NE FONCTIONNE PAS DE LA MEME FACON SUR MOBILE
-     * ET OUI, CES ENCULES D'EVENT POINTENT SUR UNE TARGET QUI EST TOUJOURS LA MEME :
-     * LA TARGET DE DEPART, ALORS QUE SUR PC CA POINT BIEN SUR LA TARGET QUI EST SOUS NOTRE POINTEUR
-     * DE PLUS LE POINTER ENTER NE FONCTIONNE PAS NON PLUS, LOGIQUE ON CHANGE JAMAIS DE TARGET
-     * LA SEULE SOLUTION QUE J'AI TROUVEE C'EST DE FOUTRE UN FUCKING POINTERMOVE POUR VERIFIER CES MERDES
-     * ET TOUT RECALCULER SOUS MOBILE DE MERDE
-     * @param event
+     * Chrome Mobile
+     * https://github.com/aifedespaix/picross/issues/1
+     * this.is_chrome +
      */
     private pointerMove(event: PointerEvent) {
-      if (!this.isMouse(event)) {
+      if (this.isChromeMobile) {
         const element = document.elementFromPoint(event.pageX, event.pageY) as HTMLElement;
         const position = {
           col: parseInt(element.dataset.col as string, 10),

@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-1 justify-end items-center bg-gray-300" :class="{'bg-green-300': hintsModel.valid}">
-    <div :class="[hintStyle, hint.valid ? 'text-blue-700' : 'text-gray-500']"
+  <div class="flex flex-1 justify-end items-center" :class="hintsDifferenceStyles()">
+    <div :class="[hintStyle, hintDifferenceStyles(hint)]"
          v-for="hint in hintsModel.hints">
       {{hint.value}}
     </div>
@@ -10,6 +10,7 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import HintsModel from '@/components/Hints.model';
+  import {Hint} from '@/components/Hint';
 
   @Component({})
   export default class Hints extends Vue {
@@ -23,6 +24,23 @@
       'w-4',
       'h-4',
     ];
+
+    private hintDifferenceStyles(hint: Hint) {
+      return hint.valid ? [
+        'text-gray-500',
+
+      ] : [
+        'text-gray-800',
+      ];
+    }
+
+    private hintsDifferenceStyles() {
+      return this.hintsModel.valid ? [
+        'bg-gray-100',
+      ] : [
+        'bg-gray-300',
+      ];
+    }
 
   }
 </script>
