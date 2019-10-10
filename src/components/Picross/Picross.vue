@@ -55,15 +55,16 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import Square from '@/components/Square.vue';
-  import Hints from '@/components/Hints.vue';
-  import HintsModel from '@/components/Hints.model';
-  import {SquareState} from '@/components/SquareState';
-  import {SquarePosition} from '@/components/SquarePosition';
+  import Square from '@/components/Picross/Square/Square.vue';
+  import Hints from '@/components/Picross/Hints/Hints.vue';
+  import HintsModel from '@/components/Picross/Hints/Hints.model';
+  import {SquareState} from '@/components/Picross/Square/SquareState';
+  import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
   import _ from 'lodash';
-  import {GameGridModel} from '@/components/GameGrid.model';
-  import {MouseDirection} from '@/components/MouseDirection';
+  import {GameGridModel} from '@/components/Picross/GameGrid/GameGrid.model';
+  import {MouseDirection} from '@/components/MouseDirection.enum';
   import ToggleButton from '@/components/ToggleButton.vue';
+  import testMap from '@/assets/maps/test';
 
   @Component({
     components: {Square, Hints, ToggleButton},
@@ -94,8 +95,6 @@
     private stateToUse!: SquareState;
     private stateToClose!: SquareState;
 
-    private blabla = [] as any[];
-
     private hintStyle = [
       'flex',
       'justify-center',
@@ -113,18 +112,7 @@
     }
 
     private initSolution() {
-      this.solutionGrid = new GameGridModel([
-        [2, 2, 2, 2, 1, 1, 2, 2, 2, 2],
-        [2, 2, 2, 2, 1, 1, 2, 2, 2, 2],
-        [2, 1, 1, 1, 1, 1, 1, 1, 1, 2],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [2, 1, 1, 1, 1, 1, 1, 1, 1, 2],
-        [2, 1, 2, 1, 2, 2, 1, 2, 1, 2],
-        [1, 1, 2, 1, 2, 2, 1, 2, 1, 1],
-        [1, 1, 2, 1, 2, 2, 1, 2, 1, 1],
-        [1, 1, 2, 1, 2, 2, 1, 2, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      ]);
+      this.solutionGrid = new GameGridModel(testMap);
     }
 
     private initGameGrid() {
@@ -318,7 +306,7 @@
 <style>
   .picross-container {
     width: 100vmin;
-    max-width: calc(100vh - 16rem);
+    max-width: calc(100vh - 18rem);
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto 1fr;
@@ -328,7 +316,7 @@
     touch-action: none;
     width: 100%;
     height: 100vmin;
-    max-height: calc(100vh - 16rem);
+    max-height: calc(100vh - 18rem);
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: auto 1fr;

@@ -9,45 +9,43 @@
 </template>
 
 <script lang="ts">
-  import {Component, Prop, Vue} from 'vue-property-decorator';
-  import {SquareState} from '@/components/SquareState';
-  import {SquarePosition} from '@/components/SquarePosition';
+  import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
+  import {SquareState} from '@/components/Picross/Square/SquareState';
+  import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
   import _ from 'lodash';
+  import {Action, Getter} from 'vuex-class';
+  import {AppColors} from '@/app.colors.interface';
+  import {AppSounds} from '@/app.sounds.interface';
 
   @Component
   export default class Square extends Vue {
 
-    @Prop() private state!: SquareState;
-    @Prop() private position!: SquarePosition;
+    @Prop({default: SquareState.Empty}) private state!: SquareState;
+    @Prop() private readonly position!: SquarePosition;
 
     private audioEmpty!: HTMLAudioElement;
-
     private isChromeMobile!: boolean;
 
-    /**
-     * todo : passer en "mounted" ? Doit être appelé avant l'event pointerenter/pointermove
-     */
+    @Getter private colors!: AppColors;
+
+    @Action private playStateSound: any;
+
+    @Watch('state')
+    private onPropertyChanged(state: SquareState, oldValue: string) {
+      this.playStateSound(state);
+    }
+
     private beforeMount() {
       const userAgent = navigator.userAgent.toLowerCase();
       this.isChromeMobile = userAgent.indexOf('chrome') > -1 && userAgent.indexOf('mobile') > -1;
-      this.loadAudio();
-    }
-
-    private loadAudio() {
-      try {
-        // this.audioEmpty = new Audio('../assets/audio/empty.mp3');
-        // this.audioEmpty.play();
-      } catch (e) {
-        // console.log(e);
-      }
     }
 
     private getBgClass() {
-      return {
-        'bg-white': this.state === SquareState.Close,
-        'bg-gray-400': this.state === SquareState.Empty,
-        'bg-blue-900': this.state === SquareState.Value,
-      };
+      return [
+        this.state === SquareState.Close ? this.colors.second_bg : null,
+        this.state === SquareState.Value ? this.colors.main_bg : null,
+        this.state === SquareState.Empty ? 'bg-gray-400' : null,
+      ];
     }
 
     private startPlacing(event: PointerEvent) {

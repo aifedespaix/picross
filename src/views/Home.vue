@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Picross from '@/components/Picross.vue'; // @ is an alias to /src
+import Picross from '@/components/Picross/Picross.vue'; // @ is an alias to /src
 
 @Component({
   components: {

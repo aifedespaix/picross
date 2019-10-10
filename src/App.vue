@@ -3,15 +3,20 @@
     <Menu/>
     <router-view/>
   </div>
+
+  <ConfigModal v-if="!openConfig"/>
+
 </template>
 
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
   import Menu from '@/components/Menu.vue';
+  import ConfigModal from '@/components/Config.modal.vue';
 
   @Component({
     components: {
       Menu,
+      ConfigModal,
     },
   })
   export default class App extends Vue {

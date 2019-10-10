@@ -1,5 +1,5 @@
-import {SquareState} from '@/components/SquareState';
-import {Hint} from '@/components/Hint';
+import {SquareState} from '@/components/Picross/Square/SquareState';
+import {Hint} from '@/components/Picross/Hints/Hint';
 
 export default class HintsModel {
 
@@ -13,7 +13,7 @@ export default class HintsModel {
     this.valid = false;
   }
 
-  public verify(line: number[]) {
+  public verify(line: SquareState[]) {
     const userHints = this.getHintsForLine(line);
     for (let i = 0; i < this.hints.length; i++) {
       this.hints[i].valid = typeof userHints[i] !== 'undefined' && userHints[i].value === this.hints[i].value;
@@ -36,7 +36,7 @@ export default class HintsModel {
     this.valid = true;
   }
 
-  private getHintsForLine(line: number[]) {
+  private getHintsForLine(line: SquareState[]) {
     const hints = [];
     let iteration = false;
     let hint = 0;

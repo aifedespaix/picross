@@ -1,11 +1,11 @@
-import {SquarePosition} from '@/components/SquarePosition';
-import {SquareState} from '@/components/SquareState';
+import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
+import {SquareState} from '@/components/Picross/Square/SquareState';
 
 export class GameGridModel {
 
-  public states = [] as number[][];
+  public states = [] as SquareState[][];
 
-  constructor(states: number[][]) {
+  constructor(states: SquareState[][]) {
     this.states = states;
   }
 
@@ -18,9 +18,9 @@ export class GameGridModel {
   }
 
   public initEmpty(cols: number, rows: number) {
-    this.states = [] as number[][];
+    this.states = [] as SquareState[][];
     for (let row = 0; row < rows; row++) {
-      const gameRow = [] as number[];
+      const gameRow = [] as SquareState[];
       for (let col = 0; col < cols; col++) {
         gameRow.push(SquareState.Close);
       }
@@ -29,7 +29,7 @@ export class GameGridModel {
   }
 
   public getColumn(col: number) {
-    const columnList = [] as number[];
+    const columnList = [] as SquareState[];
     for (const row of this.states) {
       columnList.push(row[col]);
     }
@@ -38,7 +38,7 @@ export class GameGridModel {
 
 
   public getRow(row: number) {
-    const rowList = [] as number[];
+    const rowList = [] as SquareState[];
     for (let col = 0; col < this.states[0].length; col++) {
       rowList.push(this.states[row][col]);
     }

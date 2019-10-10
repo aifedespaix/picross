@@ -9,8 +9,8 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
-  import HintsModel from '@/components/Hints.model';
-  import {Hint} from '@/components/Hint';
+  import HintsModel from '@/components/Picross/Hints/Hints.model';
+  import {Hint} from '@/components/Picross/Hints/Hint';
 
   @Component({})
   export default class Hints extends Vue {
