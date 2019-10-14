@@ -1,69 +1,98 @@
 <template>
-  <div :class="styleClasses()" @click="toggle" class="toggleButton" v-bind:value="value">
-    <div :class="value ? 'bubbleOn' : 'bubbleOff'"
-         class="rounded-full w-12 h-12 shadow-md toggleButton absolute flex items-center justify-center bg-white">
-      <svg height="24" v-if="value" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0h24v24H0z" fill="none"/>
-        <path :fill="offColor" d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"/>
-      </svg>
-      <svg height="24" v-else viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path :fill="onColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
-        <path d="M0 0h24v24H0z" fill="none"/>
-      </svg>
+  <div :class="toggleClass" @click="toggle" class="toggleButton">
+
+    <div :class="theme.value" class="bubble" ref="bubble">
+      <DrawIcon class="fill-current" v-if="isValueState"/>
+      <TimesIcon class="fill-current" v-else/>
     </div>
+
   </div>
 </template>
 
 <script lang="ts">
-  import {Component, Prop, Vue} from 'vue-property-decorator';
-  import {Getter} from 'vuex-class';
-  import {AppColors} from '@/app.colors.interface';
+  import {Component, Vue, Watch} from 'vue-property-decorator';
+  import {Action, Getter} from 'vuex-class';
+  import DrawIcon from '@/components/icons/Draw.vue';
+  import {Theme} from '@/components/Theme/theme';
+  import TimesIcon from '@/components/icons/Times.vue';
+  import {SquareState} from '@/components/Picross/Square/SquareState';
 
-  @Component
+  @Component({
+    components: {DrawIcon, TimesIcon},
+  })
   export default class ToggleButton extends Vue {
 
-    @Prop() private value!: boolean;
+    @Getter private theme!: Theme;
+    @Getter private gameState!: SquareState;
+    @Action private changeGameState!: any;
 
-    private offColor = '#333';
-    private onColor = '#333';
-
-    @Getter private colors!: AppColors;
-
-    private toggle(event: MouseEvent) {
-      this.$emit('input', !this.value);
+    get isValueState() {
+      return this.gameState === SquareState.Value;
     }
 
-    private styleClasses() {
-      return this.value ? [
-        this.colors.main_bg,
-      ] : [
-        this.colors.second_bg,
-      ];
+    private mounted() {
+      this.putBubble(this.gameState === SquareState.Value ? 1 : 0);
     }
 
-    private bubbleClasses() {
-      return this.value ? [
-        'bubble-on',
-      ] : [
-        'bubble-off',
-      ];
+    @Watch('gameState')
+    private onValueChange(value: SquareState) {
+      if (value === SquareState.Value) {
+        this.putBubble(1);
+      } else {
+        this.putBubble(0);
+      }
+    }
+
+    /**
+     * @param position Value between 0 and 1
+     */
+    private putBubble(position: number) {
+      const bubble = this.$refs.bubble as HTMLElement;
+      bubble.style.transform = `translateX(${5.75 * position + .25}rem)`;
+    }
+
+    private toggle() {
+      this.changeGameState(this.gameState === SquareState.Value ? SquareState.Empty : SquareState.Value);
+    }
+
+    get toggleClass() {
+      return this.gameState === SquareState.Value ? this.theme.value : this.theme.empty;
+    }
+
+    private dragBubble(event: DragEvent) {
+      const x = event.offsetX;
+      const target = event.target as HTMLElement;
+
+      if (x < 0) {
+        if (this.gameState === SquareState.Value) {
+          this.toggle();
+        }
+      } else if (x > target.clientWidth) {
+        if (this.gameState === SquareState.Empty) {
+          this.toggle();
+        }
+      } else {
+        const coef = target.clientWidth / x;
+        if (coef > .5 && this.gameState === SquareState.Empty) {
+          this.toggle();
+        } else if (coef <= .5 && this.gameState === SquareState.Empty) {
+          this.toggle();
+        } else {
+          this.putBubble(x / target.clientWidth);
+        }
+      }
+
     }
   }
 </script>
 
 <style>
-
-  .bubble-on {
-    left: calc(100% - 3.25rem);
-  }
-
-  .bubble-off {
-    left: .25rem;
+  .bubble {
+    @apply rounded-full w-12 h-12 shadow-md toggleButton absolute flex items-center justify-center;
   }
 
   .toggleButton {
     transition: all .3s ease;
-    @apply rounded-full flex h-16 p-1 items-center shadow-md toggleButton relative cursor-pointer select-none;
-    width: 10rem;
+    @apply rounded-full flex h-16 p-1 items-center shadow-md toggleButton relative cursor-pointer select-none w-40;
   }
 </style>

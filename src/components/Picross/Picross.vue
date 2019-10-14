@@ -1,21 +1,11 @@
+import { SquareState } from '@/components/Picross/Square/SquareState';
+import { SquareState } from '@/components/Picross/Square/SquareState';
 <template>
   <div class="picross-container">
 
-    <div class="flex justify-between items-center w-full p-4">
-      <button :disabled="!history.length" @click="undo()"
-              class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
-        <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0h24v24H0z" fill="none"/>
-          <path fill="#2a4365" d="M14 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-2-9c-4.97 0-9 4.03-9 9H0l4 4 4-4H5c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.44C8.04 20.3 9.94 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
-        </svg>
-      </button>
-      <button :disabled="!history.length" @click="undo()"
-              class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
-        <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0h24v24H0z" fill="none"/>
-          <path fill="#2a4365" d="M14 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-2-9c-4.97 0-9 4.03-9 9H0l4 4 4-4H5c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.44C8.04 20.3 9.94 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
-        </svg>
-      </button>
+    <div class="flex flex-col items-center w-full p-4">
+      <h1 class="text-center text-2xl w-full">Picross</h1>
+      <div class="text-center text-xl w-full">Difficulté : Facile</div>
     </div>
 
     <div @touchmove.prevent class="picross select-none" ref="picross">
@@ -32,11 +22,12 @@
         <Hints :hintsModel="hintsModel" :key="key" class="flex-row" v-for="(hintsModel, key) in rowHints"/>
       </div>
 
-      <div @contextmenu="rightClick($event)" class="gameGrid w-full h-full" ref="gameGrid">
+      <div @contextmenu="rightClick($event)" @pointerleave="stopPlacing"
+           class="gameGrid w-full h-full" ref="gameGrid">
         <template v-for="(gameRow, row) in gameGrid.states">
-          <Square :data-col="col" :data-row="row" :key="`square_${col}-${row}`"
-                  :position="{col, row}" :state="gameSquareState"
-                  @changeStateMode="changeStateMode()"
+          <Square :data-col="col" :data-row="row" :id="gameSquareState"
+                  :key="`square_${col}-${row}`" :position="{col, row}"
+                  :state="gameSquareState"
                   @startPlacing="startPlacing"
                   @stopPlacing="stopPlacing"
                   @traceSquares="traceSquares"
@@ -47,7 +38,19 @@
     </div>
 
     <div class="flex justify-around items-center w-full">
-      <ToggleButton v-model.isActive="isValueMode"/>
+
+      <button :class="theme.second" :disabled="!history.length"
+              @click="undo()" class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
+        <BackIcon class="fill-current"/>
+      </button>
+
+      <ToggleButton v-if="gameConfig.rightClickChange"/>
+
+      <button :class="theme.second" :disabled="!history.length"
+              @click="undo()" class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
+        <BackIcon class="fill-current"/>
+      </button>
+
     </div>
 
   </div>
@@ -65,9 +68,13 @@
   import {MouseDirection} from '@/components/MouseDirection.enum';
   import ToggleButton from '@/components/ToggleButton.vue';
   import testMap from '@/assets/maps/test';
+  import BackIcon from '@/components/icons/Back.vue';
+  import {Action, Getter} from 'vuex-class';
+  import {Theme} from '@/components/Theme/theme';
+  import {GameConfig} from '@/components/Picross/GameConfig';
 
   @Component({
-    components: {Square, Hints, ToggleButton},
+    components: {Square, Hints, ToggleButton, BackIcon},
   })
   export default class Picross extends Vue {
     private gameStarted = false;
@@ -90,10 +97,15 @@
     private shouldCalcDirection = false;
     private squareFrom!: SquarePosition;
     private tracingDirection!: MouseDirection;
-    private isValueMode = true;
 
     private stateToUse!: SquareState;
     private stateToClose!: SquareState;
+
+    @Getter private theme!: Theme;
+    @Getter private gameConfig!: GameConfig;
+    @Getter private gameState!: SquareState;
+
+    @Action private changeGameState!: any;
 
     private hintStyle = [
       'flex',
@@ -135,7 +147,9 @@
 
     private rightClick(event: MouseEvent) {
       event.preventDefault(); // Remove right click menu
-      this.changeStateMode();
+      if (this.gameConfig.rightClickChange) {
+        this.changeStateMode();
+      }
     }
 
     private startGame() {
@@ -180,7 +194,7 @@
       this.traceSquares(position);
     }
 
-    private stopPlacing(event: PointerEvent) {
+    private stopPlacing() {
       this.isMouseDown = false;
       this.usedBlocs = this.gameGrid.countSquareState(SquareState.Value);
     }
@@ -204,18 +218,18 @@
     }
 
     private changeStateMode() {
-      this.isValueMode = !this.isValueMode;
+      this.changeGameState(this.gameState === SquareState.Value ? SquareState.Empty : SquareState.Value,
+      );
     }
 
     private prepareActiveState(position: SquarePosition) {
-      const stateAction = this.isValueMode ? SquareState.Value : SquareState.Empty;
       const actualGridState = this.gameGrid.getState(position);
 
       if (actualGridState === SquareState.Close) {
-        this.stateToUse = stateAction;
+        this.stateToUse = this.gameState;
         this.stateToClose = SquareState.Close;
       } else {
-        this.stateToUse = actualGridState === stateAction ? SquareState.Close : stateAction;
+        this.stateToUse = actualGridState === this.gameState ? SquareState.Close : this.gameState;
         this.stateToClose = actualGridState;
       }
 

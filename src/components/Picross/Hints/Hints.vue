@@ -1,8 +1,10 @@
 <template>
-  <div class="flex flex-1 justify-end items-center" :class="hintsDifferenceStyles()">
-    <div :class="[hintStyle, hintDifferenceStyles(hint)]"
+  <div class="flex flex-1 justify-end items-center"
+       :class="theme.hints">
+    <div :class="[hint.valid ? theme.hint_valid : '', hintStyle]"
          v-for="hint in hintsModel.hints">
       {{hint.value}}
+<!--      {{hint.valid}}-->
     </div>
   </div>
 </template>
@@ -10,12 +12,14 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import HintsModel from '@/components/Picross/Hints/Hints.model';
-  import {Hint} from '@/components/Picross/Hints/Hint';
+  import {Theme} from '@/components/Theme/theme';
+  import {Getter} from 'vuex-class';
 
-  @Component({})
+  @Component
   export default class Hints extends Vue {
 
     @Prop() private hintsModel!: HintsModel;
+    @Getter private theme!: Theme;
 
     private hintStyle = [
       'flex',
@@ -24,23 +28,6 @@
       'w-4',
       'h-4',
     ];
-
-    private hintDifferenceStyles(hint: Hint) {
-      return hint.valid ? [
-        'text-gray-500',
-
-      ] : [
-        'text-gray-800',
-      ];
-    }
-
-    private hintsDifferenceStyles() {
-      return this.hintsModel.valid ? [
-        'bg-gray-100',
-      ] : [
-        'bg-gray-300',
-      ];
-    }
 
   }
 </script>

@@ -2,10 +2,12 @@
   <div :class="getBgClass()"
        @pointerdown="startPlacing($event)"
        @pointerenter="pointerEnter($event)"
-       @pointermove="pointerMove"
+       @pointermove="pointerMove($event)"
        @pointerup="stopPlacing($event)"
-       class="square flex justify-center items-center border border-gray-100"
-  ></div>
+       class="square flex justify-center items-center border"
+  >
+    <TimesIcon class="fill-current" v-if="isEmpty" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -14,21 +16,29 @@
   import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
   import _ from 'lodash';
   import {Action, Getter} from 'vuex-class';
-  import {AppColors} from '@/app.colors.interface';
-  import {AppSounds} from '@/app.sounds.interface';
+  import {Theme} from '@/components/Theme/theme';
+  import TimesIcon from '@/components/icons/Times.vue';
+  import {GameConfig} from '@/components/Picross/GameConfig';
 
-  @Component
+  @Component({
+    components: {TimesIcon},
+  })
   export default class Square extends Vue {
+
+    private isChromeMobile!: boolean;
 
     @Prop({default: SquareState.Empty}) private state!: SquareState;
     @Prop() private readonly position!: SquarePosition;
 
-    private audioEmpty!: HTMLAudioElement;
-    private isChromeMobile!: boolean;
-
-    @Getter private colors!: AppColors;
+    @Getter private theme!: Theme;
+    @Getter private gameConfig!: GameConfig;
 
     @Action private playStateSound: any;
+    @Action private changeGameState!: any;
+
+    get isEmpty() {
+      return this.state === SquareState.Empty;
+    }
 
     @Watch('state')
     private onPropertyChanged(state: SquareState, oldValue: string) {
@@ -42,19 +52,26 @@
 
     private getBgClass() {
       return [
-        this.state === SquareState.Close ? this.colors.second_bg : null,
-        this.state === SquareState.Value ? this.colors.main_bg : null,
-        this.state === SquareState.Empty ? 'bg-gray-400' : null,
+        this.state === SquareState.Close ? this.theme.close : null,
+        this.state === SquareState.Value ? this.theme.value : null,
+        this.state === SquareState.Empty ? this.theme.empty : null,
       ];
     }
 
     private startPlacing(event: PointerEvent) {
-      if (!this.isMouse(event) || this.isLeftClick(event)) {
+      const isMouse = this.isMouse(event);
+      if (!isMouse || this.isLeftClick(event)) {
+        this.$emit('startPlacing', this.position);
+      } else if (!this.gameConfig.rightClickChange && isMouse && this.isRightClick(event)) {
+        this.changeGameState(SquareState.Empty);
         this.$emit('startPlacing', this.position);
       }
     }
 
-    private stopPlacing() {
+    private stopPlacing(event: PointerEvent) {
+      if (!this.gameConfig.rightClickChange && this.isMouse(event) && this.isRightClick(event)) {
+        this.changeGameState(SquareState.Value);
+      }
       this.$emit('stopPlacing', this.position);
     }
 
@@ -89,6 +106,10 @@
 
     private isLeftClick(event: PointerEvent) {
       return event.button === 0;
+    }
+
+    private isRightClick(event: PointerEvent) {
+      return event.button === 2;
     }
 
   }

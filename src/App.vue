@@ -1,17 +1,17 @@
 <template>
-  <div id="app" class="app h-full">
-    <Menu/>
-    <router-view/>
+  <div class="app h-full" id="app">
+    <Menu @toggleConfigModal="toggleConfigModal"/>
+    <router-view :class="theme.main"/>
+    <ConfigModal @close="toggleConfigModal" v-if="isModalConfigOpen"/>
   </div>
-
-  <ConfigModal v-if="!openConfig"/>
-
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
+  import {Component, Vue} from 'vue-property-decorator';
   import Menu from '@/components/Menu.vue';
-  import ConfigModal from '@/components/Config.modal.vue';
+  import ConfigModal from '@/components/ConfigModal.vue';
+  import {Getter} from 'vuex-class';
+  import {Theme} from '@/components/Theme/theme';
 
   @Component({
     components: {
@@ -20,6 +20,14 @@
     },
   })
   export default class App extends Vue {
+    private isModalConfigOpen = false;
+
+    @Getter private theme!: Theme;
+
+    private toggleConfigModal() {
+      this.isModalConfigOpen = !this.isModalConfigOpen;
+    }
+
   }
 
 </script>
@@ -28,6 +36,7 @@
   html, body {
     height: 100%;
   }
+
   .app {
     display: grid;
     grid-template-columns: 1fr;

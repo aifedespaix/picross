@@ -1,8 +1,10 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import {AppColors} from '@/app.colors.interface';
 import {AppSounds} from '@/app.sounds.interface';
 import {SquareState} from '@/components/Picross/Square/SquareState';
+import {Theme} from '@/components/Theme/theme';
+import {ThemeEnum} from '@/components/Theme/theme.enum';
+import {GameConfig} from '@/components/Picross/GameConfig';
 
 Vue.use(Vuex);
 
@@ -12,12 +14,9 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
 
-    colors: {
-      main_bg: 'bg-blue-900',
-      main_text: 'text-white',
-      second_bg: 'bg-white',
-      second_text: 'text-black',
-    } as AppColors,
+    theme: new Theme(),
+    gameConfig: new GameConfig(),
+    gameState: SquareState.Value,
 
     sounds: {
       isActivated: true,
@@ -30,30 +29,23 @@ export default new Vuex.Store({
 
   },
   mutations: {
-    MAIN_BG(state, bgClass: string) {
-      state.colors.main_bg = bgClass;
+    CHANGE_THEME(state, theme: ThemeEnum) {
+      state.theme.actualTheme = theme;
     },
-    MAIN_TEXT(state, textClass: string) {
-      state.colors.main_text = textClass;
+    CONFIG_RIGHT_CLICK_CHANGE(state, value: boolean) {
+      state.gameConfig.rightClickChange = value;
     },
-    SECOND_BG(state, bgClass: string) {
-      state.colors.second_bg = bgClass;
-    },
-    SECOND_TEXT(state, textClass: string) {
-      state.colors.second_text = textClass;
+    CHANGE_GAME_STATE(state, value: SquareState) {
+      state.gameState = value;
     },
   },
   getters: {
-    colors: (state) => state.colors,
+    theme: (state) => state.theme,
     sounds: (state) => state.sounds,
+    gameConfig: (state) => state.gameConfig,
+    gameState: (state) => state.gameState,
   },
   actions: {
-    mainBg(context, bgClass: string) {
-      context.commit('MAIN_BG', bgClass);
-    },
-    mainText(context, textClass: string) {
-      context.commit('MAIN_TEXT', textClass);
-    },
     playSound({getters}, sound: HTMLAudioElement) {
       if (getters.sounds.isActivated) {
         sound.currentTime = 0;
@@ -62,6 +54,15 @@ export default new Vuex.Store({
     },
     playStateSound({state, getters, dispatch}, squareState: SquareState) {
       dispatch('playSound', getters.sounds[squareState]);
+    },
+    changeTheme(context, theme: ThemeEnum) {
+      context.commit('CHANGE_THEME', theme);
+    },
+    configRightClickChange(context, value: boolean) {
+      context.commit('CONFIG_RIGHT_CLICK_CHANGE', value);
+    },
+    changeGameState(context, value: SquareState) {
+      context.commit('CHANGE_GAME_STATE', value);
     },
   },
   strict: true,
