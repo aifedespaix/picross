@@ -85,7 +85,7 @@
   })
   export default class Picross extends Vue {
     private gameStarted = false;
-    private gameWin = true;
+    private gameWin = false;
 
     private timerInterval!: any;
     private duration = 0;
