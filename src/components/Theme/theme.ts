@@ -99,7 +99,7 @@ export class Theme implements ThemeColors {
   private setColorsLight() {
     const squareBorder = 'border-gray-400';
     this._main = ['bg-white', 'text-black'];
-    this._second = ['bg-gray-400', 'text-black'];
+    this._second = ['bg-blue-700', 'text-white'];
     this._close = [...this.main, squareBorder];
     this._value = [...this.second, squareBorder];
     this._empty = ['bg-white', 'text-gray-400', squareBorder];

@@ -25,6 +25,7 @@ export default new Vuex.Store({
       undo: new Audio(require('@/assets/audio/undo.mp3')),
       undo_2: new Audio(require('@/assets/audio/undo_2.mp3')),
       value: new Audio(require('@/assets/audio/value.mp3')),
+      win: new Audio(require('@/assets/audio/win.mp3')),
     } as AppSounds,
 
   },
@@ -52,7 +53,10 @@ export default new Vuex.Store({
         sound.play();
       }
     },
-    playStateSound({state, getters, dispatch}, squareState: SquareState) {
+    playWinSound({getters, dispatch}) {
+      dispatch('playSound', getters.sounds.win);
+    },
+    playStateSound({getters, dispatch}, squareState: SquareState) {
       dispatch('playSound', getters.sounds[squareState]);
     },
     changeTheme(context, theme: ThemeEnum) {
