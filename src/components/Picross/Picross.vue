@@ -85,7 +85,7 @@
   })
   export default class Picross extends Vue {
     private gameStarted = false;
-    private gameWin = false;
+    private gameWin = true;
 
     private timerInterval!: any;
     private duration = 0;
@@ -435,9 +435,9 @@
 
   .win-message {
     @apply absolute w-full h-full flex justify-center items-center text-white elegantshadow;
-    transition: .2s ease-in-out;
+    animation: .2s ease-in-out;
     /*font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;*/
-    font-size: 92px;
+    font-size: 6rem;
     text-align: center;
     text-transform: uppercase;
     text-rendering: optimizeLegibility;
@@ -445,7 +445,7 @@
   }
 
   .elegantshadow {
-    color: #131313;
+    color: #000;
     background-color: #fafafa;
     letter-spacing: .15em;
     text-shadow:
