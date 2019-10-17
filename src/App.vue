@@ -25,6 +25,7 @@
     @Getter private theme!: Theme;
 
     private toggleConfigModal() {
+      alert(process.env);
       this.isModalConfigOpen = !this.isModalConfigOpen;
     }
 
