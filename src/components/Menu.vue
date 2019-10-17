@@ -1,6 +1,6 @@
 <template>
   <header :class="theme.second" class="flex items-center justify-between h-20">
-    <div class="mx-4">PicrossFdp</div>
+    <img alt="Logo Picross" class="h-full p-2" src="@/assets/icons/picross-icon.svg">
 
     <nav>
       <router-link :to="item.to" class="px-2" v-bind:key="item.id"

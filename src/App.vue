@@ -1,5 +1,5 @@
 <template>
-  <div class="app h-full" id="app" @contextmenu="prevent($event)">
+  <div class="app h-full" id="app">
     <Menu @toggleConfigModal="toggleConfigModal"/>
     <router-view :class="theme.main"/>
     <ConfigModal @close="toggleConfigModal" v-if="isModalConfigOpen"/>
@@ -27,10 +27,6 @@
     private toggleConfigModal() {
       alert(process.env);
       this.isModalConfigOpen = !this.isModalConfigOpen;
-    }
-
-    private prevent(event: Event) {
-      event.preventDefault();
     }
 
   }
