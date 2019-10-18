@@ -28,7 +28,7 @@
         <div class="text-lg mt-4">Configuration</div>
         <div class="flex items-center">
           <input id="rightClickChange" type="checkbox" v-model="rightClickChange">
-          <label for="rightClickChange" class="select-none mx-2 w-">
+          <label class="select-none mx-2 w-" for="rightClickChange">
             <template v-if="rightClickChange">Change de mode de saisie au clic droit</template>
             <template v-else>Place un ou plusieurs marqueurs au clic droit</template>
           </label>
@@ -57,23 +57,20 @@
   import BackIcon from '@/components/icons/Back.vue';
   import SaveIcon from '@/components/icons/Save.vue';
   import CheckIcon from '@/components/icons/Check.vue';
-  import {Action, Getter} from 'vuex-class';
   import {ThemeEnum} from '@/components/Theme/theme.enum';
-  import {Theme} from '@/components/Theme/theme';
-  import {GameConfig} from '@/components/Picross/GameConfig';
+  import {gameSettingsModule} from '@/store/modules/GameSettings';
+  import {settingsModule} from '@/store/modules/Settings';
 
   @Component({
     components: {TimesIcon, ConfigIcon, BackIcon, SaveIcon, CheckIcon},
   })
   export default class ConfigModal extends Vue {
-    @Getter private theme!: Theme;
-    @Getter private gameConfig!: GameConfig;
+    private last_Theme!: ThemeEnum;
+    private last_isToggleStateButtonActive!: boolean;
 
-    @Action private changeTheme: any;
-    @Action private configRightClickChange: any;
-
-    private lastTheme!: ThemeEnum;
-    private lastConfigRightClickChange!: boolean;
+    get theme() {
+      return settingsModule.theme;
+    }
 
     get isLigth() {
       return this.theme.actualTheme === ThemeEnum.LIGHT;
@@ -84,16 +81,16 @@
     }
 
     get rightClickChange() {
-      return this.gameConfig.rightClickChange;
+      return gameSettingsModule.isToggleStateButtonActive;
     }
 
     set rightClickChange(value: boolean) {
-      this.configRightClickChange(value);
+      gameSettingsModule.ChangeToggleStateButtonActive(value);
     }
 
     private beforeMount() {
-      this.lastTheme = this.theme.actualTheme;
-      this.lastConfigRightClickChange = this.gameConfig.rightClickChange;
+      this.last_Theme = this.theme.actualTheme;
+      this.last_isToggleStateButtonActive = gameSettingsModule.isToggleStateButtonActive;
     }
 
     private close() {
@@ -101,11 +98,11 @@
     }
 
     private setLightTheme() {
-      this.changeTheme(ThemeEnum.LIGHT);
+      settingsModule.changeTheme(ThemeEnum.LIGHT);
     }
 
     private setDarkTheme() {
-      this.changeTheme(ThemeEnum.DARK);
+      settingsModule.changeTheme(ThemeEnum.DARK);
     }
 
     private save() {
@@ -114,8 +111,8 @@
     }
 
     private reset() {
-      this.changeTheme(this.lastTheme);
-      this.rightClickChange = this.lastConfigRightClickChange;
+      settingsModule.changeTheme(this.last_Theme);
+      this.rightClickChange = this.last_isToggleStateButtonActive;
       this.close();
     }
   }

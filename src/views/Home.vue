@@ -1,7 +1,7 @@
 <template>
   <div @contextmenu="rightClick($event)" class="flex justify-center">
-    <Picross/>
-<!--    <PicrossMain/>-->
+<!--    <Picross/>-->
+    <PicrossMain/>
   </div>
 </template>
 

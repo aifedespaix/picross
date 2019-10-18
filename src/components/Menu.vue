@@ -1,5 +1,5 @@
 <template>
-  <header :class="theme.second" class="flex items-center justify-between h-20">
+  <header :class="theme.second" class="header">
     <img alt="Logo Picross" class="h-full p-2" src="@/assets/icons/picross-icon.svg">
 
     <nav>
@@ -21,6 +21,7 @@
   import {Getter} from 'vuex-class';
   import ConfigIcon from '@/components/icons/Config.vue';
   import {Theme} from '@/components/Theme/theme';
+  import {settingsModule} from '@/store/modules/Settings';
 
   interface Item {
     to: string;
@@ -33,7 +34,9 @@
   export default class Menu extends Vue {
     private items!: Item[];
 
-    @Getter private theme!: Theme;
+    get theme() {
+      return settingsModule.theme;
+    }
 
     private beforeCreate() {
       this.items = [
@@ -48,3 +51,9 @@
 
   }
 </script>
+
+<style lang="scss">
+  .header {
+    @apply flex items-center justify-between h-20;
+  }
+</style>

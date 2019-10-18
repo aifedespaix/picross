@@ -1,24 +1,27 @@
 <template>
-  <div :class="getBgClass()"
-       @pointerdown="startPlacing($event)"
-       @pointerenter="pointerEnter($event)"
-       @pointermove="pointerMove($event)"
-       @pointerup="stopPlacing($event)"
-       class="square flex justify-center items-center border"
+  <div
+    :class="getBgClass()"
+    @pointerdown="startPlacing($event)"
+    @pointerenter="pointerEnter($event)"
+    @pointermove="pointerMove($event)"
+    @pointerup="stopPlacing($event)"
+    class="square flex justify-center items-center border"
+    ref="square"
   >
-    <TimesIcon class="fill-current" v-if="isEmpty" />
+    <TimesIcon class="fill-current" v-if="isEmpty"/>
   </div>
 </template>
 
 <script lang="ts">
-  import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
+  import {Component, Prop, Vue} from 'vue-property-decorator';
   import {SquareState} from '@/components/Picross/Square/SquareState';
   import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
   import _ from 'lodash';
-  import {Action, Getter} from 'vuex-class';
-  import {Theme} from '@/components/Theme/theme';
   import TimesIcon from '@/components/icons/Times.vue';
-  import {GameConfig} from '@/components/Picross/GameConfig';
+  import {settingsModule} from '@/store/modules/Settings';
+  import {gameSettingsModule} from '@/store/modules/GameSettings';
+  import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {Mouse} from '@/utils/Mouse';
 
   @Component({
     components: {TimesIcon},
@@ -30,19 +33,8 @@
     @Prop({default: SquareState.Empty}) private state!: SquareState;
     @Prop() private readonly position!: SquarePosition;
 
-    @Getter private theme!: Theme;
-    @Getter private gameConfig!: GameConfig;
-
-    @Action private playStateSound: any;
-    @Action private changeGameState!: any;
-
     get isEmpty() {
       return this.state === SquareState.Empty;
-    }
-
-    @Watch('state')
-    private onPropertyChanged(state: SquareState, oldValue: string) {
-      this.playStateSound(state);
     }
 
     private beforeMount() {
@@ -50,34 +42,48 @@
       this.isChromeMobile = userAgent.indexOf('chrome') > -1 && userAgent.indexOf('mobile') > -1;
     }
 
+    private mounted() {
+      this.cssSpecialBorders();
+    }
+
+    private cssSpecialBorders() {
+      const $square = this.$refs.square as HTMLDivElement;
+      if (this.position.col && this.position.col % 5 === 0) {
+        $square.style.marginLeft = '1px';
+      }
+      if (this.position.row && this.position.row % 5 === 0) {
+        $square.style.marginTop = '1px';
+      }
+    }
+
     private getBgClass() {
       return [
-        this.state === SquareState.Close ? this.theme.close : null,
-        this.state === SquareState.Value ? this.theme.value : null,
-        this.state === SquareState.Empty ? this.theme.empty : null,
+        this.state === SquareState.Close ? settingsModule.theme.close : null,
+        this.state === SquareState.Value ? settingsModule.theme.value : null,
+        this.state === SquareState.Empty ? settingsModule.theme.empty : null,
       ];
     }
 
     private startPlacing(event: PointerEvent) {
-      const isMouse = this.isMouse(event);
-      if (!isMouse || this.isLeftClick(event)) {
-        this.$emit('startPlacing', this.position);
-      } else if (!this.gameConfig.rightClickChange && isMouse && this.isRightClick(event)) {
-        this.changeGameState(SquareState.Empty);
-        this.$emit('startPlacing', this.position);
+      const isMouse = Mouse.isMouse(event);
+      if (!isMouse || Mouse.isLeftClick(event)) {
+        gamePlayModule.startPlacing(this.position);
+      } else if (gameSettingsModule.isToggleStateButtonActive && isMouse && Mouse.isRightClick(event)) {
+        gamePlayModule.switchStateMode();
+        gamePlayModule.startPlacing(this.position);
       }
     }
 
     private stopPlacing(event: PointerEvent) {
-      if (!this.gameConfig.rightClickChange && this.isMouse(event) && this.isRightClick(event)) {
-        this.changeGameState(SquareState.Value);
+      if (!gameSettingsModule.isToggleStateButtonActive && Mouse.isMouse(event) && Mouse.isRightClick(event)) {
+        gamePlayModule.switchStateMode();
       }
-      this.$emit('stopPlacing', this.position);
+      gamePlayModule.stopPlacing();
     }
 
     private pointerEnter(event: PointerEvent) {
       if (!this.isChromeMobile) {
-        this.$emit('traceSquares', this.position);
+        gamePlayModule.changeStatesTo(this.position);
       }
     }
 
@@ -95,21 +101,9 @@
         } as SquarePosition;
 
         if (position.col && position.row && !_.isEqual(position, this.position)) {
-          this.$emit('traceSquares', position);
+          gamePlayModule.changeStatesTo(this.position);
         }
       }
-    }
-
-    private isMouse(event: PointerEvent) {
-      return event.pointerType === 'mouse';
-    }
-
-    private isLeftClick(event: PointerEvent) {
-      return event.button === 0;
-    }
-
-    private isRightClick(event: PointerEvent) {
-      return event.button === 2;
     }
 
   }

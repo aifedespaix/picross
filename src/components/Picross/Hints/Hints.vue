@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-1 justify-end items-center"
+  <div class="flex justify-end items-center"
        :class="theme.hints">
     <div :class="[hint.valid ? theme.hint_valid : '', hintStyle]"
          v-for="hint in hintsModel.hints">
@@ -14,12 +14,16 @@
   import HintsModel from '@/components/Picross/Hints/Hints.model';
   import {Theme} from '@/components/Theme/theme';
   import {Getter} from 'vuex-class';
+  import {settingsModule} from '@/store/modules/Settings';
 
   @Component
   export default class Hints extends Vue {
 
     @Prop() private hintsModel!: HintsModel;
-    @Getter private theme!: Theme;
+
+    get theme() {
+      return settingsModule.theme;
+    }
 
     private hintStyle = [
       'flex',

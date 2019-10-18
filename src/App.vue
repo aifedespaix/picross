@@ -12,6 +12,7 @@
   import ConfigModal from '@/components/ConfigModal.vue';
   import {Getter} from 'vuex-class';
   import {Theme} from '@/components/Theme/theme';
+  import {settingsModule} from '@/store/modules/Settings';
 
   @Component({
     components: {
@@ -22,13 +23,13 @@
   export default class App extends Vue {
     private isModalConfigOpen = false;
 
-    @Getter private theme!: Theme;
-
-    private toggleConfigModal() {
-      alert(process.env);
-      this.isModalConfigOpen = !this.isModalConfigOpen;
+    get theme() {
+      return settingsModule.theme;
     }
 
+    private toggleConfigModal() {
+      this.isModalConfigOpen = !this.isModalConfigOpen;
+    }
   }
 
 </script>

@@ -1,6 +1,6 @@
 import {SquareState} from '@/components/Picross/Square/SquareState';
-
-export default [
+// todo repare
+export default `[
   [
     SquareState.Empty,
     SquareState.Empty,
@@ -121,4 +121,4 @@ export default [
     SquareState.Value,
     SquareState.Value,
   ],
-];
+]`;
