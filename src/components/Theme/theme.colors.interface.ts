@@ -10,4 +10,5 @@ export interface ThemeColors {
   hints: string[];
   hint_valid: string[];
   modal: string[];
+  grid: string[];
 }
