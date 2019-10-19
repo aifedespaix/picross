@@ -1,6 +1,6 @@
 <template>
-  <button :class="theme.second" :disabled="isRevertable"
-          @click="undo()" class="btn btn-blue rounded-full h-16 w-16 flex items-center justify-center">
+  <button :class="theme.second" :disabled="!isRevertable"
+          @click="undo" class="revertButton">
     <BackIcon class="fill-current"/>
   </button>
 </template>
@@ -36,3 +36,13 @@
     }
   }
 </script>
+
+<style lang="scss">
+  .revertButton {
+    @apply rounded-full h-16 w-16 flex items-center justify-center;
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed bg-gray-500;
+    }
+  }
+</style>

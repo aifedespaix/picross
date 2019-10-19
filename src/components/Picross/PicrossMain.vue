@@ -47,7 +47,7 @@
     }
 
     private get isToggleButtonActive() {
-      return gameSettingsModule.isToggleStateButtonActive;
+      return gameSettingsModule.isToggleStateButtonActive.value;
     }
 
     private get theme() {
@@ -63,7 +63,7 @@
     }
 
     private rightClick(event: MouseEvent) {
-      if (!gameSettingsModule.isToggleStateButtonActive) {
+      if (!gameSettingsModule.isToggleStateButtonActive.value) {
         this.switchStateMode();
       }
     }
@@ -78,9 +78,8 @@
 <style>
   .picross-container {
     display: grid;
-    grid-template-columns: minmax(auto, 1fr) 1fr;
+    grid-template-columns: minmax(12rem, 1fr) 1fr;
     grid-template-rows: auto auto;
-    width: 100vw;
   }
 
   .picross-infos {
@@ -92,7 +91,7 @@
     .picross-container {
       display: grid;
       grid-template-columns: 1fr;
-      grid-template-rows: auto calc(100vw - 5rem) auto;
+      grid-template-rows: 1fr auto 1fr;
     }
   }
 

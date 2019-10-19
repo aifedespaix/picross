@@ -1,3 +1,5 @@
+import { DeviceType } from '@/store/modules/App';
+import { SquareState } from '@/components/Picross/Square/SquareState';
 <template>
   <div class="modal flex items-center justify-center cursor-default">
     <div class="modal-overlay opacity-75 bg-black z-0"></div>
@@ -25,14 +27,16 @@
           </button>
         </div>
 
-        <div class="text-lg mt-4">Configuration</div>
-        <div class="flex items-center">
+        <div class="text-lg mt-4" v-if="!isMobile">Configuration</div>
+
+        <div v-if="!isMobile" class="flex items-center">
           <input id="rightClickChange" type="checkbox" v-model="rightClickChange">
           <label class="select-none mx-2 w-" for="rightClickChange">
             <template v-if="rightClickChange">Change de mode de saisie au clic droit</template>
             <template v-else>Place un ou plusieurs marqueurs au clic droit</template>
           </label>
         </div>
+
       </div>
 
       <div class="flex  mt-4 justify-between">
@@ -51,71 +55,84 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator';
-  import TimesIcon from '@/components/icons/Times.vue';
-  import ConfigIcon from '@/components/icons/Config.vue';
-  import BackIcon from '@/components/icons/Back.vue';
-  import SaveIcon from '@/components/icons/Save.vue';
-  import CheckIcon from '@/components/icons/Check.vue';
-  import {ThemeEnum} from '@/components/Theme/theme.enum';
-  import {gameSettingsModule} from '@/store/modules/GameSettings';
-  import {settingsModule} from '@/store/modules/Settings';
+import {Component, Vue} from 'vue-property-decorator';
+import TimesIcon from '@/components/icons/Times.vue';
+import ConfigIcon from '@/components/icons/Config.vue';
+import BackIcon from '@/components/icons/Back.vue';
+import SaveIcon from '@/components/icons/Save.vue';
+import CheckIcon from '@/components/icons/Check.vue';
+import {ThemeEnum} from '@/components/Theme/theme.enum';
+import {gameSettingsModule} from '@/store/modules/GameSettings';
+import {settingsModule} from '@/store/modules/Settings';
+import {gamePlayModule} from '@/store/modules/GamePlay';
+import {SquareState} from '@/components/Picross/Square/SquareState';
+import {appModule, DeviceType} from '@/store/modules/App';
 
-  @Component({
-    components: {TimesIcon, ConfigIcon, BackIcon, SaveIcon, CheckIcon},
-  })
-  export default class ConfigModal extends Vue {
-    private last_Theme!: ThemeEnum;
-    private last_isToggleStateButtonActive!: boolean;
+@Component({
+  components: {TimesIcon, ConfigIcon, BackIcon, SaveIcon, CheckIcon},
+})
+export default class ConfigModal extends Vue {
 
-    get theme() {
-      return settingsModule.theme;
-    }
+  private last_Theme!: ThemeEnum;
+  private last_isToggleStateButtonActive!: boolean;
 
-    get isLigth() {
-      return this.theme.actualTheme === ThemeEnum.LIGHT;
-    }
-
-    get isDark() {
-      return this.theme.actualTheme === ThemeEnum.DARK;
-    }
-
-    get rightClickChange() {
-      return gameSettingsModule.isToggleStateButtonActive;
-    }
-
-    set rightClickChange(value: boolean) {
-      gameSettingsModule.ChangeToggleStateButtonActive(value);
-    }
-
-    private beforeMount() {
-      this.last_Theme = this.theme.actualTheme;
-      this.last_isToggleStateButtonActive = gameSettingsModule.isToggleStateButtonActive;
-    }
-
-    private close() {
-      this.$emit('close');
-    }
-
-    private setLightTheme() {
-      settingsModule.changeTheme(ThemeEnum.LIGHT);
-    }
-
-    private setDarkTheme() {
-      settingsModule.changeTheme(ThemeEnum.DARK);
-    }
-
-    private save() {
-      this.theme.save();
-      this.close();
-    }
-
-    private reset() {
-      settingsModule.changeTheme(this.last_Theme);
-      this.rightClickChange = this.last_isToggleStateButtonActive;
-      this.close();
-    }
+  get theme() {
+    return settingsModule.theme;
   }
+
+  get isLigth() {
+    return this.theme.actualTheme === ThemeEnum.LIGHT;
+  }
+
+  get isDark() {
+    return this.theme.actualTheme === ThemeEnum.DARK;
+  }
+
+  get isMobile() {
+    return appModule.device === DeviceType.Mobile;
+  }
+
+  get rightClickChange() {
+    return gameSettingsModule.isToggleStateButtonActive.value;
+  }
+
+  set rightClickChange(value: boolean) {
+    if (!value && gamePlayModule.actualState !== SquareState.Value) {
+      gamePlayModule.switchStateMode();
+    }
+    gameSettingsModule.changeToggleStateButtonActive(value);
+  }
+
+  private beforeMount() {
+    this.last_Theme = this.theme.actualTheme;
+    this.last_isToggleStateButtonActive = gameSettingsModule.isToggleStateButtonActive.value;
+  }
+
+  private close() {
+    this.$emit('close');
+  }
+
+  private setLightTheme() {
+    settingsModule.changeTheme(ThemeEnum.LIGHT);
+  }
+
+  private setDarkTheme() {
+    settingsModule.changeTheme(ThemeEnum.DARK);
+  }
+
+  private save() {
+    this.theme.save();
+    gameSettingsModule.isToggleStateButtonActive.save();
+    this.close();
+  }
+
+  private reset() {
+    settingsModule.changeTheme(this.last_Theme);
+    this.rightClickChange = this.last_isToggleStateButtonActive;
+    this.close();
+  }
+
+}
 </script>
 
 <style>

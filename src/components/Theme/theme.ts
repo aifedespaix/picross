@@ -44,6 +44,10 @@ export class Theme implements ThemeColors {
     return this._hints;
   }
 
+  get grid(): string[] {
+    return this._grid;
+  }
+
   private readonly themeItem = 'actualTheme';
 
   private _modal!: string[];
@@ -63,6 +67,8 @@ export class Theme implements ThemeColors {
   private _value!: string[];
 
   private _hints!: string[];
+
+  private _grid!: string[];
 
   constructor() {
     this._actualTheme = this.getLocalStorageTheme();
@@ -94,10 +100,11 @@ export class Theme implements ThemeColors {
     this._hints = ['bg-black', 'text-white'];
     this._hint_valid = ['text-gray-800'];
     this._modal = [...this.main, 'border', 'border-gray-800'];
+    this._grid = ['bg-green-900'];
   }
 
   private setColorsLight() {
-    const squareBorder = 'border-gray-400';
+    const squareBorder = 'border-blue-700';
     this._main = ['bg-white', 'text-black'];
     this._second = ['bg-blue-700', 'text-white'];
     this._close = [...this.main, squareBorder];
@@ -106,6 +113,7 @@ export class Theme implements ThemeColors {
     this._hints = ['bg-white', 'text-black'];
     this._hint_valid = ['text-gray-400'];
     this._modal = [...this.main];
+    this._grid = ['bg-blue-700'];
   }
 
   private getLocalStorageTheme() {

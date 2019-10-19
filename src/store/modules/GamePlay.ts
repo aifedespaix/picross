@@ -124,7 +124,7 @@ export class GamePlay extends VuexModule implements IGamePlayState {
   }
 
   get isRevertable() {
-    return this._history && this._history.length > 1;
+    return this._history && this._history.length;
   }
 
   private _history = [] as GameGridModel[];

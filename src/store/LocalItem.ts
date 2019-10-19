@@ -35,6 +35,8 @@ export class LocalItem<T> {
     if (value) {
       const item = JSON.parse(value) as LocalItem<T>;
       this._value = item.value;
+    } else {
+      this._value = this._defaultValue;
     }
   }
 

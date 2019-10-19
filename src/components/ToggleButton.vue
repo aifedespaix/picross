@@ -16,15 +16,20 @@
   import {Theme} from '@/components/Theme/theme';
   import TimesIcon from '@/components/icons/Times.vue';
   import {SquareState} from '@/components/Picross/Square/SquareState';
+  import {settingsModule} from '@/store/modules/Settings';
+  import {gamePlayModule} from '@/store/modules/GamePlay';
 
   @Component({
     components: {DrawIcon, TimesIcon},
   })
   export default class ToggleButton extends Vue {
 
-    @Getter private theme!: Theme;
-    @Getter private gameState!: SquareState;
-    @Action private changeGameState!: any;
+    get theme() {
+      return settingsModule.theme;
+    }
+    get gameState() {
+      return gamePlayModule.actualState;
+    }
 
     get isValueState() {
       return this.gameState === SquareState.Value;
@@ -52,7 +57,7 @@
     }
 
     private toggle() {
-      this.changeGameState(this.gameState === SquareState.Value ? SquareState.Empty : SquareState.Value);
+      gamePlayModule.switchStateMode();
     }
 
     get toggleClass() {

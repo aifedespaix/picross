@@ -1,5 +1,5 @@
 <template>
-  <div @pointerleave="pointerleave" class="gameGrid" ref="gameGrid">
+  <div @pointerleave="pointerleave" class="gameGrid" :class="theme.grid" ref="gameGrid">
     <template v-for="(rowStates, row) of states">
       <Square :key="`${col}_${row}`"
               :position="{row, col}"
@@ -15,6 +15,7 @@
   import {Component, Vue} from 'vue-property-decorator';
   import {gamePlayModule} from '@/store/modules/GamePlay';
   import Square from '@/components/Picross/Square/Square.vue';
+  import {settingsModule} from '@/store/modules/Settings';
 
   @Component({
     components: {Square},
@@ -22,6 +23,9 @@
   export default class GameGrid extends Vue {
     get states() {
       return gamePlayModule.playingGrid.states;
+    }
+    get theme() {
+      return settingsModule.theme;
     }
 
     private mounted() {
@@ -31,17 +35,12 @@
 
       $gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
       $gameGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
-      // const $colHints = this.$refs.colHints as HTMLElement;
-      // $colHints.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-      //
-      // const $rowHints = this.$refs.rowHints as HTMLElement;
-      // $rowHints.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     }
 
     private pointerleave() {
       gamePlayModule.stopPlacing();
     }
+
   }
 </script>
 
@@ -49,12 +48,5 @@
   .gameGrid {
     @apply bg-black select-none self-center h-full;
     display: grid;
-
-  }
-
-  @media screen and (max-aspect-ratio: 1/1) {
-    .gameGrid {
-      height: calc(100vw - 5rem);
-    }
   }
 </style>

@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import {Direction} from '@/store/modules/GamePlay';
 import HintsModel from '@/components/Picross/Hints/Hints.model';
 import {Vue} from 'vue-property-decorator';
+import {soundModule} from '@/store/modules/Sound';
 
 export class GameGridModel {
 
@@ -122,6 +123,7 @@ export class GameGridModel {
   public setState(position: SquarePosition, state: SquareState) {
     if (position.col < this.cols && position.row < this.rows) {
       Vue.set(this._states[position.row], position.col, state);
+      soundModule.playSquareStateSound(state).then();
     }
   }
 

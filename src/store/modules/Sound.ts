@@ -13,7 +13,7 @@ export class Sound extends VuexModule {
 
   @Action
   public async playSound(sound: HTMLAudioElement) {
-    if (gameSettingsModule.activateAudio) {
+    if (gameSettingsModule.activateAudio.value) {
       sound.currentTime = 0;
       await sound.play();
     }

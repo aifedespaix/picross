@@ -4,8 +4,8 @@ import {appModule, DeviceType} from '@/store/modules/App';
 import {LocalItem} from '@/store/LocalItem';
 
 export interface IGameSettingsState {
-  isToggleStateButtonActive: boolean;
-  activateAudio: boolean;
+  isToggleStateButtonActive: LocalItem<boolean>;
+  activateAudio: LocalItem<boolean>;
 }
 
 @Module({
@@ -21,8 +21,8 @@ export class GameSettings extends VuexModule implements IGameSettingsState {
     true,
   );
 
-  get activateAudio(): boolean {
-    return this._activateAudio.value;
+  get activateAudio(): LocalItem<boolean> {
+    return this._activateAudio;
   }
 
   private _isToggleStateButtonActive = new LocalItem<boolean>(
@@ -30,12 +30,12 @@ export class GameSettings extends VuexModule implements IGameSettingsState {
     appModule.device === DeviceType.Mobile,
   );
 
-  get isToggleStateButtonActive(): boolean {
-    return this._isToggleStateButtonActive.value;
+  get isToggleStateButtonActive(): LocalItem<boolean> {
+    return this._isToggleStateButtonActive;
   }
 
   @Action
-  public ChangeToggleStateButtonActive(active: boolean) {
+  public changeToggleStateButtonActive(active: boolean) {
     this.CHANGE_TOGGLE_STATE_BUTTON(active);
   }
 

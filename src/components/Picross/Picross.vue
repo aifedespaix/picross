@@ -1,32 +1,32 @@
 <template>
   <div class="picross">
     <div>
-     {{actualBlocs}} / {{maxBlocs}}
+      {{actualBlocs}} / {{maxBlocs}}
     </div>
 
     <div class="hints hints-col" ref="colHints">
       <Hints
-        v-for="(hintsModel, key) in getColHints"
         :hints-model="hintsModel"
-        class="flex-col"
         :key="key"
+        class="flex-col"
+        v-for="(hintsModel, key) in getColHints"
       />
     </div>
 
     <div class="hints hints-row" ref="rowHints">
-      <Hints v-for="(hintsModel, key) in getRowHints"
-             :hints-model="hintsModel"
+      <Hints :hints-model="hintsModel"
              :key="key"
+             v-for="(hintsModel, key) in getRowHints"
       />
     </div>
 
-    <GameGrid />
+    <GameGrid/>
+
   </div>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
   import GameGrid from '@/components/Picross/GameGrid/GameGrid.vue';
   import {gamePlayModule} from '@/store/modules/GamePlay';
   import Hints from '@/components/Picross/Hints/Hints.vue';
@@ -86,16 +86,18 @@
 </script>
 
 <style lang="scss">
+  @import "@/assets/styles";
+
   .picross {
     touch-action: none;
     justify-self: center;
     align-self: center;
 
-    width: 100vh;
-    max-width: calc(100vh - 6rem);
+    width: calc(100vh - #{$header-height});
+    max-width: calc(100vw - 12rem);
 
-    height: 100vh;
-    max-height: calc(100vh - 6rem);
+    height: calc(100vh - #{$header-height});
+    max-height: calc(100vw - 12rem);
 
     display: grid;
     grid-template-columns: auto 1fr;
@@ -103,11 +105,11 @@
     grid-row: span 2;
 
     @media screen and (max-aspect-ratio: 1/1) {
-        grid-row: span 1;
-        width: 100vw;
-        height: auto;
-        max-width: initial;
-        max-height: initial;
+      width: 100vw;
+      height: 100vw;
+      max-width: calc(100vh - #{$header-height + 10rem});
+      max-height: calc(100vh - #{$header-height + 10rem});
+      grid-row: span 1;
     }
   }
 

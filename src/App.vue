@@ -1,7 +1,7 @@
 <template>
   <div class="app h-full" id="app">
     <Menu @toggleConfigModal="toggleConfigModal"/>
-    <router-view :class="theme.main"/>
+    <router-view :class="theme.main" class="overflow-auto"/>
     <ConfigModal @close="toggleConfigModal" v-if="isModalConfigOpen"/>
   </div>
 </template>
