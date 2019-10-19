@@ -75,7 +75,7 @@ export class GamePlay extends VuexModule implements IGamePlayState {
     return this._playingGrid;
   }
 
-  private _solutionGrid = {} as  GameGridModel;
+  private _solutionGrid = {} as GameGridModel;
 
   get solutionGrid(): GameGridModel {
     return this._solutionGrid;
@@ -212,11 +212,13 @@ export class GamePlay extends VuexModule implements IGamePlayState {
     } else {
       this.SET_PLAYING_GRID(this.history.pop() as GameGridModel);
     }
+
+    soundModule.playSound(Math.random() > .5 ? GameSounds.UNDO : GameSounds.UNDO_2).then();
   }
 
   @Action
   public changeStatesTo(position: SquarePosition) {
-    if (!this.isPlacing) {
+    if (!this.isPlacing || this.win) {
       return;
     }
 
@@ -226,8 +228,8 @@ export class GamePlay extends VuexModule implements IGamePlayState {
     }
 
     this.playingGrid.changeStates(this.positionFrom, position, this.usingState, this.stateToClose, this.direction);
+    this.verifyWin();
   }
-
 
   @Action
   private async loadPicrossByQuery(query: string) {
