@@ -77,6 +77,7 @@
 
 <style>
   .picross-container {
+    @apply select-none;
     display: grid;
     grid-template-columns: minmax(12rem, 1fr) 1fr;
     grid-template-rows: auto auto;
