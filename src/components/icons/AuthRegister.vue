@@ -1,7 +1,8 @@
 <template>
   <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
     <path d="M0 0h24v24H0z" fill="none"/>
+    <path
+      d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
   </svg>
 </template>
 
@@ -9,6 +10,6 @@
   import {Component, Vue} from 'vue-property-decorator';
 
   @Component
-  export default class AlertIcon extends Vue {
+  export default class AuthRegisterIcon extends Vue {
   }
 </script>

@@ -1,1 +1,44 @@
 $header-height: 8rem;
+
+.field {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-auto-rows: 1fr;
+  @apply mb-4;
+
+  input {
+    @apply p-1 border-b-2 border-gray-800;
+    &:focus {
+      @apply border-blue-800;
+    }
+  }
+
+  label {
+    @apply p-1 mr-2;
+  }
+
+  .error {
+    column-span: 2;
+  }
+
+}
+
+.button {
+  @apply flex justify-center border p-2 w-32;
+  transition: all .25s ease-in-out;
+
+  &-valid {
+    @apply border-green-700 text-green-700;
+
+    &:hover {
+      @apply bg-green-700 text-white;
+    }
+  }
+
+  &-revert {
+    @apply border-red-700 text-red-700;
+    &:hover {
+      @apply bg-red-700 text-white;
+    }
+  }
+}

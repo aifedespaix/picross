@@ -1,3 +1,4 @@
+import { ModalEnum } from '@/store/modules/Modal';
 <template>
   <header :class="theme.second" class="header">
     <img alt="Logo Picross" class="h-full p-2" src="@/assets/icons/picross-icon.svg">
@@ -9,19 +10,25 @@
       </router-link>
     </nav>
 
-    <button @click="toggleConfig" class="flex items-center p-3 rounded-full">
-      <ConfigIcon/>
-    </button>
+    <div class="flex">
+      <button @click="showConfig" class="flex items-center p-3 rounded-full">
+        <ConfigIcon/>
+      </button>
+
+      <button @click="showAuth" class="flex items-center p-3 rounded-full">
+        <AuthIcon/>
+      </button>
+    </div>
   </header>
 
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import {Getter} from 'vuex-class';
   import ConfigIcon from '@/components/icons/Config.vue';
-  import {Theme} from '@/components/Theme/theme';
   import {settingsModule} from '@/store/modules/Settings';
+  import {modalModule, ModalModule} from '@/store/modules/Modal';
+  import AuthIcon from '@/components/icons/Auth.vue';
 
   interface Item {
     to: string;
@@ -29,7 +36,7 @@
   }
 
   @Component({
-    components: {ConfigIcon},
+    components: {ConfigIcon, AuthIcon},
   })
   export default class Menu extends Vue {
     private items!: Item[];
@@ -45,8 +52,12 @@
       ];
     }
 
-    private toggleConfig() {
-      this.$emit('toggleConfigModal');
+    private showConfig() {
+      modalModule.changeModal(ModalModule.Settings);
+    }
+
+    private showAuth() {
+      modalModule.changeModal(ModalModule.Auth);
     }
 
   }
