@@ -1,0 +1,8 @@
+{
+  "auth.login": "Connexion",
+  "auth.email": "Email",
+  "auth.register": "Inscription",
+  "auth.register.username": "Pseudo",
+  "auth.register.password": "Mot de passe",
+  "auth.register.submit": "S'inscrire"
+}

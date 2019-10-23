@@ -4,9 +4,7 @@
 
     <div class="picross-infos">
       <h1 class="text-center text-2xl w-full">Picross</h1>
-      <div class="text-center text-xl w-full">Difficulté : Facile
-        <!--        <button @click="exportMap">yo</button>-->
-      </div>
+      <div class="text-center text-xl w-full">Difficulté : Facile</div>
     </div>
 
     <Picross v-if="ready"/>

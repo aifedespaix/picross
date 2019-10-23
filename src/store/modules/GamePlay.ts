@@ -6,9 +6,8 @@ import {SquarePosition} from '@/components/Picross/Square/SquarePosition';
 import {soundModule} from '@/store/modules/Sound';
 import _ from 'lodash';
 import {GameSounds} from '@/store/modules/GameSounds';
-import request from 'graphql-request';
-import {url} from '@/store/api';
 import testPicross from '@/assets/maps/test';
+import {graphqlClient} from '@/store/api';
 
 interface PicrossModel {
   id: string;
@@ -24,8 +23,15 @@ export enum Direction {
   Horizontal,
 }
 
+export enum GameMode {
+  Create,
+  Play,
+}
+
 export interface IGamePlayState {
   ready: boolean;
+
+  gameMode: GameMode;
 
   started: boolean;
   win: boolean;
@@ -45,11 +51,18 @@ export interface IGamePlayState {
 }
 
 @Module({
+  namespaced: true,
   dynamic: true,
   name: 'gamePlay',
   store,
 })
 export class GamePlay extends VuexModule implements IGamePlayState {
+
+  private _gameMode = GameMode.Play;
+
+  get gameMode(): GameMode {
+    return this._gameMode;
+  }
 
   private _ready = false;
 
@@ -149,9 +162,28 @@ export class GamePlay extends VuexModule implements IGamePlayState {
     this.SET_ACTUAL_STATE(this.actualState === SquareState.Value ? SquareState.Empty : SquareState.Value);
   }
 
-  @Action({rawError: true})
+  @Action
+  public setActualState(state: SquareState) {
+    this.SET_ACTUAL_STATE(state);
+  }
+
+  @Action
   public async newGame() {
+    this.SET_GAME_MODE(GameMode.Play);
     await this.loadRandomPicross();
+  }
+
+  @Action({rawError: true})
+  public async newCreator(init: { cols: number, rows: number }) {
+    this.SET_GAME_MODE(GameMode.Create);
+    const gameGrid = new GameGridModel([]);
+    gameGrid.addRows(init.rows);
+    gameGrid.addCols(init.cols - 1);
+    gameGrid.init();
+
+    this.SET_SOLUTION_GRID(gameGrid);
+    this.SET_PLAYING_GRID(gameGrid);
+    this.SET_READY(true);
   }
 
   @Action
@@ -216,7 +248,7 @@ export class GamePlay extends VuexModule implements IGamePlayState {
     soundModule.playSound(Math.random() > .5 ? GameSounds.UNDO : GameSounds.UNDO_2).then();
   }
 
-  @Action
+  @Action({rawError: true})
   public changeStatesTo(position: SquarePosition) {
     if (!this.isPlacing || this.win) {
       return;
@@ -233,7 +265,7 @@ export class GamePlay extends VuexModule implements IGamePlayState {
 
   @Action
   private async loadPicrossByQuery(query: string) {
-    const result = await request<PicrossQueryResult>(url, query);
+    const result = await graphqlClient.request<PicrossQueryResult>(query);
     const imported = result.picross ? result.picross.map : testPicross;
 
     const gameGrid = new GameGridModel([]);
@@ -252,7 +284,7 @@ export class GamePlay extends VuexModule implements IGamePlayState {
     }
   `;
 
-    const saved = await request<PicrossQueryResult>(url, mutation, {map: picross.export()});
+    const saved = await graphqlClient.request<PicrossQueryResult>(mutation, {map: picross.export()});
     return saved.picross;
   }
 
@@ -335,6 +367,11 @@ export class GamePlay extends VuexModule implements IGamePlayState {
   @Mutation
   private SET_WIN(win: boolean) {
     this._win = win;
+  }
+
+  @Mutation
+  private SET_GAME_MODE(gameMode: GameMode) {
+    this._gameMode = gameMode;
   }
 
 }

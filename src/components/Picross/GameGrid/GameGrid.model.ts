@@ -8,6 +8,14 @@ import {soundModule} from '@/store/modules/Sound';
 
 export class GameGridModel {
 
+  get cols() {
+    return this._states.length > 0 ? this._states[0].length : 0;
+  }
+
+  get rows() {
+    return this._states.length;
+  }
+
   get colHints(): HintsModel[] {
     return this._colHints;
   }
@@ -24,12 +32,12 @@ export class GameGridModel {
     return this._squaresValued;
   }
 
-  get cols() {
-    return this._states.length > 0 ? this._states[0].length : 0;
+  get styleGridColumns(): string {
+    return this._styleGridColumns;
   }
 
-  get rows() {
-    return this._states.length;
+  get styleGridRows(): string {
+    return this._styleGridRows;
   }
 
   public static cloneEmpty(toClone: GameGridModel) {
@@ -45,6 +53,10 @@ export class GameGridModel {
   private _states = [] as SquareState[][];
 
   private _squaresValued!: number;
+
+  private _styleGridColumns!: string;
+
+  private _styleGridRows!: string;
 
   constructor(states: SquareState[][]) {
     this._states = states;
@@ -141,6 +153,39 @@ export class GameGridModel {
     return counter;
   }
 
+  public addRows(rows: number) {
+    if (rows > 0) {
+      for (let i = 0; i < rows; i++) {
+        const row = this._states[0] ? _.clone(this._states[0]) : [SquareState.Close];
+        this._states.push(row);
+      }
+    } else {
+      let i = 0;
+      while (this._states.length > 0 && i < Math.abs(rows)) {
+        this._states.pop();
+        i++;
+      }
+    }
+  }
+
+  public addCols(cols: number) {
+    if (cols > 0) {
+      for (let row = 0; row < this.rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          this._states[row].push(SquareState.Close);
+        }
+      }
+    } else {
+      for (let i = 0; i < cols; i++) {
+        for (let row = 0; row < this.rows; row++) {
+          if (this._states[row].length > 0) {
+            this._states[row].pop();
+          }
+        }
+      }
+    }
+  }
+
   public changeStates(
     from: SquarePosition,
     to: SquarePosition,
@@ -228,4 +273,5 @@ export class GameGridModel {
     this._colHints[position.col].verify(this.getColumn(position.col));
     this._rowHints[position.row].verify(this.getRow(position.row));
   }
+
 }

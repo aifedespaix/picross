@@ -4,12 +4,19 @@ $header-height: 8rem;
   display: grid;
   grid-template-columns: 1fr 2fr;
   grid-auto-rows: 1fr;
-  @apply mb-4;
 
   input {
     @apply p-1 border-b-2 border-gray-800;
     &:focus {
       @apply border-blue-800;
+    }
+
+    &.invalid {
+      @apply border-red-600;
+    }
+
+    &.valid {
+      @apply border-green-600;
     }
   }
 
@@ -18,7 +25,8 @@ $header-height: 8rem;
   }
 
   .error {
-    column-span: 2;
+    @apply text-xs text-right text-red-600;
+    grid-column: span 2;
   }
 
 }
@@ -39,6 +47,14 @@ $header-height: 8rem;
     @apply border-red-700 text-red-700;
     &:hover {
       @apply bg-red-700 text-white;
+    }
+  }
+
+  &:disabled {
+    @apply bg-gray-300 border-gray-600 text-gray-600 cursor-not-allowed;
+
+    &:hover {
+      @apply bg-gray-300 border-gray-600 text-gray-600;
     }
   }
 }

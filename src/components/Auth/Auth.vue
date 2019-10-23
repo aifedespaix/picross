@@ -4,14 +4,13 @@
       <button :class="loginClass"
               @click="activeLogin"
               class="auth-nav">
-<!--        {{ $t('auth.login', { msg: 'Login' }) }}-->
-<!--        {{ $t('message', { msg: 'Login' }) }}-->r
+        {{ $t('auth.login') }}
       </button>
 
       <button :class="registerClass"
               @click="activeRegister"
               class="auth-nav">
-<!--        {{ $t('auth.register', { msg: 'Register' }) }}-->e
+        {{ $t('auth.register') }}
       </button>
     </div>
 
@@ -34,7 +33,7 @@
     },
   })
   export default class Auth extends Vue {
-    private currentAuth = Login;
+    private currentAuth: any = Login;
 
     private get loginClass() {
       return this.currentAuth === Login ? 'auth-nav-open' : 'auth-nav-close';

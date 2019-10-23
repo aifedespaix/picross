@@ -1,8 +1,8 @@
 <template>
   <div class="app h-full" id="app">
     <Menu/>
-    <router-view :class="theme.main" class="overflow-auto" />
-    <Modal v-if="isModalOpen" :title="modalModule.activeModal.title">
+    <router-view :class="theme.main" class="overflow-auto"/>
+    <Modal :title="modalModule.activeModal.title" v-if="isModalOpen">
       <Settings v-if="isSettingsModal"/>
       <Auth v-if="isAuthModal"/>
     </Modal>
@@ -15,8 +15,10 @@
   import Settings from '@/components/Settings.vue';
   import {settingsModule} from '@/store/modules/Settings';
   import Modal from '@/components/Modal.vue';
-  import {ModalType, modalModule} from '@/store/modules/Modal';
+  import {modalModule, ModalType} from '@/store/modules/Modal';
   import Auth from '@/components/Auth/Auth.vue';
+  import {authModule} from '@/store/modules/Auth';
+  import {tokenModule} from '@/store/modules/Token';
 
   @Component({
     components: {
@@ -27,6 +29,12 @@
     },
   })
   export default class App extends Vue {
+    private beforeMount() {
+      if (!!tokenModule.token) {
+        authModule.loadProfile();
+      }
+    }
+
     private get isModalOpen() {
       return this.modalModule.activeModal.type !== ModalType.None;
     }

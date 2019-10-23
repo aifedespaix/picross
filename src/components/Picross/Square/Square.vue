@@ -1,3 +1,5 @@
+import { SquareState } from '@/components/Picross/Square/SquareState';
+import { GameMode } from '@/store/modules/GamePlay';
 <template>
   <div
     :class="getBgClass()"
@@ -20,7 +22,7 @@ import _ from 'lodash';
 import TimesIcon from '@/components/icons/Times.vue';
 import {settingsModule} from '@/store/modules/Settings';
 import {gameSettingsModule} from '@/store/modules/GameSettings';
-import {gamePlayModule} from '@/store/modules/GamePlay';
+import {GameMode, gamePlayModule} from '@/store/modules/GamePlay';
 import {Mouse} from '@/utils/Mouse';
 
 @Component({
@@ -29,6 +31,10 @@ import {Mouse} from '@/utils/Mouse';
 export default class Square extends Vue {
 
   private isChromeMobile!: boolean;
+
+  private get isPlayGameMode() {
+    return gamePlayModule.gameMode === GameMode.Play;
+  }
 
   @Prop({default: SquareState.Empty}) private state!: SquareState;
   @Prop() private readonly position!: SquarePosition;
@@ -67,18 +73,20 @@ export default class Square extends Vue {
   private startPlacing(event: PointerEvent) {
     const isMouse = Mouse.isMouse(event);
 
-    if (gameSettingsModule.isToggleStateButtonActive.value) {
+    if (gameSettingsModule.isToggleStateButtonActive.value || !this.isPlayGameMode) {
       if (Mouse.isRightClick(event)) {
-        gamePlayModule.switchStateMode();
+        if (this.isPlayGameMode) {
+          gamePlayModule.switchStateMode();
+        }
       } else {
         gamePlayModule.startPlacing(this.position);
       }
     } else {
       if (Mouse.isRightClick(event)) {
-        gamePlayModule.switchStateMode();
+        gamePlayModule.setActualState(SquareState.Empty);
         gamePlayModule.startPlacing(this.position);
-        gamePlayModule.switchStateMode();
       } else {
+        gamePlayModule.setActualState(SquareState.Value);
         gamePlayModule.startPlacing(this.position);
       }
     }

@@ -1,4 +1,3 @@
-import { ModalEnum } from '@/store/modules/Modal';
 <template>
   <header :class="theme.second" class="header">
     <img alt="Logo Picross" class="h-full p-2" src="@/assets/icons/picross-icon.svg">
@@ -8,6 +7,10 @@ import { ModalEnum } from '@/store/modules/Modal';
                    v-for="item in items">
         {{item.name}}
       </router-link>
+      <router-link :to="item.to" class="px-2" v-bind:key="item.id" v-for="item in loggedItems"
+                   v-if="logged">
+        {{item.name}}
+      </router-link>
     </nav>
 
     <div class="flex">
@@ -15,7 +18,11 @@ import { ModalEnum } from '@/store/modules/Modal';
         <ConfigIcon/>
       </button>
 
-      <button @click="showAuth" class="flex items-center p-3 rounded-full">
+      <div class="flex items-center p-3 rounded-full" v-if="logged">
+        coucou {{user.name}}
+      </div>
+
+      <button @click="showAuth" class="flex items-center p-3 rounded-full" v-else="!logged">
         <AuthIcon/>
       </button>
     </div>
@@ -29,6 +36,7 @@ import { ModalEnum } from '@/store/modules/Modal';
   import {settingsModule} from '@/store/modules/Settings';
   import {modalModule, ModalModule} from '@/store/modules/Modal';
   import AuthIcon from '@/components/icons/Auth.vue';
+  import {authModule} from '@/store/modules/Auth';
 
   interface Item {
     to: string;
@@ -40,6 +48,15 @@ import { ModalEnum } from '@/store/modules/Modal';
   })
   export default class Menu extends Vue {
     private items!: Item[];
+    private loggedItems!: Item[];
+
+    get logged() {
+      return authModule.logged;
+    }
+
+    get user() {
+      return authModule.user;
+    }
 
     get theme() {
       return settingsModule.theme;
@@ -48,7 +65,10 @@ import { ModalEnum } from '@/store/modules/Modal';
     private beforeCreate() {
       this.items = [
         {to: '/', name: 'Picross'} as Item,
-        {to: '/about', name: 'À Propos'} as Item,
+        // {to: '/about', name: 'À Propos'} as Item,
+      ];
+      this.loggedItems = [
+        {to: '/create', name: 'Créer'} as Item,
       ];
     }
 

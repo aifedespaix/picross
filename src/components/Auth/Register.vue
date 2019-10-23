@@ -1,75 +1,90 @@
 <template>
   <div class="flex flex-col">
-    <ValidationProvider name="Email" class="field" v-slot="{ errors }">
-      <label for="email">Email</label>
-      <input id="email"
-             required
-             type="email"
-             v-model="email">
-      <div class="error">
-        {{errors[0]}}
-      </div>
-    </ValidationProvider>
+    <ValidationObserver @submit.prevent="submit" ref="observer" tag="form" v-slot="{ invalid }">
 
-    <ValidationProvider name="Pseudo" class="field" v-slot="{ errors }">
-      <label for="name">Pseudo</label>
-      <input id="name"
-             required
-             minlength="3"
-             maxlength="25"
-             type="text"
-             v-model="name">
-      <div class="error">
-        {{errors[0]}}
-      </div>
-    </ValidationProvider>
+      <ValidationProvider class="field" name="Email" v-slot="{ errors, classes }">
+        <label for="email">{{ $t('auth.email') }}</label>
+        <input id="email"
+               :class="classes"
+               required="required"
+               type="email"
+               v-model="user.email">
+        <div class="error">
+          {{errors[0]}}
+        </div>
+      </ValidationProvider>
 
-    <ValidationProvider name="Mot de passe" class="field" v-slot="{ errors }">
-      <label for="password">Mot de passe</label>
-      <input id="password"
-             required
-             minlength="8"
-             maxlength="50"
-             type="password"
-             v-model="password">
-      <div class="error">
-        {{errors[0]}}
-      </div>
-    </ValidationProvider>
+      <ValidationProvider class="field" name="Pseudo" v-slot="{ errors, classes }">
+        <label for="name">{{ $t('auth.register.username') }}</label>
+        <input id="name"
+               :class="classes"
+               maxlength="25"
+               minlength="3"
+               required
+               type="text"
+               v-model="user.username">
+        <div class="error">
+          {{errors[0]}}
+        </div>
+      </ValidationProvider>
 
-    <div class="flex justify-center">
-      <button class="button button-valid">S'inscrire</button>
-    </div>
+      <ValidationProvider class="field" name="Mot de passe" v-slot="{ errors, classes }">
+        <label for="password">{{ $t('auth.register.password') }}</label>
+        <input id="password"
+               :class="classes"
+               maxlength="50"
+               minlength="8"
+               required
+               type="password"
+               v-model="user.password">
+        <div class="error">
+          {{errors[0]}}
+        </div>
+      </ValidationProvider>
+
+      <div v-if="error" class="text-red-800 mb-2">Inscription impossible : l'identifiant ou l'email est déjà utilisé.</div>
+
+      <div class="flex justify-center">
+        <button :disabled="invalid" class="button button-valid">{{ $t('auth.register.submit') }}</button>
+      </div>
+
+    </ValidationObserver>
 
   </div>
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator';
-  import {extend, ValidationProvider} from 'vee-validate';
-  import {email, max, min} from 'vee-validate/dist/rules';
+import {Component, Vue} from 'vue-property-decorator';
+import {extend, ValidationObserver, ValidationProvider} from 'vee-validate';
+import {email, max, min, required} from 'vee-validate/dist/rules';
+import {authModule, IRegisterInput} from '@/store/modules/Auth';
+import {ModalModule, modalModule} from '@/store/modules/Modal';
 
-  extend('required', (value) => !!value);
-  extend('email', email);
-  extend('min', min);
-  extend('max', max);
+extend('required', required);
+extend('email', email);
+extend('min', min);
+extend('max', max);
 
-  interface IRegister {
-    email: string;
-    name: string;
-    password: string;
+@Component({
+  components: {
+    ValidationProvider,
+    ValidationObserver,
+  },
+})
+export default class Register extends Vue {
+
+  public user: IRegisterInput = {username: '', email: '', password: ''};
+  private error = false;
+
+  private async submit() {
+    const registered = await authModule.register(this.user);
+    this.error = !registered;
+
+    if (registered) {
+      modalModule.changeModal(ModalModule.None);
+    }
   }
 
-  @Component({
-    components: {
-      ValidationProvider,
-    },
-  })
-  export default class Register extends Vue implements IRegister {
-
-    public email = '';
-    public password = '';
-    public name = '';
-  }
+}
 </script>
 
