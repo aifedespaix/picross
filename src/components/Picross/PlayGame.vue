@@ -29,6 +29,9 @@
   import {settingsModule} from '@/store/modules/Settings';
   import RevertButton from '@/components/Picross/RevertButton.vue';
   import Picross from '@/components/Picross/Picross.vue';
+  import {GridComp} from '@/model/Game/Grid';
+  import {GamePlayModel} from '@/model/Game/GamePlay';
+  import {GameMode} from '@/model/Game/GameModel';
 
   @Component({
     components: {
@@ -41,7 +44,8 @@
   export default class PicrossMain extends Vue {
 
     private async mounted() {
-      await gamePlayModule.newGame();
+      gamePlayModule.CHANGE_GAME_MODE(GameMode.Play);
+      await (gamePlayModule.gameModel as GamePlayModel).newGame();
     }
 
     private get isToggleButtonActive() {
@@ -53,11 +57,11 @@
     }
 
     private get isWin() {
-      return gamePlayModule.win;
+      return (gamePlayModule.gameModel as GamePlayModel).win;
     }
 
     private get ready() {
-      return gamePlayModule.ready;
+      return gamePlayModule.gameModel.loaded;
     }
 
     private rightClick(event: MouseEvent) {
@@ -67,7 +71,7 @@
     }
 
     private switchStateMode() {
-      gamePlayModule.switchStateMode();
+      (gamePlayModule.gameModel as GamePlayModel).switchActualState();
     }
 
   }

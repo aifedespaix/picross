@@ -4,7 +4,6 @@
     <div :class="[hint.valid ? theme.hint_valid : '', hintStyle]"
          v-for="hint in hintsModel.hints">
       {{hint.value}}
-<!--      {{hint.valid}}-->
     </div>
   </div>
 </template>
@@ -35,7 +34,3 @@
 
   }
 </script>
-
-<style>
-
-</style>

@@ -49,9 +49,9 @@
   import {gameSettingsModule} from '@/store/modules/GameSettings';
   import {settingsModule} from '@/store/modules/Settings';
   import {gamePlayModule} from '@/store/modules/GamePlay';
-  import {SquareState} from '@/components/Picross/Square/SquareState';
   import {appModule, DeviceType} from '@/store/modules/App';
   import {modalModule, ModalModule} from '@/store/modules/Modal';
+  import {SquareState} from '@/model/Square/SquareState';
 
   @Component({
     components: {TimesIcon, ConfigIcon, BackIcon, SaveIcon, CheckIcon},
@@ -82,8 +82,8 @@
     }
 
     set rightClickChange(value: boolean) {
-      if (!value && gamePlayModule.actualState !== SquareState.Value) {
-        gamePlayModule.switchStateMode();
+      if (!value && gamePlayModule.gameModel.actualState !== SquareState.Value) {
+        gamePlayModule.gameModel.actualState = SquareState.Value;
       }
       gameSettingsModule.changeToggleStateButtonActive(value);
     }

@@ -1,39 +1,46 @@
-import {SquareState} from '@/components/Picross/Square/SquareState';
 import {Hint} from '@/components/Picross/Hints/Hint';
+import {SquareState} from '@/model/Square/SquareState';
 
 export default class HintsModel {
 
-  public hints: Hint[];
-  public valid: boolean;
-  private readonly solutionStates!: SquareState[];
+  private _hints: Hint[];
 
-  constructor(solutionStates: SquareState[]) {
-    this.solutionStates = solutionStates;
-    this.hints = this.getHintsForLine(this.solutionStates);
-    this.valid = false;
+  get hints(): Hint[] {
+    return this._hints;
+  }
+
+  private _valid: boolean;
+
+  get valid(): boolean {
+    return this._valid;
+  }
+
+  constructor(states: SquareState[]) {
+    this._hints = this.getHintsForLine(states);
+    this._valid = false;
   }
 
   public verify(line: SquareState[]) {
     const userHints = this.getHintsForLine(line);
-    for (let i = 0; i < this.hints.length; i++) {
-      this.hints[i].valid = typeof userHints[i] !== 'undefined' && userHints[i].value === this.hints[i].value;
+    for (let i = 0; i < this._hints.length; i++) {
+      this._hints[i].valid = typeof userHints[i] !== 'undefined' && userHints[i].value === this._hints[i].value;
     }
 
-    if (userHints.length === this.hints.length) {
+    if (userHints.length === this._hints.length) {
       this.generalVerify();
     } else {
-      this.valid = false;
+      this._valid = false;
     }
   }
 
   private generalVerify() {
-    for (const hint of this.hints) {
+    for (const hint of this._hints) {
       if (!hint.valid) {
-        this.valid = false;
+        this._valid = false;
         return;
       }
     }
-    this.valid = true;
+    this._valid = true;
   }
 
   private getHintsForLine(line: SquareState[]) {

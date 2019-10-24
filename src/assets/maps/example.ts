@@ -1,4 +1,3 @@
-import {SquareState} from '@/components/Picross/Square/SquareState';
 // todo repare
 export default `[
   [

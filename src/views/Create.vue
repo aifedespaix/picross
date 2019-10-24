@@ -16,21 +16,26 @@
           {{errors[0]}}
         </div>
       </ValidationProvider>
+
+      <button @click="save">Save</button>
     </div>
 
-    <Picross v-if="ready"/>
+    <Picross v-if="ready" ref="picross"/>
 
   </div>
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator';
+  import {Component, Vue, Watch} from 'vue-property-decorator';
   import Picross from '@/components/Picross/Picross.vue';
-  import PicrossMain from '@/components/Picross/PicrossMain.vue';
+  import PicrossMain from '@/components/Picross/PlayGame.vue';
   import GameGrid from '@/components/Picross/GameGrid/GameGrid.vue';
   import {extend, ValidationObserver, ValidationProvider} from 'vee-validate';
   import {max_value, min_value, required} from 'vee-validate/dist/rules';
   import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {SquareState} from '@/model/Square/SquareState';
+  import {GameMode} from '@/model/Game/GameModel';
+  import {GameCreateModel} from '@/model/Game/GameCreate';
 
   extend('min_value', min_value);
   extend('max_value', max_value);
@@ -46,44 +51,44 @@
     },
   })
   export default class Create extends Vue {
-    private _cols = 10;
-    private _rows = 10;
 
-    get cols(): number {
-      return this._cols;
-    }
-
-    set cols(value: number) {
-      this._cols = value;
-      gamePlayModule.playingGrid.addCols(this._cols - gamePlayModule.playingGrid.cols);
-    }
-
-    get rows(): number {
-      return this._rows;
-    }
-
-    set rows(value: number) {
-      this._rows = value;
-      gamePlayModule.playingGrid.addRows(this._rows - gamePlayModule.playingGrid.rows);
-    }
-
-    /**
-     * todo
-     */
     private get ready() {
-      return true;
+      return gamePlayModule.gameModel.loaded;
+    }
+
+    private cols = 10;
+    private rows = 10;
+
+    @Watch('cols')
+    public setCols(value: number) {
+      gamePlayModule.gameModel.gameGrid.setCols(value, SquareState.Close);
+      const picross = this.$refs.picross as any;
+      picross.calcGridStyle();
+    }
+
+    @Watch('rows')
+    public setRows(value: number) {
+      gamePlayModule.gameModel.gameGrid.setRows(this.rows, SquareState.Close);
+      const picross = this.$refs.picross as any;
+      picross.calcGridStyle();
+    }
+
+    private mounted() {
+      gamePlayModule.CHANGE_GAME_MODE(GameMode.Create);
+      gamePlayModule.gameModel.newGame(this.cols, this.rows);
     }
 
     private rightClick(event: MouseEvent) {
       event.preventDefault();
     }
 
-    private async mounted() {
-      await gamePlayModule.newCreator({cols: this._cols, rows: this._rows});
+    private save() {
+      (gamePlayModule.gameModel as GameCreateModel).save();
     }
 
   }
 </script>
+
 <style>
   .create {
     display: grid;

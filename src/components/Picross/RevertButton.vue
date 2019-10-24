@@ -24,7 +24,7 @@
   export default class RevertButton extends Vue {
 
     private get isRevertable() {
-      return gamePlayModule.isRevertable;
+      return gamePlayModule.gameModel.isRevertable();
     }
 
     private get theme() {
@@ -32,7 +32,7 @@
     }
 
     private undo() {
-      gamePlayModule.undo();
+      gamePlayModule.gameModel.undo();
     }
   }
 </script>

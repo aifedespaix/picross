@@ -11,13 +11,11 @@
 
 <script lang="ts">
   import {Component, Vue, Watch} from 'vue-property-decorator';
-  import {Action, Getter} from 'vuex-class';
   import DrawIcon from '@/components/icons/Draw.vue';
-  import {Theme} from '@/components/Theme/theme';
   import TimesIcon from '@/components/icons/Times.vue';
-  import {SquareState} from '@/components/Picross/Square/SquareState';
   import {settingsModule} from '@/store/modules/Settings';
   import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {SquareState} from '@/model/Square/SquareState';
 
   @Component({
     components: {DrawIcon, TimesIcon},
@@ -28,7 +26,7 @@
       return settingsModule.theme;
     }
     get gameState() {
-      return gamePlayModule.actualState;
+      return gamePlayModule.gameModel.actualState;
     }
 
     get isValueState() {
@@ -57,7 +55,7 @@
     }
 
     private toggle() {
-      gamePlayModule.switchStateMode();
+      gamePlayModule.gameModel.switchActualState();
     }
 
     get toggleClass() {

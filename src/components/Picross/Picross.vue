@@ -1,3 +1,4 @@
+import { GridComp } from '@/model/Game/Grid';
 <template>
   <div class="picross">
     <div>
@@ -14,75 +15,84 @@
     </div>
 
     <div class="hints hints-row" ref="rowHints">
-      <Hints :hints-model="hintsModel"
-             :key="key"
-             v-for="(hintsModel, key) in getRowHints"
+      <Hints
+        :hints-model="hintsModel"
+        :key="key"
+        v-for="(hintsModel, key) in getRowHints"
       />
     </div>
 
-    <GameGrid/>
+    <GameGrid ref="gameGrid"/>
 
   </div>
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator';
-  import GameGrid from '@/components/Picross/GameGrid/GameGrid.vue';
-  import {gamePlayModule} from '@/store/modules/GamePlay';
-  import Hints from '@/components/Picross/Hints/Hints.vue';
+import {Component, Vue} from 'vue-property-decorator';
+import GameGrid from '@/components/Picross/GameGrid/GameGrid.vue';
+import {gamePlayModule} from '@/store/modules/GamePlay';
+import Hints from '@/components/Picross/Hints/Hints.vue';
+import {SquareState} from '@/model/Square/SquareState';
+import {GridComp} from '@/model/Game/Grid';
 
-  @Component({
-    components: {GameGrid, Hints},
-  })
-  export default class Picross extends Vue {
+@Component({
+  components: {GameGrid, Hints},
+})
+export default class Picross extends Vue {
 
-    private timerInterval!: any;
-    private duration = 0;
-
-    private hintStyle = [
-      'flex',
-      'justify-center',
-      'items-center',
-      'w-4',
-      'h-4',
-    ];
-
-    get maxBlocs() {
-      return gamePlayModule.solutionGrid.squaresValued;
-    }
-
-    get actualBlocs() {
-      return gamePlayModule.playingGrid.squaresValued;
-    }
-
-    get getColHints() {
-      return gamePlayModule.playingGrid.colHints;
-    }
-
-    get getRowHints() {
-      return gamePlayModule.playingGrid.rowHints;
-    }
-
-    private startGame() {
-      this.timerInterval = setInterval(() => {
-        this.duration += 1;
-      }, 100);
-    }
-
-    private stopGame() {
-      clearTimeout(this.timerInterval);
-    }
-
-    private async mounted() {
-      const $colHints = this.$refs.colHints as HTMLElement;
-      $colHints.style.gridTemplateColumns = `repeat(${gamePlayModule.playingGrid.cols}, 1fr)`;
-
-      const $rowHints = this.$refs.rowHints as HTMLElement;
-      $rowHints.style.gridTemplateRows = `repeat(${gamePlayModule.playingGrid.rows}, 1fr)`;
-    }
-
-
+  get maxBlocs() {
+    return gamePlayModule.gameModel.gameGrid.countValue(SquareState.Value);
   }
+
+  get actualBlocs() {
+    return gamePlayModule.gameModel.gameGrid.countValue(SquareState.Value);
+  }
+
+  get getColHints() {
+    return gamePlayModule.gameModel.hintsManager.colHints;
+  }
+
+  get getRowHints() {
+    return gamePlayModule.gameModel.hintsManager.rowHints;
+  }
+
+  private timerInterval!: any;
+  private duration = 0;
+
+  private hintStyle = [
+    'flex',
+    'justify-center',
+    'items-center',
+    'w-4',
+    'h-4',
+  ];
+
+  public calcGridStyle() {
+    const $colHints = this.$refs.colHints as HTMLElement;
+    $colHints.style.gridTemplateColumns = gamePlayModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
+
+    const $rowHints = this.$refs.rowHints as HTMLElement;
+    $rowHints.style.gridTemplateRows = gamePlayModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
+
+    const gameGrid = this.$refs.gameGrid as any;
+    gameGrid.calcGridStyle();
+  }
+
+  private startGame() {
+    this.timerInterval = setInterval(() => {
+      this.duration += 1;
+    }, 100);
+  }
+
+  private stopGame() {
+    clearTimeout(this.timerInterval);
+  }
+
+  private mounted() {
+    this.calcGridStyle();
+  }
+
+}
 </script>
 
 <style lang="scss">

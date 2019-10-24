@@ -1,19 +1,15 @@
 <template>
   <div @contextmenu="rightClick($event)" class="flex justify-center">
-    <PicrossMain/>
+    <PlayGame/>
   </div>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import Picross from '@/components/Picross/Picross.vue';
-  import PicrossMain from '@/components/Picross/PicrossMain.vue';
+  import PlayGame from '@/components/Picross/PlayGame.vue';
 
   @Component({
-    components: {
-      PicrossMain,
-      Picross,
-    },
+    components: {PlayGame},
   })
   export default class Home extends Vue {
     private rightClick(event: MouseEvent) {

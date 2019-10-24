@@ -1,8 +1,8 @@
 import {Action, getModule, Module, VuexModule} from 'vuex-module-decorators';
 import store from '@/store';
 import {gameSettingsModule} from '@/store/modules/GameSettings';
-import {SquareState} from '@/components/Picross/Square/SquareState';
 import {GameSounds} from '@/store/modules/GameSounds';
+import {SquareState} from '@/model/Square/SquareState';
 
 @Module({
   dynamic: true,
