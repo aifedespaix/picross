@@ -1,5 +1,3 @@
-import { ISquareState } from '@/components/Picross/Square/ISquareState';
-import { GameMode } from '@/store/modules/GamePlay';
 <template>
   <div
     :class="getBgClass()"
@@ -20,10 +18,12 @@ import { GameMode } from '@/store/modules/GamePlay';
   import TimesIcon from '@/components/icons/Times.vue';
   import {settingsModule} from '@/store/modules/Settings';
   import {gameSettingsModule} from '@/store/modules/GameSettings';
-  import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {gameModule} from '@/store/modules/Game';
   import {Mouse} from '@/utils/Mouse';
   import {IGridPosition} from '@/model/Square/IGridPosition';
   import {SquareState} from '@/model/Square/SquareState';
+  import {GameMode} from '@/model/Game/GameModel';
+  import {GamePlayModel} from '@/model/Game/GamePlay';
 
   @Component({
     components: {TimesIcon},
@@ -67,31 +67,42 @@ import { GameMode } from '@/store/modules/GamePlay';
       ];
     }
 
+    private switchState() {
+      if (gameModule.gameMode === GameMode.Play) {
+        (gameModule.gameModel as GamePlayModel).switchActualState();
+      }
+    }
+
     private startPlacing(event: PointerEvent) {
       const isMouse = Mouse.isMouse(event);
 
       if (gameSettingsModule.isToggleStateButtonActive.value) {
         if (Mouse.isRightClick(event)) {
-          gamePlayModule.gameModel.switchActualState();
+          this.switchState();
         } else {
-          gamePlayModule.gameModel.startPlacing(this.position);
+          gameModule.gameModel.startPlacing(this.position);
         }
       } else {
-        gamePlayModule.gameModel.actualState = Mouse.isRightClick(event) ? SquareState.Empty : SquareState.Value;
-        gamePlayModule.gameModel.startPlacing(this.position);
+        if (gameModule.gameMode === GameMode.Play) {
+          (gameModule.gameModel as GamePlayModel).actualState = Mouse.isRightClick(event) ?
+            SquareState.Empty : SquareState.Value;
+        }
+        gameModule.gameModel.startPlacing(this.position);
       }
     }
 
     private stopPlacing(event: PointerEvent) {
       if (!gameSettingsModule.isToggleStateButtonActive.value && Mouse.isMouse(event) && Mouse.isRightClick(event)) {
-        gamePlayModule.gameModel.switchActualState();
+        if (gameModule.gameMode === GameMode.Play) {
+          this.switchState();
+        }
       }
-      gamePlayModule.gameModel.stopPlacing();
+      gameModule.gameModel.stopPlacing();
     }
 
     private pointerEnter(event: PointerEvent) {
       if (!this.isChromeMobile) {
-        gamePlayModule.gameModel.changeStatesTo(this.position);
+        gameModule.gameModel.changeStatesTo(this.position);
       }
     }
 
@@ -109,7 +120,7 @@ import { GameMode } from '@/store/modules/GamePlay';
         } as IGridPosition;
 
         if (position.col && position.row && !_.isEqual(position, this.position)) {
-          gamePlayModule.gameModel.changeStatesTo(this.position);
+          gameModule.gameModel.changeStatesTo(this.position);
         }
       }
     }

@@ -8,7 +8,7 @@
 <script lang="ts">
 
   import {Component, Vue} from 'vue-property-decorator';
-  import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {gameModule} from '@/store/modules/Game';
   import GameGrid from '@/components/Picross/GameGrid/GameGrid.vue';
   import ToggleButton from '@/components/ToggleButton.vue';
   import BackIcon from '@/components/icons/Back.vue';
@@ -24,7 +24,7 @@
   export default class RevertButton extends Vue {
 
     private get isRevertable() {
-      return gamePlayModule.gameModel.isRevertable();
+      return gameModule.gameModel.isRevertable();
     }
 
     private get theme() {
@@ -32,7 +32,7 @@
     }
 
     private undo() {
-      gamePlayModule.gameModel.undo();
+      gameModule.gameModel.undo();
     }
   }
 </script>

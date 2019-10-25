@@ -3,7 +3,7 @@ import store from '@/store';
 import {Theme} from '@/components/Theme/theme';
 import {ThemeEnum} from '@/components/Theme/theme.enum';
 
-export interface ISettings {
+export interface ISettingsState {
   theme: Theme;
 }
 
@@ -13,7 +13,7 @@ export interface ISettings {
   name: 'settings',
   store,
 })
-export class Settings extends VuexModule implements ISettings {
+export class Settings extends VuexModule implements ISettingsState {
   private _theme = new Theme();
 
   get theme(): Theme {

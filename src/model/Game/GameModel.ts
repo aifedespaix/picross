@@ -5,6 +5,7 @@ import {GameGridModel} from '@/model/Game/GameGrid.model';
 import _ from 'lodash';
 import {soundModule} from '@/store/modules/Sound';
 import {GameSounds} from '@/store/modules/GameSounds';
+import {HintsManager} from '@/model/Hints/HintsManager';
 
 export enum GameMode {
   Play,
@@ -14,9 +15,14 @@ export enum GameMode {
 interface IGame {
   loaded: boolean;
   gameGrid: GameGridModel;
+  hintsManager: HintsManager;
 }
 
 export abstract class GameModel implements IGame {
+
+  get hintsManager(): HintsManager {
+    return this._hintsManager;
+  }
 
   get loaded(): boolean {
     return this._loaded;
@@ -34,6 +40,8 @@ export abstract class GameModel implements IGame {
   protected usingState: SquareState; // todo rename placingState
 
   protected _loaded: boolean;
+
+  private _hintsManager: HintsManager;
   private direction: IDirection;
   private haveToCalcDirection: boolean;
   private isPlacing: boolean;
@@ -53,11 +61,14 @@ export abstract class GameModel implements IGame {
     this._positionFrom = {col: -1, row: -1};
     this.stateToClose = SquareState.Close;
     this.usingState = SquareState.Value;
+    this._hintsManager = new HintsManager(this.gameGrid);
 
     this._history = [];
 
     this._loaded = false;
   }
+
+  public abstract newGame(params: object): void;
 
   public startPlacing(position: IGridPosition) {
     this.isPlacing = true;

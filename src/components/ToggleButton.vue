@@ -14,8 +14,9 @@
   import DrawIcon from '@/components/icons/Draw.vue';
   import TimesIcon from '@/components/icons/Times.vue';
   import {settingsModule} from '@/store/modules/Settings';
-  import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {gameModule} from '@/store/modules/Game';
   import {SquareState} from '@/model/Square/SquareState';
+  import {GamePlayModel} from '@/model/Game/GamePlay';
 
   @Component({
     components: {DrawIcon, TimesIcon},
@@ -25,8 +26,9 @@
     get theme() {
       return settingsModule.theme;
     }
+
     get gameState() {
-      return gamePlayModule.gameModel.actualState;
+      return this.gamePlayMode.actualState;
     }
 
     get isValueState() {
@@ -54,8 +56,12 @@
       bubble.style.transform = `translateX(${5.75 * position + .25}rem)`;
     }
 
+    get gamePlayMode() {
+      return gameModule.gameModel as GamePlayModel;
+    }
+
     private toggle() {
-      gamePlayModule.gameModel.switchActualState();
+      this.gamePlayMode.switchActualState();
     }
 
     get toggleClass() {

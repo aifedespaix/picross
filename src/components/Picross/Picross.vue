@@ -30,7 +30,7 @@ import { GridComp } from '@/model/Game/Grid';
 <script lang="ts">
 import {Component, Vue} from 'vue-property-decorator';
 import GameGrid from '@/components/Picross/GameGrid/GameGrid.vue';
-import {gamePlayModule} from '@/store/modules/GamePlay';
+import {gameModule} from '@/store/modules/Game';
 import Hints from '@/components/Picross/Hints/Hints.vue';
 import {SquareState} from '@/model/Square/SquareState';
 import {GridComp} from '@/model/Game/Grid';
@@ -41,19 +41,19 @@ import {GridComp} from '@/model/Game/Grid';
 export default class Picross extends Vue {
 
   get maxBlocs() {
-    return gamePlayModule.gameModel.gameGrid.countValue(SquareState.Value);
+    return gameModule.gameModel.gameGrid.countValue(SquareState.Value);
   }
 
   get actualBlocs() {
-    return gamePlayModule.gameModel.gameGrid.countValue(SquareState.Value);
+    return gameModule.gameModel.gameGrid.countValue(SquareState.Value);
   }
 
   get getColHints() {
-    return gamePlayModule.gameModel.hintsManager.colHints;
+    return gameModule.gameModel.hintsManager.colHints;
   }
 
   get getRowHints() {
-    return gamePlayModule.gameModel.hintsManager.rowHints;
+    return gameModule.gameModel.hintsManager.rowHints;
   }
 
   private timerInterval!: any;
@@ -69,10 +69,10 @@ export default class Picross extends Vue {
 
   public calcGridStyle() {
     const $colHints = this.$refs.colHints as HTMLElement;
-    $colHints.style.gridTemplateColumns = gamePlayModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
+    $colHints.style.gridTemplateColumns = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
 
     const $rowHints = this.$refs.rowHints as HTMLElement;
-    $rowHints.style.gridTemplateRows = gamePlayModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
+    $rowHints.style.gridTemplateRows = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
 
     const gameGrid = this.$refs.gameGrid as any;
     gameGrid.calcGridStyle();

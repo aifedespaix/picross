@@ -48,7 +48,7 @@
   import {ThemeEnum} from '@/components/Theme/theme.enum';
   import {gameSettingsModule} from '@/store/modules/GameSettings';
   import {settingsModule} from '@/store/modules/Settings';
-  import {gamePlayModule} from '@/store/modules/GamePlay';
+  import {gameModule} from '@/store/modules/Game';
   import {appModule, DeviceType} from '@/store/modules/App';
   import {modalModule, ModalModule} from '@/store/modules/Modal';
   import {SquareState} from '@/model/Square/SquareState';
@@ -82,9 +82,6 @@
     }
 
     set rightClickChange(value: boolean) {
-      if (!value && gamePlayModule.gameModel.actualState !== SquareState.Value) {
-        gamePlayModule.gameModel.actualState = SquareState.Value;
-      }
       gameSettingsModule.changeToggleStateButtonActive(value);
     }
 

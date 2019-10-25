@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import {Component, Vue, Watch} from 'vue-property-decorator';
-import {gamePlayModule} from '@/store/modules/GamePlay';
+import {gameModule} from '@/store/modules/Game';
 import Square from '@/components/Picross/Square/Square.vue';
 import {settingsModule} from '@/store/modules/Settings';
 import {GridComp} from '@/model/Game/Grid';
@@ -23,11 +23,11 @@ import {GridComp} from '@/model/Game/Grid';
 })
 export default class GameGrid extends Vue {
   public mounted() {
-    this.calcGrid();
+    this.calcGridStyle();
   }
 
   get states() {
-    return gamePlayModule.gameModel.gameGrid.objects;
+    return gameModule.gameModel.gameGrid.objects;
   }
 
   get theme() {
@@ -48,12 +48,12 @@ export default class GameGrid extends Vue {
     const $gameGrid = this.$refs.gameGrid as HTMLElement;
     const cols = 0;
     const rows = 0;
-    $gameGrid.style.gridTemplateColumns = gamePlayModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
-    $gameGrid.style.gridTemplateRows = gamePlayModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
+    $gameGrid.style.gridTemplateColumns = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
+    $gameGrid.style.gridTemplateRows = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
   }
 
   private pointerleave() {
-    gamePlayModule.gameModel.stopPlacing();
+    gameModule.gameModel.stopPlacing();
   }
 
 }

@@ -6,7 +6,7 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import PlayGame from '@/components/Picross/PlayGame.vue';
+  import PlayGame from '@/components/Picross/GamePlay.vue';
 
   @Component({
     components: {PlayGame},

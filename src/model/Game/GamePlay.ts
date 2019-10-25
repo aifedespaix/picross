@@ -2,7 +2,6 @@ import {SquareState} from '@/model/Square/SquareState';
 import {GameModel} from '@/model/Game/GameModel';
 import testPicross from '@/assets/maps/example';
 import {GameGridModel} from '@/model/Game/GameGrid.model';
-import {HintsManager} from '@/model/Hints/HintsManager';
 import {GqlPicross} from '@/api/Picross';
 import {IGridPosition} from '@/model/Square/IGridPosition';
 import {soundModule} from '@/store/modules/Sound';
@@ -18,10 +17,6 @@ export class GamePlayModel extends GameModel implements IGamePlay {
 
   get solutionGrid(): GameGridModel {
     return this._solutionGrid;
-  }
-
-  get hintsManager(): HintsManager {
-    return this._hintsManager;
   }
 
   get started(): boolean {
@@ -42,8 +37,6 @@ export class GamePlayModel extends GameModel implements IGamePlay {
 
   private _solutionGrid: GameGridModel;
 
-  private _hintsManager: HintsManager;
-
   private _started: boolean;
 
   private _actualState: SquareState;
@@ -58,14 +51,13 @@ export class GamePlayModel extends GameModel implements IGamePlay {
     this._started = false;
 
     this._solutionGrid = new GameGridModel();
-    this._hintsManager = new HintsManager(this.gameGrid);
   }
 
   public async newGame() {
     const result = await GqlPicross.loadRandomPicross();
     const imported = result.picross ? result.picross.map : testPicross;
     this._solutionGrid.importFromString(imported);
-    this._hintsManager.init(this._solutionGrid);
+    this.hintsManager.init(this._solutionGrid);
 
     this.gameGrid.reinit(this._solutionGrid.cols, this._solutionGrid.rows, SquareState.Close);
 

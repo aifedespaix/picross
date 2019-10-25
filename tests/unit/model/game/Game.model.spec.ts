@@ -4,6 +4,11 @@ import {IGridPosition} from '@/model/Square/IGridPosition';
 
 describe('GameModel', () => {
   class GameModelSpec extends GameModel {
+
+    public newGame(params: object): void {
+      return;
+    }
+
     protected postEachChange(position: IGridPosition): void {
       return;
     }

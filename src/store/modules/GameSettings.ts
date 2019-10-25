@@ -2,6 +2,7 @@ import {Action, getModule, Module, Mutation, VuexModule} from 'vuex-module-decor
 import store from '@/store';
 import {appModule, DeviceType} from '@/store/modules/App';
 import {LocalItem} from '@/store/LocalItem';
+import {gameModule} from '@/store/modules/Game';
 
 export interface IGameSettingsState {
   isToggleStateButtonActive: LocalItem<boolean>;
@@ -37,6 +38,9 @@ export class GameSettings extends VuexModule implements IGameSettingsState {
   @Action
   public changeToggleStateButtonActive(active: boolean) {
     this.CHANGE_TOGGLE_STATE_BUTTON(active);
+    if (!active) {
+      gameModule.resetGamePlayModelState();
+    }
   }
 
   @Action
