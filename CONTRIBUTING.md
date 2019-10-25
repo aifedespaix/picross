@@ -20,8 +20,6 @@ Les responsables du projet ne sont pas responsables de vous et n'ont en aucun ca
 
 ## Application de la loi
 
-Des cas de comportement abusif, de harcèlement ou d'autres comportements inacceptables peuvent être signalés en contactant l'équipe du projet à maximeblanc.dev@gmail.com. Il y a de forte chance pour que ces plaintes ne soient pas lues.
-
 Les responsables de projet qui ne suivent pas ou n'appliquent pas le Code de conduite de bonne foi ne risquent rien étant donné qu'il n'est pas contraignant.
 
 ## Attribution
@@ -33,3 +31,5 @@ Pour des réponses aux questions les plus fréquentes concernant ce code de cond
 ## Le mot de la fin
 
 Nous estimons que vous devez vous comportez en individu libre et responsable. Nous n'avons pas a vous dire quel comportement est moral ou non. Ce point ne constitue en aucun cas l'obligation d'être un connard fini. En bref, soyez apaisés pour le bien de tous.
+
+### Tout est copié de https://github.com/jean-smaug/condorcet merci enculé
