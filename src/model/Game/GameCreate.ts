@@ -13,6 +13,12 @@ export class GameCreateModel extends GameModel {
     return data;
   }
 
+  public changeSize(cols: number, rows: number) {
+    this.gameGrid.setCols(cols, SquareState.Close);
+    this.gameGrid.setRows(rows, SquareState.Close);
+    this.hintsManager.init(this.gameGrid);
+  }
+
   public newGame({cols, rows}: { cols: number, rows: number }) {
     this.gameGrid.reinit(cols, rows, SquareState.Close);
     this.hintsManager.init(this.gameGrid);
