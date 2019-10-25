@@ -10,6 +10,11 @@ export interface IUser {
   email: string;
 }
 
+export interface ILoginInput {
+  email: string;
+  password: string;
+}
+
 export interface IRegisterInput {
   username: string;
   email: string;
@@ -45,6 +50,11 @@ export class AuthModule extends VuexModule {
     return this._logged;
   }
 
+  @Action public logout() {
+    tokenModule.changeToken('');
+    this.CHANGE_LOGGED(false);
+  }
+
   @Action
   public async register(user: IRegisterInput) {
     const mutation =
@@ -62,6 +72,30 @@ export class AuthModule extends VuexModule {
       const {signup} = await graphqlClient.request<{ signup: IRegisterResult }>(mutation, user);
       tokenModule.changeToken(signup.token);
       this.CHANGE_USER(signup.user);
+      this.CHANGE_LOGGED(true);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @Action
+  public async login(user: ILoginInput) {
+    const mutation = `mutation login($email: String $password: String) {
+      login(email: $email password: $password) {
+        token
+        user {
+          id
+          name
+          email
+        }
+      }
+    }`;
+    try {
+      const {login} = await graphqlClient.request<{ login: IRegisterResult }>(mutation, user);
+      this.CHANGE_USER(login.user);
+      tokenModule.changeToken(login.token);
       this.CHANGE_LOGGED(true);
     } catch (e) {
       return false;

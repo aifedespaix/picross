@@ -1,7 +1,8 @@
+import { SquareState } from '@/model/Square/SquareState';
 <template>
-  <div @contextmenu="rightClick($event)" class="create">
-    <div class="flex justify-center">
-      <ValidationProvider class="field" name="Columns" v-slot="{ errors, classes }">
+  <div @contextmenu="rightClick($event)" class="picross-container">
+    <div class="create-actions">
+      <ValidationProvider class="field field-small" name="Columns" v-slot="{ errors, classes }">
         <label for="cols">{{ $t('create.cols') }}</label>
         <input :class="classes" id="cols" max="25" min="3" required="required" type="number" v-model="cols">
         <div class="error">
@@ -9,7 +10,7 @@
         </div>
       </ValidationProvider>
 
-      <ValidationProvider class="field" name="Rows" v-slot="{ errors, classes }">
+      <ValidationProvider class="field field-small" name="Rows" v-slot="{ errors, classes }">
         <label for="rows">{{ $t('create.rows') }}</label>
         <input :class="classes" id="rows" max="25" min="3" required="required" type="number" v-model="rows">
         <div class="error">
@@ -17,10 +18,10 @@
         </div>
       </ValidationProvider>
 
-      <button @click="save">Save</button>
+      <button @click="save" class="button button-valid" :disabled="!isValid">Enregistrer</button>
     </div>
 
-    <Picross ref="picross" v-if="ready"/>
+    <Picross class="picross" ref="picross" v-if="ready"/>
 
   </div>
 </template>
@@ -33,7 +34,7 @@ import {max_value, min_value, required} from 'vee-validate/dist/rules';
 import {gameModule} from '@/store/modules/Game';
 import {SquareState} from '@/model/Square/SquareState';
 import {GameMode} from '@/model/Game/GameModel';
-import {GameCreateModel} from '@/model/Game/GameCreate';
+import {ModalModule, modalModule} from '@/store/modules/Modal';
 
 extend('min_value', min_value);
 extend('max_value', max_value);
@@ -48,13 +49,20 @@ extend('required', required);
 })
 export default class GameCreate extends Vue {
 
-
-  private get ready() {
+  get ready() {
     return gameModule.gameModel.loaded;
   }
 
   private cols = 10;
   private rows = 10;
+
+  get isValid() {
+    const cols = gameModule.gameModel.gameGrid.cols;
+    const rows = gameModule.gameModel.gameGrid.cols;
+    const blocs = gameModule.gameModel.gameGrid.countValue(SquareState.Value);
+
+    return blocs > (cols * rows) / 3;
+  }
 
   @Watch('cols')
   public setCols(value: number) {
@@ -70,6 +78,14 @@ export default class GameCreate extends Vue {
     picross.calcGridStyle();
   }
 
+  public rightClick(event: MouseEvent) {
+    event.preventDefault();
+  }
+
+  public save() {
+    modalModule.changeModal(ModalModule.Create);
+  }
+
   private beforeMount() {
     gameModule.changeGameMode(GameMode.Create);
   }
@@ -78,21 +94,12 @@ export default class GameCreate extends Vue {
     gameModule.gameModel.newGame({cols: this.cols, rows: this.rows});
   }
 
-  private rightClick(event: MouseEvent) {
-    event.preventDefault();
-  }
-
-  private save() {
-    (gameModule.gameModel as GameCreateModel).save();
-  }
-
 }
 </script>
 
 <style>
-  .create {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+  .create-actions {
+    @apply flex justify-center flex-col items-center;
+    grid-row: span 2
   }
 </style>

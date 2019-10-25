@@ -42,7 +42,7 @@ export class GqlPicross extends GraphQL {
           id
         }
      }`;
-// todo interface
+
     return graphqlClient.request<any>(mutation, {map});
   }
 

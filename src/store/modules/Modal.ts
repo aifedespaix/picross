@@ -5,6 +5,7 @@ export enum ModalType {
   None,
   Settings,
   Auth,
+  Create,
 }
 
 interface IModal {
@@ -34,6 +35,10 @@ export class ModalModule extends VuexModule implements IModalState {
   public static readonly Settings: IModal = {
     type: ModalType.Settings,
     title: 'Paramètres',
+  };
+  public static readonly Create: IModal = {
+    type: ModalType.Create,
+    title: 'Création',
   };
 
   private _activeModal = ModalModule.None;

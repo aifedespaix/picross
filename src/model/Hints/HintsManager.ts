@@ -65,6 +65,7 @@ export class HintsManager implements IHintsManager {
 
   public initToPosition(position: IGridPosition, grid: GameGridModel) {
     this.colHints[position.col] = new HintsModel(grid.getColumn(position.col));
-    this.rowHints[position.row] = new HintsModel(grid.getColumn(position.row));
+    this.rowHints[position.row] = new HintsModel(grid.getRow(position.row));
   }
+
 }

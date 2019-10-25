@@ -5,8 +5,12 @@ import {GqlPicross} from '@/api/Picross';
 
 export class GameCreateModel extends GameModel {
 
-  public save() {
-    GqlPicross.savePicross(this.gameGrid.export());
+  public async save() {
+    const {data} = await GqlPicross.savePicross(this.gameGrid.export());
+    if (!data) {
+      return false;
+    }
+    return data;
   }
 
   public newGame({cols, rows}: { cols: number, rows: number }) {

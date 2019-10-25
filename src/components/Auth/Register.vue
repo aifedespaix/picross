@@ -18,7 +18,7 @@
         <label for="name">{{ $t('auth.register.username') }}</label>
         <input id="name"
                :class="classes"
-               maxlength="25"
+               maxlength="80"
                minlength="3"
                required
                type="text"
@@ -64,6 +64,13 @@ extend('required', required);
 extend('email', email);
 extend('min', min);
 extend('max', max);
+
+
+export interface ILoginInput {
+  username: string;
+  email: string;
+  password: string;
+}
 
 @Component({
   components: {

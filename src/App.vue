@@ -5,6 +5,7 @@
     <Modal :title="modalModule.activeModal.title" v-if="isModalOpen">
       <Settings v-if="isSettingsModal"/>
       <Auth v-if="isAuthModal"/>
+      <CreateModal v-if="isCreateModal"/>
     </Modal>
   </div>
 </template>
@@ -19,9 +20,11 @@
   import Auth from '@/components/Auth/Auth.vue';
   import {authModule} from '@/store/modules/Auth';
   import {tokenModule} from '@/store/modules/Token';
+  import CreateModal from '@/components/Picross/Create.modal.vue';
 
   @Component({
     components: {
+      CreateModal,
       Auth,
       Menu,
       Modal,
@@ -39,12 +42,16 @@
       return this.modalModule.activeModal.type !== ModalType.None;
     }
 
-    private get isSettingsModal() {
+    get isSettingsModal() {
       return this.modalModule.activeModal.type === ModalType.Settings;
     }
 
-    private get isAuthModal() {
+    get isAuthModal() {
       return this.modalModule.activeModal.type === ModalType.Auth;
+    }
+
+    get isCreateModal() {
+      return this.modalModule.activeModal.type === ModalType.Create;
     }
 
     private get modalModule() {

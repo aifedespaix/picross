@@ -4,7 +4,7 @@
 
     <div :class="theme.modal" class="z-10 p-4 shadow">
       <div class="flex justify-between items-center select-none">
-        <h3 class="text-xl font-bold">{{title}}</h3>
+        <h3 class="text-xl font-bold mr-4">{{title}}</h3>
 
         <button @click="close"
                 class="close w-8 h-8 rounded-full flex justify-center items-center hover:text-red-700 hover:shadow">

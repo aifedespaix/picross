@@ -20,12 +20,12 @@ interface IGame {
 
 export abstract class GameModel implements IGame {
 
-  get hintsManager(): HintsManager {
-    return this._hintsManager;
-  }
-
   get loaded(): boolean {
     return this._loaded;
+  }
+
+  get hintsManager(): HintsManager {
+    return this._hintsManager;
   }
 
   get gameGrid(): GameGridModel {
@@ -40,12 +40,12 @@ export abstract class GameModel implements IGame {
   protected usingState: SquareState; // todo rename placingState
 
   protected _loaded: boolean;
-
-  private _hintsManager: HintsManager;
   private direction: IDirection;
   private haveToCalcDirection: boolean;
   private isPlacing: boolean;
   private readonly _history: GameGridModel[];
+
+  private _hintsManager: HintsManager;
 
   private _gameGrid: GameGridModel;
 

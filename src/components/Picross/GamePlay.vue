@@ -7,11 +7,11 @@
       <div class="text-center text-xl w-full">Difficulté : Facile</div>
     </div>
 
-    <Picross v-if="ready"/>
-    <div v-else>loadingue</div>
+    <Picross class="picross" v-if="ready"/>
+    <Loading class="picross" v-else></Loading>
 
-    <div class="flex justify-around items-center w-full" v-if="!isWin">
-      <RevertButton/>
+    <div class="flex justify-around items-center w-full picross-actions" v-if="!isWin">
+      <RevertButton class="mobile"/>
       <ToggleButton v-if="isToggleButtonActive"/>
       <RevertButton/>
     </div>
@@ -22,21 +22,26 @@
 <script lang="ts">
 
   import {Component, Vue} from 'vue-property-decorator';
-  import {gameModule} from '@/store/modules/Game';
-  import {gameSettingsModule} from '@/store/modules/GameSettings';
+
   import ToggleButton from '@/components/ToggleButton.vue';
   import BackIcon from '@/components/icons/Back.vue';
-  import {settingsModule} from '@/store/modules/Settings';
   import RevertButton from '@/components/Picross/RevertButton.vue';
+  import Loading from '@/components/Loading.vue';
   import Picross from '@/components/Picross/Picross.vue';
+
   import {GamePlayModel} from '@/model/Game/GamePlay';
   import {GameMode} from '@/model/Game/GameModel';
+
+  import {settingsModule} from '@/store/modules/Settings';
+  import {gameModule} from '@/store/modules/Game';
+  import {gameSettingsModule} from '@/store/modules/GameSettings';
 
   @Component({
     components: {
       Picross,
       ToggleButton,
       BackIcon,
+      Loading,
       RevertButton,
     },
   })
@@ -156,6 +161,12 @@
     }
     to {
       display: none;
+    }
+  }
+
+  @media screen and (min-aspect-ratio: 1/1) {
+    .picross-actions {
+      @apply flex-col;
     }
   }
 

@@ -46,8 +46,6 @@ export default class GameGrid extends Vue {
   @Watch('rows')
   private calcGridStyle() {
     const $gameGrid = this.$refs.gameGrid as HTMLElement;
-    const cols = 0;
-    const rows = 0;
     $gameGrid.style.gridTemplateColumns = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
     $gameGrid.style.gridTemplateRows = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
   }
