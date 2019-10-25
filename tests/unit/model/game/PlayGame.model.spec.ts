@@ -1,5 +1,7 @@
 import {SquareState} from '@/model/Square/SquareState';
 import {GamePlayModel} from '@/model/Game/GamePlay';
+import {gameModule} from '@/store/modules/Game';
+import {GameMode} from '@/model/Game/GameModel';
 
 describe('PlayGameModel', () => {
 
@@ -8,7 +10,8 @@ describe('PlayGameModel', () => {
   const rows = 2;
 
   beforeEach(() => {
-    gamePlay = new GamePlayModel();
+    gameModule.changeGameMode(GameMode.Play);
+    gamePlay = gameModule.gameModel as GamePlayModel;
   });
 
   it('should place square state in first case', () => {

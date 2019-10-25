@@ -16,7 +16,7 @@ export interface IGameState {
   store,
 })
 export class GameModule extends VuexModule implements IGameState {
-  private _gameCreateModel = new GameCreateModel();
+  private _gameCreateModel: GameCreateModel = new GameCreateModel();
   private _gamePlayModel: GamePlayModel = new GamePlayModel();
 
   private _gameModel: GameModel = this._gamePlayModel;
