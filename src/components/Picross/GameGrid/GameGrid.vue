@@ -12,36 +12,49 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator';
-  import {gamePlayModule} from '@/store/modules/GamePlay';
-  import Square from '@/components/Picross/Square/Square.vue';
-  import {settingsModule} from '@/store/modules/Settings';
+import {Component, Vue, Watch} from 'vue-property-decorator';
+import {gameModule} from '@/store/modules/Game';
+import Square from '@/components/Picross/Square/Square.vue';
+import {settingsModule} from '@/store/modules/Settings';
+import {GridComp} from '@/model/Game/Grid';
 
-  @Component({
-    components: {Square},
-  })
-  export default class GameGrid extends Vue {
-    get states() {
-      return gamePlayModule.playingGrid.states;
-    }
-    get theme() {
-      return settingsModule.theme;
-    }
-
-    private mounted() {
-      const $gameGrid = this.$refs.gameGrid as HTMLElement;
-      const cols = gamePlayModule.playingGrid.cols;
-      const rows = gamePlayModule.playingGrid.rows;
-
-      $gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-      $gameGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    }
-
-    private pointerleave() {
-      gamePlayModule.stopPlacing();
-    }
-
+@Component({
+  components: {Square},
+})
+export default class GameGrid extends Vue {
+  public mounted() {
+    this.calcGridStyle();
   }
+
+  get states() {
+    return gameModule.gameModel.gameGrid.objects;
+  }
+
+  get theme() {
+    return settingsModule.theme;
+  }
+
+  get cols() {
+    return 0;
+  }
+
+  get rows() {
+    return 0;
+  }
+
+  @Watch('cols')
+  @Watch('rows')
+  private calcGridStyle() {
+    const $gameGrid = this.$refs.gameGrid as HTMLElement;
+    $gameGrid.style.gridTemplateColumns = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Col);
+    $gameGrid.style.gridTemplateRows = gameModule.gameModel.gameGrid.getCssGridStyle(GridComp.Row);
+  }
+
+  private pointerleave() {
+    gameModule.gameModel.stopPlacing();
+  }
+
+}
 </script>
 
 <style>

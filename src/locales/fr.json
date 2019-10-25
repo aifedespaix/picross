@@ -1,0 +1,14 @@
+{
+  "auth.login": "Connexion",
+  "auth.email": "Email",
+  "auth.register": "Inscription",
+  "auth.register.username": "Pseudo",
+  "auth.register.password": "Mot de passe",
+  "auth.register.submit": "S'inscrire",
+  "validations.max_value": "Valeur trop élevée",
+  "validations.min_value": "Valeur trop faible",
+  "create.rows": "Lignes",
+  "create.cols": "Colonnes",
+  "create.title": "Titre",
+  "create.submit": "Envoyer"
+}
