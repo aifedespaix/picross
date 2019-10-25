@@ -1,5 +1,7 @@
 <template>
   <div
+    :data-col="position.col"
+    :data-row="position.row"
     :class="getBgClass()"
     @pointerdown="startPlacing($event)"
     @pointerenter="pointerEnter($event)"
@@ -31,7 +33,6 @@
   export default class Square extends Vue {
 
     private isChromeMobile!: boolean;
-
 
     @Prop({default: SquareState.Empty}) private state!: SquareState;
     @Prop() private readonly position!: IGridPosition;
@@ -119,8 +120,8 @@
           row: parseInt(element.dataset.row as string, 10),
         } as IGridPosition;
 
-        if (position.col && position.row && !_.isEqual(position, this.position)) {
-          gameModule.gameModel.changeStatesTo(this.position);
+        if (position.col >= 0 && position.row >= 0 && !_.isEqual(position, this.position)) {
+          gameModule.gameModel.changeStatesTo(position);
         }
       }
     }
