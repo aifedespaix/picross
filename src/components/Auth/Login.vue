@@ -3,7 +3,7 @@
     <ValidationObserver @submit.prevent="submit" ref="observer" tag="form" v-slot="{ invalid }">
 
       <ValidationProvider class="field" name="Pseudo" v-slot="{ errors, classes }">
-        <label for="name">{{ $t('auth.login.username') }}</label>
+        <label for="name">{{ $t('auth.username') }}</label>
         <input :class="classes"
                id="name"
                maxlength="80"
@@ -17,7 +17,7 @@
       </ValidationProvider>
 
       <ValidationProvider class="field" name="Mot de passe" v-slot="{ errors, classes }">
-        <label for="password">{{ $t('auth.login.password') }}</label>
+        <label for="password">{{ $t('auth.password') }}</label>
         <input :class="classes"
                id="password"
                maxlength="50"
