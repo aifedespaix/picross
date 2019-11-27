@@ -15,7 +15,7 @@
       </ValidationProvider>
 
       <ValidationProvider class="field" name="Pseudo" v-slot="{ errors, classes }">
-        <label for="name">{{ $t('auth.register.username') }}</label>
+        <label for="name">{{ $t('auth.username') }}</label>
         <input id="name"
                :class="classes"
                maxlength="80"
@@ -29,7 +29,7 @@
       </ValidationProvider>
 
       <ValidationProvider class="field" name="Mot de passe" v-slot="{ errors, classes }">
-        <label for="password">{{ $t('auth.register.password') }}</label>
+        <label for="password">{{ $t('auth.password') }}</label>
         <input id="password"
                :class="classes"
                maxlength="50"
@@ -45,7 +45,7 @@
       <div v-if="error" class="text-red-800 mb-2">Inscription impossible : l'identifiant ou l'email est déjà utilisé.</div>
 
       <div class="flex justify-center">
-        <button :disabled="invalid" class="button button-valid">{{ $t('auth.register.submit') }}</button>
+        <button :disabled="invalid" class="button button-valid">{{ $t('auth.submit') }}</button>
       </div>
 
     </ValidationObserver>
