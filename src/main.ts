@@ -1,4 +1,4 @@
-import Vue, { CreateElement } from 'vue';
+import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -15,17 +15,15 @@ interface ValidationValues extends Record<string, unknown> {
   _rule_: string;
 }
 
-Vue.config.productionTip = false;
-
 configure({
   // this will be used to generate messages.
   defaultMessage: (_: unknown, values: ValidationValues): string =>
-    i18n.t(`validations.${values._rule_}`, values),
+    i18n.global.t(`validations.${values._rule_}`, values),
 } as Partial<VeeValidateConfig>);
 
-new Vue({
-  router,
-  store,
-  i18n,
-  render: (h: CreateElement) => h(App),
-}).$mount('#app');
+const app = createApp(App);
+
+app.use(router);
+app.use(store);
+app.use(i18n);
+app.mount('#app');

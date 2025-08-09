@@ -1,5 +1,4 @@
-import {IGridPosition} from '@/model/Square/IGridPosition';
-import {Vue} from 'vue-property-decorator';
+import { IGridPosition } from '@/model/Square/IGridPosition';
 import * as _ from 'lodash';
 
 export enum GridComp {
@@ -114,7 +113,7 @@ export class Grid<T> {
 
   public setValue(position: IGridPosition, value: T) {
     if (this.isValidPosition(position)) {
-      Vue.set(this._objects[position.row], position.col, value);
+      this._objects[position.row][position.col] = value;
     }
   }
 

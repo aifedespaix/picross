@@ -1,11 +1,8 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-import {IAppState} from '@/store/modules/App';
-import {IGameSettingsState} from '@/store/modules/GameSettings';
-import {ISettingsState} from '@/store/modules/Settings';
-import {IGameState} from '@/store/modules/Game';
-
-Vue.use(Vuex);
+import { createStore } from 'vuex';
+import { IAppState } from '@/store/modules/App';
+import { IGameSettingsState } from '@/store/modules/GameSettings';
+import { ISettingsState } from '@/store/modules/Settings';
+import { IGameState } from '@/store/modules/Game';
 
 export interface IRootState {
   app: IAppState;
@@ -19,4 +16,4 @@ export interface IRootState {
 }
 
 // Declare empty store first, dynamically register all modules later.
-export default new Vuex.Store<IRootState>({});
+export default createStore<IRootState>({});
