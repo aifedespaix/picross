@@ -1,19 +1,7 @@
 import {Action, getModule, Module, Mutation, VuexModule} from 'vuex-module-decorators';
 import store from '@/store';
 import {LocalItem} from '@/store/LocalItem';
-import {IUser} from '@/store/modules/Auth';
-
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-}
-
-export interface IRegisterInput {
-  username: string;
-  email: string;
-  password: string;
-}
+import {IUser, IRegisterInput} from '@/store/types/Auth';
 
 interface IRegisterResult {
   user: IUser;

@@ -1,22 +1,10 @@
 import {Action, getModule, Module, Mutation, VuexModule} from 'vuex-module-decorators';
 import store from '@/store';
-import {IRegisterInput, IUser} from '@/store/modules/Auth';
+import {IUser, IRegisterInput} from '@/store/types/Auth';
 import {graphqlClient} from '@/store/api';
 import {tokenModule} from '@/store/modules/Token';
 
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-}
-
 export interface ILoginInput {
-  email: string;
-  password: string;
-}
-
-export interface IRegisterInput {
-  username: string;
   email: string;
   password: string;
 }
