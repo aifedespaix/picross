@@ -11,8 +11,12 @@ node_modules
 
 # Log files
 npm-debug.log*
-yarn-debug.log*:wq
+yarn-debug.log*
 yarn-error.log*
+
+# Yarn Berry artifacts
+.yarn/
+.yarnrc.yml
 
 # Editor directories and files
 .idea
