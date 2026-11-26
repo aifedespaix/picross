@@ -19,13 +19,13 @@ const siteConfig = useSiteConfig();
 const absolute = (path: string) => `${siteConfig.url.replace(/\/$/, '')}${path}`;
 const alternates = computed(() => {
   const links = locales.value.map((l) => ({
-    rel: 'alternate',
+    rel: 'alternate' as const,
     hreflang: l.code,
     href: absolute(switchLocalePath(l.code)),
   }));
   return [
     ...links,
-    { rel: 'alternate', hreflang: 'x-default', href: absolute(switchLocalePath('fr')) },
+    { rel: 'alternate' as const, hreflang: 'x-default', href: absolute(switchLocalePath('fr')) },
   ];
 });
 

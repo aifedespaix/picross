@@ -15987,8 +15987,8 @@ var app_vue_vue_type_script_setup_true_lang_default = /*@__PURE__*/ defineCompon
 				href: absolute(switchLocalePath("fr"))
 			}];
 		});
+		useHead(() => ({ link: alternates.value }));
 		useHead({
-			link: () => alternates.value,
 			htmlAttrs: { class: computed(() => settings.theme === "dark" ? "dark" : "") },
 			script: [{
 				innerHTML: THEME_INIT,

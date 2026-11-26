@@ -522,7 +522,7 @@ function renderHTMLDocumentChunks(html, appChunks) {
 	];
 }
 
-const entryFileName = "DgLr450v.js";
+const entryFileName = "Dw0_u1Q4.js";
 
 /** A stylesheet Vite serves inline in development, which needs no link. */
 function isDevInlineStyle(file) {
