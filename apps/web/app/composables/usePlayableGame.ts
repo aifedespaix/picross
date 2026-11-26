@@ -43,7 +43,7 @@ export function localPuzzle(exclude?: string, lang: 'fr' | 'en' = 'fr'): Playabl
 
 /** Logique d'une partie : plateau, minuteur, détection de victoire, sons. */
 export function usePlayableGame() {
-  const { play } = useSound();
+  const { play, playBurst } = useSound();
   const corruption = useCorruptionStore();
   const puzzle = shallowRef<PlayablePuzzle | null>(null);
   const won = ref(false);
@@ -57,14 +57,14 @@ export function usePlayableGame() {
   const clues = computed(() => computeClues(solution.value));
   const target = computed(() => countSolution(solution.value));
 
-  let lastSound = 0;
   const board = useBoard(createGrid(1, 1), {
     locked: won,
-    onPaint(state: CellState) {
-      const now = performance.now();
-      if (now - lastSound < 40) return; // un son par case lors d'un glissé serait cacophonique
-      lastSound = now;
-      play(state === 'filled' ? 'fill' : state === 'crossed' ? 'cross' : 'clear');
+    onPaint(states: CellState[]) {
+      // Un son par case modifiée : une ligne de 6 cases d'un coup s'entend comme 6 cases.
+      const count = (wanted: CellState) => states.filter((state) => state === wanted).length;
+      playBurst('fill', count('filled'));
+      playBurst('cross', count('crossed'));
+      playBurst('clear', count('blank'));
     },
     onChange(grid) {
       if (startedAt.value === null) {
@@ -109,6 +109,12 @@ export function usePlayableGame() {
 
   const filled = computed(() => countFilled(board.cells.value));
 
+  /** Efface la grille (avec le son de remise à zéro). */
+  function clear() {
+    play('clear');
+    reset();
+  }
+
   function reset() {
     won.value = false;
     mistakes.value = 0;
@@ -131,5 +137,18 @@ export function usePlayableGame() {
     if (board.undo()) play(Math.random() > 0.5 ? 'undo' : 'undo2');
   }
 
-  return { puzzle, board, won, mistakes, elapsed, clues, target, filled, start, reset, undo };
+  return {
+    puzzle,
+    board,
+    won,
+    mistakes,
+    elapsed,
+    clues,
+    target,
+    filled,
+    start,
+    reset,
+    clear,
+    undo,
+  };
 }

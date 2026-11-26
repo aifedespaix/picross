@@ -17,23 +17,75 @@ const URLS = {
 
 export type SoundName = keyof typeof URLS;
 
-const cache = new Map<SoundName, HTMLAudioElement>();
+/** Écart entre deux sons d'une même rafale : assez court pour rester fluide, assez long pour les compter. */
+const BURST_STEP_S = 0.035;
+/** Au-delà, la rafale n'ajoute plus de son (une grille entière ne doit pas devenir un bruit blanc). */
+const BURST_MAX = 24;
 
-/** Les fichiers audio ne sont créés qu'à la première lecture (pas de chargement au démarrage). */
+let context: AudioContext | null = null;
+const buffers = new Map<SoundName, AudioBuffer>();
+const loading = new Map<SoundName, Promise<AudioBuffer | null>>();
+
+function getContext(): AudioContext | null {
+  if (context) return context;
+  if (typeof AudioContext === 'undefined') return null;
+  context = new AudioContext();
+  return context;
+}
+
+/** Charge et décode un son (une seule fois). Les erreurs réseau/décodage ne sont pas applicatives. */
+function load(ctx: AudioContext, name: SoundName): Promise<AudioBuffer | null> {
+  const cached = buffers.get(name);
+  if (cached) return Promise.resolve(cached);
+  let pending = loading.get(name);
+  if (!pending) {
+    pending = fetch(URLS[name])
+      .then((response) => response.arrayBuffer())
+      .then((data) => ctx.decodeAudioData(data))
+      .then((buffer) => {
+        buffers.set(name, buffer);
+        return buffer;
+      })
+      .catch(() => null);
+    loading.set(name, pending);
+  }
+  return pending;
+}
+
+/**
+ * Sons via Web Audio : chaque lecture est indépendante, donc plusieurs sons peuvent se
+ * chevaucher (contrairement à un `<audio>` unique qu'on relance). Rien n'est chargé avant
+ * la première lecture.
+ */
 export function useSound() {
   const settings = useSettingsStore();
 
-  function play(name: SoundName) {
-    if (!settings.sound) return;
-    let audio = cache.get(name);
-    if (!audio) {
-      audio = new Audio(URLS[name]);
-      cache.set(name, audio);
+  function start(name: SoundName, delay: number) {
+    const ctx = getContext();
+    if (!ctx) return;
+    void ctx.resume().catch(() => {});
+    const buffer = buffers.get(name);
+    if (!buffer) {
+      void load(ctx, name); // premier appel : le son sera prêt pour les suivants
+      return;
     }
-    audio.currentTime = 0;
-    // Le navigateur peut refuser la lecture (autoplay) : ce n'est pas une erreur applicative.
-    void audio.play().catch(() => {});
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(ctx.currentTime + delay);
   }
 
-  return { play };
+  function play(name: SoundName) {
+    if (!settings.sound) return;
+    start(name, 0);
+  }
+
+  /** Joue `count` fois le son, en cascade : on entend chaque case posée ou retirée. */
+  function playBurst(name: SoundName, count: number) {
+    if (!settings.sound) return;
+    const total = Math.min(count, BURST_MAX);
+    for (let i = 0; i < total; i++) start(name, i * BURST_STEP_S);
+  }
+
+  return { play, playBurst };
 }

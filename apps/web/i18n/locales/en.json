@@ -51,7 +51,14 @@
     "offline": "Server unreachable: playing an offline puzzle.",
     "loadError": "Could not load this puzzle.",
     "help": "Left click: fill · Right click: cross · Drag to draw a line.",
-    "helpTouch": "Tap to fill, drag to draw a line. Switch to the cross with the tool below."
+    "helpTouch": "Tap to fill, drag to draw a line. Switch to the cross with the tool below.",
+    "eraseTitle": "Clear the board?",
+    "eraseText": "Every cell of this puzzle will be erased.",
+    "newTitle": "New puzzle?",
+    "newText": "The current game will be abandoned.",
+    "toolTo": "Switch to {tool}",
+    "loadingNext": "Loading puzzle…",
+    "confirm": "Confirm"
   },
   "win": {
     "title": "Well done!",
@@ -132,7 +139,8 @@
     "language": "Language",
     "sound": "Sound effects",
     "corruption": "Mood: the demon",
-    "corruptionHint": "The background reddens as you make mistakes. It senses them, without telling you where."
+    "corruptionHint": "The background reddens as you make mistakes. It senses them, without telling you where.",
+    "stats": "Show time and filled cells"
   },
   "errors": {
     "email": "Enter a valid email address.",

@@ -51,7 +51,14 @@
     "offline": "Serveur injoignable : grille hors ligne.",
     "loadError": "Impossible de charger cette grille.",
     "help": "Clic gauche : remplir · Clic droit : croix · Glissez pour tracer une ligne.",
-    "helpTouch": "Touchez pour remplir, glissez pour tracer une ligne. Basculez sur la croix avec l’outil ci-dessous."
+    "helpTouch": "Touchez pour remplir, glissez pour tracer une ligne. Basculez sur la croix avec l’outil ci-dessous.",
+    "eraseTitle": "Effacer la grille ?",
+    "eraseText": "Toutes les cases de cette grille seront effacées.",
+    "newTitle": "Nouvelle grille ?",
+    "newText": "La partie en cours sera abandonnée.",
+    "toolTo": "Passer à {tool}",
+    "loadingNext": "Chargement de la grille…",
+    "confirm": "Confirmer"
   },
   "win": {
     "title": "Bravo !",
@@ -132,7 +139,8 @@
     "language": "Langue",
     "sound": "Effets sonores",
     "corruption": "Ambiance : le démon",
-    "corruptionHint": "Le fond rougit à mesure que vous faites des erreurs. Il les sent, sans vous dire où."
+    "corruptionHint": "Le fond rougit à mesure que vous faites des erreurs. Il les sent, sans vous dire où.",
+    "stats": "Afficher le temps et les cases"
   },
   "errors": {
     "email": "Entrez une adresse email valide.",

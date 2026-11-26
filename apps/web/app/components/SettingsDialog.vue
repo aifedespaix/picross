@@ -60,6 +60,10 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
         <input v-model="settings.sound" type="checkbox" class="size-5 accent-demon" />
         <span class="text-sm font-medium">{{ t('settings.sound') }}</span>
       </label>
+      <label class="flex cursor-pointer items-center gap-3">
+        <input v-model="settings.showStats" type="checkbox" class="size-5 accent-demon" />
+        <span class="text-sm font-medium">{{ t('settings.stats') }}</span>
+      </label>
       <label class="flex cursor-pointer items-start gap-3">
         <input v-model="settings.corruption" type="checkbox" class="mt-0.5 size-5 accent-demon" />
         <span>

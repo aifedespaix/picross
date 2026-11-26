@@ -7,10 +7,21 @@ const HISTORY_LIMIT = 200;
 export interface BoardOptions {
   /** Quand `true` (grille résolue…), plus aucune modification n'est acceptée. */
   locked?: Ref<boolean>;
-  /** Appelé à chaque case modifiée, avec l'état posé (pour le son). */
-  onPaint?: (state: CellState) => void;
+  /** Appelé à chaque modification, avec le nouvel état de chaque case modifiée (pour le son). */
+  onPaint?: (states: CellState[]) => void;
   /** Appelé après chaque modification de la grille. */
   onChange?: (grid: Grid) => void;
+}
+
+/** Nouvel état de chaque case qui diffère entre deux grilles. */
+function changedStates(before: Grid, after: Grid): CellState[] {
+  const states: CellState[] = [];
+  after.forEach((line, row) =>
+    line.forEach((state, col) => {
+      if (state !== before[row]?.[col]) states.push(state);
+    }),
+  );
+  return states;
 }
 
 /**
@@ -46,7 +57,7 @@ export function useBoard(initial: Grid, options: BoardOptions = {}) {
     lastKey = key;
     const next = strokeTo(stroke, pos);
     if (!gridsEqual(next, cells.value)) {
-      options.onPaint?.(stroke.brush);
+      options.onPaint?.(changedStates(cells.value, next));
       commit(next);
     }
   }

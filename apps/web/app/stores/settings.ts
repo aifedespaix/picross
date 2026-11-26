@@ -17,11 +17,13 @@ export const useSettingsStore = defineStore('settings', () => {
     ...COOKIE,
     default: () => true,
   });
+  /** Temps et cases remplies pendant la partie : masqués par défaut pour rester concentré. */
+  const showStats = useCookie<boolean>('picross_stats', { ...COOKIE, default: () => false });
   const prefersDark = usePreferredDark();
 
   const isDark = computed(
     () => theme.value === 'dark' || (theme.value === 'system' && prefersDark.value),
   );
 
-  return { theme, sound, corruption, isDark };
+  return { theme, sound, corruption, showStats, isDark };
 });

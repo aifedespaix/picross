@@ -48,7 +48,16 @@ describe('useBoard', () => {
     board.move({ row: 0, col: 0 }); // même case : aucun nouveau changement
     board.end();
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onPaint).toHaveBeenCalledWith('filled');
+    expect(onPaint).toHaveBeenCalledWith(['filled']);
+  });
+
+  it('signale chaque case modifiée par un trait', () => {
+    const onPaint = vi.fn();
+    const board = useBoard(createGrid(6, 1), { onPaint });
+    board.begin({ row: 0, col: 0 });
+    board.move({ row: 0, col: 5 });
+    board.end();
+    expect(onPaint).toHaveBeenLastCalledWith(Array(5).fill('filled'));
   });
 
   it('un redimensionnement checkpointé est annulable', () => {
