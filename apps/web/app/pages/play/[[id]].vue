@@ -147,7 +147,7 @@ useSeoMeta({
 
 <template>
   <div
-    class="mx-auto grid max-w-6xl gap-3 p-3 lg:grid-cols-[1fr_18rem] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-4"
+    class="mx-auto grid max-w-6xl gap-3 p-3 lg:grid-cols-[1fr_20rem] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-4"
   >
     <!-- Infos -->
     <div class="space-y-2 lg:col-start-2 lg:row-start-1 lg:pt-4">
