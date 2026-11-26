@@ -1,28 +1,22 @@
-.DS_Store
 node_modules
-/dist
+dist
+*.tsbuildinfo
+coverage
 
-/tests/e2e/videos/
-/tests/e2e/screenshots/
+# env locaux (ne JAMAIS committer de secrets)
+.env
+.env.*
+!.env.example
 
-# local env files
-.env.local
-.env.*.local
+# base SQLite locale
+*.db
+*.db-shm
+*.db-wal
+data/
 
-# Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Yarn Berry artifacts
-.yarn/
-.yarnrc.yml
-
-# Editor directories and files
+# logs / OS / éditeurs
+*.log
+.DS_Store
 .idea
 .vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.swp
