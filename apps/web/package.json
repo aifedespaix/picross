@@ -15,6 +15,7 @@
     "@nuxtjs/i18n": "^10.7.0",
     "@nuxtjs/robots": "^7.1.0",
     "@nuxtjs/sitemap": "^9.2.0",
+    "@picross/api": "workspace:*",
     "@picross/shared": "workspace:*",
     "@pinia/nuxt": "^1.0.3",
     "@tailwindcss/vite": "^4.3.5",

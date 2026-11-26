@@ -4,3 +4,6 @@ apps/api/drizzle
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
 LICENSE
+.nuxt
+.output
+.vercel

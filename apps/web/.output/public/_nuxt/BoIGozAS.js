@@ -1,2 +1,0 @@
-//# allFunctionsCalledOnLoad
-import"#entry";

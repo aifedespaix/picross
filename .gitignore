@@ -1,5 +1,8 @@
 node_modules
 dist
+.nuxt
+.output
+.vercel
 *.tsbuildinfo
 coverage
 

@@ -37,7 +37,7 @@ export function sessionMiddleware({ db, env }: Deps): MiddlewareHandler<AppEnv> 
       try {
         const payload = await verify(token, env.jwtSecret, ALG);
         if (typeof payload.sub === 'string') {
-          const user = db.select().from(users).where(eq(users.id, payload.sub)).get();
+          const user = await db.select().from(users).where(eq(users.id, payload.sub)).get();
           c.set('user', user ?? null);
         }
       } catch {

@@ -68,7 +68,7 @@ export function picrossRoutes({ db, env }: Deps) {
   const base = (userId: string | undefined) =>
     db.select(columns(userId)).from(picrosses).leftJoin(users, eq(picrosses.authorId, users.id));
 
-  type Row = ReturnType<ReturnType<typeof base>['all']>[number];
+  type Row = Awaited<ReturnType<ReturnType<typeof base>['all']>>[number];
 
   const toSummary = (row: Row, lang: Lang): PicrossSummary => ({
     id: row.id,
@@ -94,10 +94,10 @@ export function picrossRoutes({ db, env }: Deps) {
     return row.validated || (user && (user.role === 'admin' || user.id === row.authorId));
   };
 
-  const getOr404 = (c: AppContext, id: string) => {
+  const getOr404 = async (c: AppContext, id: string) => {
     const parsed = idSchema.safeParse(id);
     const row = parsed.success
-      ? base(c.get('user')?.id).where(eq(picrosses.id, id)).get()
+      ? await base(c.get('user')?.id).where(eq(picrosses.id, id)).get()
       : undefined;
     if (!row || !canSee(c, row)) throw new HttpError(404, 'not_found');
     return row;
@@ -123,7 +123,7 @@ export function picrossRoutes({ db, env }: Deps) {
     key: (c) => c.get('user')?.id ?? 'anonymous',
   });
 
-  app.get('/', (c) => {
+  app.get('/', async (c) => {
     const query = listQuery.parse(c.req.query());
     const user = c.get('user');
     if (query.status !== 'validated') requireAdmin(c);
@@ -143,12 +143,14 @@ export function picrossRoutes({ db, env }: Deps) {
     const where = conditions.length ? and(...conditions) : undefined;
 
     const total =
-      db
-        .select({ n: sql<number>`count(*)` })
-        .from(picrosses)
-        .where(where)
-        .get()?.n ?? 0;
-    const rows = base(user?.id)
+      (
+        await db
+          .select({ n: sql<number>`count(*)` })
+          .from(picrosses)
+          .where(where)
+          .get()
+      )?.n ?? 0;
+    const rows = await base(user?.id)
       .where(where)
       .orderBy(...order(query.sort))
       .limit(query.limit)
@@ -158,18 +160,18 @@ export function picrossRoutes({ db, env }: Deps) {
     return c.json({ items: rows.map((row) => toSummary(row, query.lang)), total });
   });
 
-  app.get('/mine', (c) => {
+  app.get('/mine', async (c) => {
     const user = requireUser(c);
-    const rows = base(user.id)
+    const rows = await base(user.id)
       .where(eq(picrosses.authorId, user.id))
       .orderBy(desc(picrosses.createdAt))
       .all();
     return c.json({ items: rows.map((row) => toSummary(row, langOf(c))), total: rows.length });
   });
 
-  app.get('/random', (c) => {
+  app.get('/random', async (c) => {
     const exclude = idSchema.safeParse(c.req.query('exclude'));
-    const row = base(c.get('user')?.id)
+    const row = await base(c.get('user')?.id)
       .where(
         and(
           eq(picrosses.validated, true),
@@ -181,17 +183,17 @@ export function picrossRoutes({ db, env }: Deps) {
       .get();
     // S'il n'y a qu'une seule grille, on la rejoue plutôt que de renvoyer une erreur.
     const fallback =
-      row ?? base(c.get('user')?.id).where(eq(picrosses.validated, true)).limit(1).get();
+      row ?? (await base(c.get('user')?.id).where(eq(picrosses.validated, true)).limit(1).get());
     if (!fallback) throw new HttpError(404, 'not_found');
     return c.json(toDetail(fallback, langOf(c)));
   });
 
-  app.get('/:id', (c) => c.json(toDetail(getOr404(c, c.req.param('id')), langOf(c))));
+  app.get('/:id', async (c) => c.json(toDetail(await getOr404(c, c.req.param('id')), langOf(c))));
 
   app.post('/', createLimit, async (c) => {
     const user = requireUser(c);
     const input = await jsonBody(createPicrossSchema)(c);
-    const created = db
+    const created = await db
       .insert(picrosses)
       .values({
         title: input.title,
@@ -204,37 +206,42 @@ export function picrossRoutes({ db, env }: Deps) {
       })
       .returning({ id: picrosses.id })
       .get();
-    return c.json(toSummary(getOr404(c, created.id), langOf(c)), 201);
+    return c.json(toSummary(await getOr404(c, created.id), langOf(c)), 201);
   });
 
-  app.delete('/:id', (c) => {
+  app.delete('/:id', async (c) => {
     const user = requireUser(c);
-    const row = getOr404(c, c.req.param('id'));
+    const row = await getOr404(c, c.req.param('id'));
     if (user.role !== 'admin' && row.authorId !== user.id) throw new HttpError(403, 'forbidden');
-    db.delete(picrosses).where(eq(picrosses.id, row.id)).run();
+    await db.delete(picrosses).where(eq(picrosses.id, row.id)).run();
     return c.body(null, 204);
   });
 
   app.put('/:id/like', async (c) => {
     const user = requireUser(c);
-    const row = getOr404(c, c.req.param('id'));
+    const row = await getOr404(c, c.req.param('id'));
     const { liked } = await jsonBody(likeSchema)(c);
     if (liked) {
-      db.insert(likes).values({ userId: user.id, picrossId: row.id }).onConflictDoNothing().run();
+      await db
+        .insert(likes)
+        .values({ userId: user.id, picrossId: row.id })
+        .onConflictDoNothing()
+        .run();
     } else {
-      db.delete(likes)
+      await db
+        .delete(likes)
         .where(and(eq(likes.userId, user.id), eq(likes.picrossId, row.id)))
         .run();
     }
-    return c.json(toSummary(getOr404(c, row.id), langOf(c)));
+    return c.json(toSummary(await getOr404(c, row.id), langOf(c)));
   });
 
   app.put('/:id/validation', async (c) => {
     requireAdmin(c);
-    const row = getOr404(c, c.req.param('id'));
+    const row = await getOr404(c, c.req.param('id'));
     const { validated } = await jsonBody(validateSchema)(c);
-    db.update(picrosses).set({ validated }).where(eq(picrosses.id, row.id)).run();
-    return c.json(toSummary(getOr404(c, row.id), langOf(c)));
+    await db.update(picrosses).set({ validated }).where(eq(picrosses.id, row.id)).run();
+    return c.json(toSummary(await getOr404(c, row.id), langOf(c)));
   });
 
   return app;

@@ -1,15 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { starterBits, STARTER_PUZZLES } from '@picross/shared';
 import { createApp } from './app.ts';
-import { createDb } from './db/index.ts';
+import { createDb, migrateDb } from './db/index.ts';
 import { loadEnv } from './env.ts';
 import { seedStarterPuzzles } from './seed.ts';
 
 const MAP = starterBits(STARTER_PUZZLES.find((p) => p.slug === 'bon-chien')!.rows); // 11 × 11
 
-function setup(overrides: Record<string, string> = {}) {
+async function setup(overrides: Record<string, string> = {}) {
   const env = loadEnv({ NODE_ENV: 'test', JWT_SECRET: 'x'.repeat(40), ...overrides });
-  const { db } = createDb(':memory:');
+  const { db } = await createDb({ url: ':memory:' });
+  await migrateDb(db);
   const app = createApp({ db, env });
 
   /** Petit client HTTP qui conserve le cookie de session. */
@@ -42,9 +43,9 @@ const user = (n = 1) => ({
 });
 
 describe('auth', () => {
-  let ctx: ReturnType<typeof setup>;
-  beforeEach(() => {
-    ctx = setup();
+  let ctx: Awaited<ReturnType<typeof setup>>;
+  beforeEach(async () => {
+    ctx = await setup();
   });
 
   it('inscrit, connecte et déconnecte', async () => {
@@ -117,7 +118,7 @@ describe('auth', () => {
   });
 
   it('promeut les emails listés dans ADMIN_EMAILS', async () => {
-    const admin = setup({ ADMIN_EMAILS: 'joueur1@example.com' });
+    const admin = await setup({ ADMIN_EMAILS: 'joueur1@example.com' });
     const res = await admin.client()('POST', '/auth/register', user());
     expect(res.json.role).toBe('admin');
   });
@@ -145,13 +146,13 @@ describe('auth', () => {
 });
 
 describe('picrosses', () => {
-  let ctx: ReturnType<typeof setup>;
-  beforeEach(() => {
-    ctx = setup();
+  let ctx: Awaited<ReturnType<typeof setup>>;
+  beforeEach(async () => {
+    ctx = await setup();
   });
 
   it('sert les grilles de départ et une grille aléatoire', async () => {
-    seedStarterPuzzles(ctx.db);
+    await seedStarterPuzzles(ctx.db);
     const http = ctx.client();
     const list = await http('GET', '/picrosses');
     expect(list.json.total).toBe(STARTER_PUZZLES.length);
@@ -162,13 +163,13 @@ describe('picrosses', () => {
     expect(other.json.id).not.toBe(random.json.id);
   });
 
-  it('insère les grilles livrées une seule fois, sans doublon', () => {
-    expect(seedStarterPuzzles(ctx.db)).toBe(STARTER_PUZZLES.length);
-    expect(seedStarterPuzzles(ctx.db)).toBe(0);
+  it('insère les grilles livrées une seule fois, sans doublon', async () => {
+    expect(await seedStarterPuzzles(ctx.db)).toBe(STARTER_PUZZLES.length);
+    expect(await seedStarterPuzzles(ctx.db)).toBe(0);
   });
 
   it('sert les titres dans la langue demandée', async () => {
-    seedStarterPuzzles(ctx.db);
+    await seedStarterPuzzles(ctx.db);
     const http = ctx.client();
     const fr = await http('GET', '/picrosses?search=Canard');
     expect(fr.json.items[0].title).toBe('Canard (débogage)');
@@ -179,7 +180,7 @@ describe('picrosses', () => {
   });
 
   it('trie du plus facile au plus difficile', async () => {
-    seedStarterPuzzles(ctx.db);
+    await seedStarterPuzzles(ctx.db);
     const { json } = await ctx.client()('GET', '/picrosses?sort=difficulty&limit=50');
     const ranks = json.items.map((i: { difficulty: string }) =>
       ['easy', 'medium', 'hard', 'expert'].indexOf(i.difficulty),
@@ -189,7 +190,7 @@ describe('picrosses', () => {
   });
 
   it('filtre par difficulté', async () => {
-    seedStarterPuzzles(ctx.db);
+    await seedStarterPuzzles(ctx.db);
     const http = ctx.client();
     for (const level of ['easy', 'medium', 'hard', 'expert']) {
       const res = await http('GET', `/picrosses?difficulty=${level}&limit=50`);
@@ -259,7 +260,7 @@ describe('picrosses', () => {
   });
 
   it('un admin valide une grille qui devient publique', async () => {
-    const admin = setup({ ADMIN_EMAILS: 'admin@example.com' });
+    const admin = await setup({ ADMIN_EMAILS: 'admin@example.com' });
     const author = admin.client();
     const mod = admin.client();
     await author('POST', '/auth/register', user(1));
@@ -282,7 +283,7 @@ describe('picrosses', () => {
   });
 
   it('un like par utilisateur, annulable', async () => {
-    seedStarterPuzzles(ctx.db);
+    await seedStarterPuzzles(ctx.db);
     const http = ctx.client();
     const [first] = (await http('GET', '/picrosses')).json.items;
     expect((await http('PUT', `/picrosses/${first.id}/like`, { liked: true })).status).toBe(401);
@@ -308,7 +309,7 @@ describe('picrosses', () => {
   });
 
   it('recherche par titre sans interpréter % et _', async () => {
-    const auto = setup({ AUTO_VALIDATE: 'true' });
+    const auto = await setup({ AUTO_VALIDATE: 'true' });
     const http = auto.client();
     await http('POST', '/auth/register', user());
     await http('POST', '/picrosses', { title: 'Un cœur', map: MAP });

@@ -13,7 +13,7 @@ export default tseslint.config(
       'apps/api/drizzle/**',
       'apps/web/public/**',
       '**/.nuxt/**',
-      '**/.output/**',
+      '**/.output/**', '**/.vercel/**',
     ],
   },
   js.configs.recommended,

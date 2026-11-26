@@ -6,6 +6,13 @@ import tailwindcss from '@tailwindcss/vite';
  */
 const siteUrl = process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:5173';
 
+/**
+ * Où tourne l'API ?
+ * - Docker / Dokploy : service séparé, relayé par un proxy (NUXT_API_URL).
+ * - Vercel (ou API_MODE=embedded) : embarquée dans le serveur Nuxt, sans service à part.
+ */
+const embeddedApi = process.env.API_MODE === 'embedded' || !!process.env.VERCEL;
+
 /** Pages privées : jamais indexées, absentes du sitemap, interdites aux robots. */
 const PRIVATE_PATHS = [
   '/connexion',
@@ -129,6 +136,16 @@ export default defineNuxtConfig({
     },
     '/_nuxt/**': { headers: { 'Cache-Control': 'public, max-age=31536000, immutable' } },
   },
-  nitro: { compressPublicAssets: true },
+  nitro: {
+    compressPublicAssets: true,
+    handlers: [
+      {
+        route: '/api/**',
+        handler: embeddedApi
+          ? './server/handlers/api-embedded.ts'
+          : './server/handlers/api-proxy.ts',
+      },
+    ],
+  },
   experimental: { payloadExtraction: false },
 });

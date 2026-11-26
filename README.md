@@ -47,7 +47,7 @@ sons optionnels, mode hors ligne (grilles de départ) si l'API est injoignable.
 | Couche  | Technologies                                                                                                   |
 | ------- | -------------------------------------------------------------------------------------------------------------- |
 | Front   | **Nuxt 4** (SSR), Vue 3 `<script setup>`, Pinia, Tailwind CSS 4, `@nuxtjs/i18n`, sitemap / robots / schema.org |
-| API     | **Hono** (Node 22), Drizzle ORM, **SQLite** (better-sqlite3), zod                                              |
+| API     | **Hono** (Node 22), Drizzle ORM, **libSQL** (SQLite local ou Turso), zod                                       |
 | Partagé | `packages/shared` : schémas zod, calcul des indices, contrats d'API, grilles de départ                         |
 | Outils  | pnpm workspaces, TypeScript strict, ESLint 9, Prettier, Vitest, GitHub Actions, Docker                         |
 
@@ -81,7 +81,7 @@ apps/
     server/            proxy /api, CSP par hachage, source du sitemap
   api/                 Hono
     src/routes/        auth.ts, picrosses.ts
-    src/db/schema.ts   tables users / picrosses / likes   ·   drizzle/ : migrations SQL
+    src/db/schema.ts   tables users / picrosses / likes   ·   drizzle/ : migrations SQL (embarquées dans le code par `db:generate`)
 packages/shared/       code commun front/back
 compose.yaml           déploiement (web + api + volume)
 DEPLOY.md              guide de déploiement Dokploy pas à pas
@@ -124,7 +124,7 @@ défaut) pour accéder à la page de modération. Cinq grilles de départ sont i
 | `AUTO_VALIDATE` |     non     | `true` : grilles publiées sans modération (défaut `false`)               |
 | `COOKIE_SECURE` |     non     | `false` uniquement pour tester en HTTP simple                            |
 
-**API** (`apps/api/src/env.ts`) : `PORT`, `DATABASE_PATH`, `SESSION_DAYS`, `TRUST_PROXY`, `CORS_ORIGIN`.
+**API** (`apps/api/src/env.ts`) : `PORT`, `DATABASE_URL` / `DATABASE_AUTH_TOKEN`, `SESSION_DAYS`, `TRUST_PROXY`, `CORS_ORIGIN`.
 **Web** : `NUXT_PUBLIC_SITE_URL`, `NUXT_API_URL` (adresse interne de l'API, `http://api:3000` dans le compose).
 
 ## Internationalisation
@@ -191,7 +191,9 @@ mémoire.
 
 ## Déploiement
 
-Docker Compose (Dokploy recommandé) : **voir [DEPLOY.md](DEPLOY.md)** (DNS, domaine, HTTPS, variables,
+Deux cibles, même code : **Docker Compose** (Dokploy, API en service séparé + SQLite sur volume) ou **Vercel** (API
+embarquée dans Nuxt + base Turso).
+**Voir [DEPLOY.md](DEPLOY.md)** (DNS, domaine, HTTPS, variables,
 sauvegardes, mises à jour, dépannage).
 
 ## Licence

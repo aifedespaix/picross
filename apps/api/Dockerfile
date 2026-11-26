@@ -7,11 +7,8 @@ ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable
 WORKDIR /repo
 
-# --- Build : dépendances (avec compilation éventuelle de better-sqlite3) + bundle ---------------
+# --- Build : dépendances + bundle (libSQL fournit des binaires précompilés : rien à compiler) ----
 FROM base AS build
-RUN apt-get update \
- && apt-get install -y --no-install-recommends python3 make g++ \
- && rm -rf /var/lib/apt/lists/*
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
@@ -28,11 +25,10 @@ RUN pnpm --filter @picross/api build \
 FROM node:22-slim AS runtime
 ENV NODE_ENV=production \
     PORT=3000 \
-    DATABASE_PATH=/data/picross.db
+    DATABASE_URL=file:/data/picross.db
 WORKDIR /app
 COPY --from=build /out/node_modules ./node_modules
 COPY --from=build /repo/apps/api/dist ./dist
-COPY --from=build /repo/apps/api/drizzle ./drizzle
 COPY apps/api/package.json ./
 RUN mkdir -p /data && chown node:node /data
 USER node

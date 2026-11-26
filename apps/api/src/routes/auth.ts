@@ -20,9 +20,9 @@ export function authRoutes(deps: Deps) {
   const registerLimit = rateLimit({ windowMs: 60 * 60_000, max: 10, key: byIp });
 
   /** Les emails listés dans ADMIN_EMAILS deviennent administrateurs (remplace l'ancien mot de passe en dur). */
-  function promoteIfAdmin(user: UserRow): UserRow {
+  async function promoteIfAdmin(user: UserRow): Promise<UserRow> {
     if (user.role !== 'admin' && env.adminEmails.has(user.email)) {
-      db.update(users).set({ role: 'admin' }).where(eq(users.id, user.id)).run();
+      await db.update(users).set({ role: 'admin' }).where(eq(users.id, user.id)).run();
       return { ...user, role: 'admin' };
     }
     return user;
@@ -31,7 +31,7 @@ export function authRoutes(deps: Deps) {
   app.post('/register', registerLimit, async (c) => {
     const input = await jsonBody(registerSchema)(c);
 
-    const taken = db
+    const taken = await db
       .select({ email: users.email, name: users.name })
       .from(users)
       .where(sql`${users.email} = ${input.email} or lower(${users.name}) = lower(${input.name})`)
@@ -47,7 +47,7 @@ export function authRoutes(deps: Deps) {
     const passwordHash = await hashPassword(input.password);
     let user: UserRow;
     try {
-      user = db
+      user = await db
         .insert(users)
         .values({ email: input.email, name: input.name, passwordHash })
         .returning()
@@ -56,21 +56,21 @@ export function authRoutes(deps: Deps) {
       // Course entre deux inscriptions simultanées : l'index unique a tranché.
       throw new HttpError(409, 'conflict', { email: 'email_taken' });
     }
-    user = promoteIfAdmin(user);
+    user = await promoteIfAdmin(user);
     await startSession(c, deps, user.id);
     return c.json(toUserDto(user), 201);
   });
 
   app.post('/login', loginLimit, async (c) => {
     const input = await jsonBody(loginSchema)(c);
-    const user = db.select().from(users).where(eq(users.email, input.email)).get();
+    const user = await db.select().from(users).where(eq(users.email, input.email)).get();
     // Même message et même coût que l'email soit inconnu ou le mot de passe faux (anti-énumération).
     const valid = user
       ? await verifyPassword(input.password, user.passwordHash)
       : await dummyVerify(input.password);
     if (!user || !valid) throw new HttpError(401, 'invalid_credentials');
 
-    const current = promoteIfAdmin(user);
+    const current = await promoteIfAdmin(user);
     await startSession(c, deps, current.id);
     return c.json(toUserDto(current));
   });

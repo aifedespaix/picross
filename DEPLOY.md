@@ -150,7 +150,7 @@ La base est **un seul fichier SQLite** dans le volume Docker nommé `picross-dat
 
   ```bash
   docker exec $(docker ps -qf name=picross-api) \
-    node -e "const D=require('better-sqlite3');new D('/data/picross.db').backup('/data/backup.db').then(()=>console.log('ok'))"
+    node -e "import('@libsql/client').then(async ({createClient}) => { await createClient({url:'file:/data/picross.db'}).execute(\"VACUUM INTO '/data/backup.db'\"); console.log('ok') })"
   docker cp $(docker ps -qf name=picross-api):/data/backup.db ./picross-backup.db
   ```
 
@@ -194,3 +194,92 @@ SITE_URL=http://localhost:8080 JWT_SECRET=un-secret-de-test-assez-long-012345678
   docker compose -f compose.yaml -f compose.local.yaml up --build
 # → http://localhost:8080
 ```
+
+---
+
+# Variante : Vercel + Turso (test, ou production sans serveur)
+
+Ici **tout tourne dans un seul projet Vercel** : le front Nuxt _et_ l'API (embarquée dans le serveur Nuxt,
+variable `VERCEL` détectée automatiquement). Plus de service `api`, plus de compose, plus de volume : la base est
+hébergée chez **Turso** (SQLite managé, offre gratuite généreuse).
+
+```
+Navigateur ──▶ Vercel (fonctions Nuxt + API Hono) ──libsql://──▶ Turso (SQLite hébergé)
+```
+
+## V1. Créer la base Turso
+
+**Option A — via Vercel (le plus simple)** : projet Vercel → **Storage** → **Create Database** → **Turso**.
+L'intégration crée la base et injecte `TURSO_DATABASE_URL` et `TURSO_AUTH_TOKEN` dans le projet : l'application
+les reconnaît telles quelles.
+
+**Option B — avec la CLI Turso** :
+
+```bash
+curl -sSfL https://get.tur.so/install.sh | bash
+turso auth signup                       # ou: turso auth login
+turso db create picross                 # choisir une région proche de celle de vos fonctions Vercel
+turso db show picross --url             # → libsql://picross-<compte>.turso.io   (DATABASE_URL)
+turso db tokens create picross          # → jeton                                 (DATABASE_AUTH_TOKEN)
+```
+
+Rien d'autre à faire : les migrations et les 105 grilles de départ sont appliquées automatiquement au premier
+démarrage de l'application (une seule fois, sans doublon).
+
+## V2. Créer le projet Vercel
+
+1. <https://vercel.com/new> → importer le dépôt GitHub `aifedespaix/picross`.
+2. **Root Directory** : `apps/web`. Cochez **« Include source files outside of the Root Directory »** (le code
+   partagé et l'API vivent dans `packages/` et `apps/api/`).
+3. **Framework Preset** : `Nuxt` (détecté). Laissez les commandes de build par défaut.
+4. **Settings → General → Node.js Version** : `22.x`.
+5. **Environment Variables** (tous environnements) :
+
+   | Variable               | Valeur                                                                                               |
+   | ---------------------- | ---------------------------------------------------------------------------------------------------- |
+   | `JWT_SECRET`           | secret de 32 caractères minimum (`openssl rand -base64 48`)                                          |
+   | `NUXT_PUBLIC_SITE_URL` | URL publique, sans slash final : `https://picross.aifedespaix.com`                                   |
+   | `DATABASE_URL`         | `libsql://picross-….turso.io` _(inutile avec l'intégration Turso, qui fournit `TURSO_DATABASE_URL`)_ |
+   | `DATABASE_AUTH_TOKEN`  | jeton Turso _(idem : `TURSO_AUTH_TOKEN` fourni par l'intégration)_                                   |
+   | `TRUST_PROXY`          | `true` (Vercel transmet l'IP du visiteur dans `X-Forwarded-For`)                                     |
+   | `ADMIN_EMAILS`         | votre email (compte administrateur)                                                                  |
+   | `AUTO_VALIDATE`        | `false` (ou `true` pour publier sans modération)                                                     |
+
+6. **Deploy**. Premier déploiement : 2 à 4 minutes.
+
+> Pour un premier test sur l'URL `*.vercel.app`, mettez provisoirement `NUXT_PUBLIC_SITE_URL` à cette URL
+> (sinon les liens canoniques et le sitemap pointent vers le futur domaine). Le cookie de session est `Secure` :
+> tout fonctionne en HTTPS, ce que Vercel fournit toujours.
+
+## V3. Domaine `picross.aifedespaix.com`
+
+1. Projet → **Settings → Domains** → **Add** → `picross.aifedespaix.com`.
+2. Chez votre registrar : enregistrement **`CNAME`**, nom `picross`, valeur `cname.vercel-dns.com`
+   (ou la valeur exacte affichée par Vercel).
+3. Attendez la validation (quelques minutes), le certificat HTTPS est émis automatiquement.
+4. Remettez `NUXT_PUBLIC_SITE_URL=https://picross.aifedespaix.com` et **redéployez**.
+
+## V4. Vérifier
+
+```bash
+curl -s https://picross.aifedespaix.com/api/health                 # {"status":"ok"}
+curl -s "https://picross.aifedespaix.com/api/picrosses?limit=1"     # 105 grilles au total
+curl -s https://picross.aifedespaix.com/sitemap_index.xml
+```
+
+Puis créez un compte avec l'email de `ADMIN_EMAILS` : l'entrée **Modération** doit apparaître.
+
+## V5. Points d'attention sur Vercel
+
+- **Région** : placez les fonctions près de votre base Turso (**Settings → Functions → Function Region**) :
+  chaque requête fait des allers-retours vers la base, la latence compte.
+- **Limitation de débit** : le limiteur de l'API est en mémoire, donc **par instance** de fonction ; il ralentit
+  un abus mais ne le bloque pas de façon fiable en serverless. Ajoutez une règle **Vercel Firewall → Rate Limiting**
+  sur `/api/auth/*` (par exemple 10 requêtes par minute et par IP).
+- **Démarrage à froid** : la première requête après une période d'inactivité ouvre la base et vérifie les
+  migrations (quelques centaines de ms de plus).
+- **Offre Hobby** : réservée à un usage non commercial. Pour un site à vocation commerciale, il faut Vercel Pro.
+- **Sauvegarde** : Turso gère des sauvegardes/points de restauration selon l'offre ; vous pouvez aussi faire
+  `turso db shell picross .dump > backup.sql`.
+- **Passer de Vercel à Dokploy** (ou l'inverse) : même code. Pour migrer les données, `turso db shell picross .dump`
+  puis rejouer le dump dans le fichier SQLite du volume (`/data/picross.db`).

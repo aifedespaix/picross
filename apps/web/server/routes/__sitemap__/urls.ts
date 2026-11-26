@@ -7,13 +7,12 @@ interface Page {
 
 /** Ajoute au sitemap chaque grille publique (FR + EN, avec les liens hreflang croisés). */
 export default defineSitemapEventHandler(async (event) => {
-  const { apiUrl } = useRuntimeConfig(event);
   const items: PicrossSummary[] = [];
   const LIMIT = 50;
 
   try {
     for (let offset = 0; offset < 5000; offset += LIMIT) {
-      const page = await $fetch<Page>(`${apiUrl}/api/picrosses`, {
+      const page = await event.$fetch<Page>('/api/picrosses', {
         query: { limit: LIMIT, offset },
       });
       items.push(...page.items);

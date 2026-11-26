@@ -12,28 +12,25 @@ export const STARTERS_VERSION = 2;
 const KEY = 'starters_version';
 
 /** Insère les grilles livrées avec l'application pour que le jeu soit jouable tout de suite. */
-export function seedStarterPuzzles(db: Db): number {
-  const current = Number(db.select().from(meta).where(eq(meta.key, KEY)).get()?.value ?? 0);
+export async function seedStarterPuzzles(db: Db): Promise<number> {
+  const current = Number((await db.select().from(meta).where(eq(meta.key, KEY)).get())?.value ?? 0);
   if (current >= STARTERS_VERSION) return 0;
 
-  return db.transaction((tx) => {
+  return db.transaction(async (tx) => {
     // Anciennes grilles de départ (avant les slugs) : sans auteur ni slug, on les remplace.
     tx.delete(picrosses)
       .where(and(isNull(picrosses.authorId), isNull(picrosses.slug)))
       .run();
 
     const known = new Set(
-      tx
-        .select({ slug: picrosses.slug })
-        .from(picrosses)
-        .all()
-        .map((row) => row.slug),
+      (await tx.select({ slug: picrosses.slug }).from(picrosses).all()).map((row) => row.slug),
     );
     let inserted = 0;
     for (const puzzle of STARTER_PUZZLES) {
       if (known.has(puzzle.slug)) continue;
       const bits = starterBits(puzzle.rows);
-      tx.insert(picrosses)
+      await tx
+        .insert(picrosses)
         .values({
           slug: puzzle.slug,
           title: puzzle.fr,
@@ -48,7 +45,8 @@ export function seedStarterPuzzles(db: Db): number {
         .run();
       inserted++;
     }
-    tx.insert(meta)
+    await tx
+      .insert(meta)
       .values({ key: KEY, value: String(STARTERS_VERSION) })
       .onConflictDoUpdate({ target: meta.key, set: { value: sql`excluded.value` } })
       .run();

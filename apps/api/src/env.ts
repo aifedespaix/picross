@@ -8,8 +8,17 @@ const bool = z
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
-  /** Fichier SQLite (ou `:memory:` pour les tests). */
-  DATABASE_PATH: z.string().default('./data/picross.db'),
+  /**
+   * Base libSQL/SQLite : `file:./data/picross.db` (local, Docker) ou `libsql://…turso.io` (Vercel).
+   * Accepte aussi les variables de l'intégration Vercel × Turso (`TURSO_DATABASE_URL`).
+   */
+  DATABASE_URL: z.string().optional(),
+  TURSO_DATABASE_URL: z.string().optional(),
+  /** Ancien nom (chemin de fichier SQLite), conservé pour compatibilité. */
+  DATABASE_PATH: z.string().optional(),
+  /** Jeton d'accès Turso (inutile pour une base locale). */
+  DATABASE_AUTH_TOKEN: z.string().optional(),
+  TURSO_AUTH_TOKEN: z.string().optional(),
   /** Secret de signature des sessions : obligatoire en production. */
   JWT_SECRET: z.string().min(32, 'JWT_SECRET doit faire au moins 32 caractères').optional(),
   /** Durée de vie d'une session, en jours. */
@@ -29,7 +38,8 @@ const schema = z.object({
 export interface Env {
   nodeEnv: 'development' | 'test' | 'production';
   port: number;
-  databasePath: string;
+  databaseUrl: string;
+  databaseAuthToken: string | undefined;
   jwtSecret: string;
   sessionDays: number;
   adminEmails: Set<string>;
@@ -60,7 +70,11 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
   return {
     nodeEnv: raw.NODE_ENV,
     port: raw.PORT,
-    databasePath: raw.DATABASE_PATH,
+    databaseUrl:
+      raw.DATABASE_URL ??
+      raw.TURSO_DATABASE_URL ??
+      (raw.DATABASE_PATH ? `file:${raw.DATABASE_PATH}` : 'file:./data/picross.db'),
+    databaseAuthToken: raw.DATABASE_AUTH_TOKEN ?? raw.TURSO_AUTH_TOKEN,
     jwtSecret: raw.JWT_SECRET ?? randomBytes(32).toString('hex'),
     sessionDays: raw.SESSION_DAYS,
     adminEmails: new Set(
