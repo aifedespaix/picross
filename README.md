@@ -6,12 +6,38 @@ la communauté. Gratuit, sans publicité, sans compte pour jouer. Français 🇫
 > Monorepo unique : ce dépôt contient **tout** (front, API, code partagé, déploiement). Les anciens dépôts
 > `picross-backend` et `F-Picross` ne sont plus utilisés.
 
+<p align="center">
+  <img src="docs/screenshots/accueil.webp" alt="Page d'accueil de Picross : titre « Le picross, version moderne. » et plateau d'exemple" width="720">
+</p>
+
+**En ligne : <https://picross.aifedespaix.com>**
+
 ## Sommaire
 
-- [Aperçu](#aperçu) · [Stack](#stack) · [Architecture](#architecture) · [Structure du dépôt](#structure-du-dépôt)
+- [Captures d'écran](#captures-découran) · [Aperçu](#aperçu) · [Stack](#stack) · [Architecture](#architecture) · [Structure du dépôt](#structure-du-dépôt)
 - [Démarrer en local](#démarrer-en-local) · [Scripts](#scripts) · [Variables d'environnement](#variables-denvironnement)
 - [Internationalisation](#internationalisation) · [SEO](#seo) · [Sécurité](#sécurité)
 - [API](#api) · [Tests](#tests) · [Déploiement](#déploiement) · [Licence](#licence)
+
+## Captures d'écran
+
+Une interface sobre « à la Apple » (blanc, noir, beaucoup d'air) où le rouge ne sert qu'à de petits détails.
+Plus on avance dans la grille, plus il déborde discrètement sur les bords de l'écran.
+
+| Partie en cours                                                                                   | Victoire                                                                                                  |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| ![Une grille 11×11 à moitié remplie, indices de lignes et colonnes](docs/screenshots/partie.webp) | ![Écran de victoire : le chien en pixel art, dont un seul pixel est rond](docs/screenshots/victoire.webp) |
+
+| Galerie                                                                                 | Thème sombre                                                     |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| ![Galerie : recherche, filtre de difficulté, tri, likes](docs/screenshots/galerie.webp) | ![Accueil en thème sombre](docs/screenshots/accueil-sombre.webp) |
+
+<p align="center">
+  <img src="docs/screenshots/mobile.webp" alt="La grille sur mobile, avec la barre d'onglets du bas" width="300">
+</p>
+
+Pour les refaire : `pnpm dev`, puis capturer <http://localhost:5173> (1280×800, échelle 2) dans les trois états
+ci-dessus ; les fichiers vivent dans `docs/screenshots/` (WebP, 1600 px de large).
 
 ## Aperçu
 
