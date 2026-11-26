@@ -1,0 +1,235 @@
+{
+  "app": {
+    "name": "Picross",
+    "skip": "Aller au contenu"
+  },
+  "nav": {
+    "play": "Jouer",
+    "gallery": "Galerie",
+    "create": "Créer",
+    "profile": "Mon compte",
+    "admin": "Modération",
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Se déconnecter",
+    "settings": "Réglages",
+    "main": "Navigation principale",
+    "account": "Mon compte"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "more": "Voir plus",
+    "size": "{width} × {height}",
+    "by": "par {author}",
+    "builtin": "Grille d’origine"
+  },
+  "game": {
+    "title": "Grille",
+    "cells": "Cases",
+    "time": "Temps",
+    "tool": "Outil",
+    "fill": "Remplir",
+    "cross": "Marquer (croix)",
+    "undo": "Annuler",
+    "reset": "Effacer",
+    "next": "Grille suivante",
+    "random": "Grille au hasard",
+    "new": "Nouvelle",
+    "boardLabel": "Grille de picross, {width} colonnes par {height} lignes. Flèches pour se déplacer, espace pour remplir, X pour marquer, Ctrl+Z pour annuler.",
+    "cell": "ligne {row}, colonne {col}",
+    "state": {
+      "blank": "vide",
+      "filled": "pleine",
+      "crossed": "marquée"
+    },
+    "offline": "Serveur injoignable : grille hors ligne.",
+    "loadError": "Impossible de charger cette grille.",
+    "help": "Clic gauche : remplir · Clic droit : croix · Glissez pour tracer une ligne.",
+    "helpTouch": "Touchez pour remplir, glissez pour tracer une ligne. Basculez sur la croix avec l’outil ci-dessous."
+  },
+  "win": {
+    "title": "Bravo !",
+    "text": "Grille « {title} » résolue en {time}.",
+    "like": "J’aime",
+    "liked": "Aimée",
+    "loginToLike": "Connectez-vous pour aimer cette grille."
+  },
+  "gallery": {
+    "title": "Galerie",
+    "search": "Rechercher une grille",
+    "sort": "Tri",
+    "recent": "Plus récentes",
+    "popular": "Plus aimées",
+    "empty": "Aucune grille trouvée.",
+    "play": "Jouer",
+    "count": "{count} grille | {count} grilles"
+  },
+  "create": {
+    "title": "Créer une grille",
+    "intro": "Dessinez le motif : les indices sont calculés automatiquement. Une grille doit être remplie à plus d’un tiers.",
+    "name": "Titre",
+    "cols": "Colonnes",
+    "rows": "Lignes",
+    "link": "Lier colonnes et lignes (grille carrée)",
+    "clear": "Tout effacer",
+    "submit": "Envoyer la grille",
+    "tooEmpty": "Remplissez davantage de cases ({done} / {min} minimum).",
+    "sent": "Grille envoyée !",
+    "sentPending": "Elle sera visible par tous après validation par un administrateur.",
+    "sentPublic": "Elle est publiée et visible par tous.",
+    "seeProfile": "Voir mes grilles",
+    "again": "En créer une autre"
+  },
+  "profile": {
+    "title": "Mon compte",
+    "hello": "Bonjour {name}",
+    "mine": "Mes grilles",
+    "none": "Vous n’avez pas encore créé de grille.",
+    "pending": "En attente de validation",
+    "published": "Publiée",
+    "likes": "{count} j’aime | {count} j’aime",
+    "confirmDelete": "Supprimer définitivement « {title} » ?"
+  },
+  "admin": {
+    "title": "Modération",
+    "pending": "Grilles à valider",
+    "all": "Toutes les grilles",
+    "validate": "Valider",
+    "unvalidate": "Retirer",
+    "none": "Rien à modérer.",
+    "preview": "Aperçu"
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "registerTitle": "Créer un compte",
+    "email": "Email",
+    "name": "Pseudo",
+    "password": "Mot de passe",
+    "passwordHint": "8 caractères minimum",
+    "submitLogin": "Se connecter",
+    "submitRegister": "S’inscrire",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Déjà inscrit ?",
+    "show": "Afficher le mot de passe",
+    "hide": "Masquer le mot de passe"
+  },
+  "settings": {
+    "title": "Réglages",
+    "theme": "Thème",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre",
+    "language": "Langue",
+    "sound": "Effets sonores"
+  },
+  "errors": {
+    "email": "Entrez une adresse email valide.",
+    "name": "Le pseudo doit faire entre {min} et {max} caractères.",
+    "password": "Le mot de passe doit faire au moins {min} caractères.",
+    "passwordRequired": "Entrez votre mot de passe.",
+    "title": "Le titre doit faire entre {min} et {max} caractères.",
+    "map": "La grille n’est pas valide.",
+    "invalid_credentials": "Email ou mot de passe incorrect.",
+    "email_taken": "Cette adresse email est déjà utilisée.",
+    "name_taken": "Ce pseudo est déjà pris.",
+    "too_many_requests": "Trop de tentatives. Réessayez dans quelques minutes.",
+    "network": "Serveur injoignable. Vérifiez votre connexion.",
+    "forbidden": "Action non autorisée.",
+    "unauthenticated": "Connectez-vous pour continuer.",
+    "not_found": "Introuvable.",
+    "unknown": "Une erreur est survenue. Réessayez.",
+    "notFoundPage": "Cette page n’existe pas."
+  },
+  "footer": {
+    "tagline": "nonogrammes gratuits et open source",
+    "nav": "Liens du pied de page"
+  },
+  "seo": {
+    "home": {
+      "title": "Picross en ligne gratuit — nonogrammes à résoudre et à créer",
+      "description": "Jouez au picross (nonogramme) gratuitement : résolvez des grilles pixel art, créez les vôtres et partagez-les. Sur mobile, tablette et ordinateur, sans inscription."
+    },
+    "gallery": {
+      "title": "Galerie de grilles de picross",
+      "description": "Parcourez les grilles de picross de la communauté : recherchez, triez par popularité et jouez gratuitement."
+    },
+    "play": {
+      "title": "Picross « {title} » — grille {width} × {height}",
+      "description": "Résolvez la grille de picross « {title} » ({width} × {height}) en ligne gratuitement. Jouable à la souris, au doigt ou au clavier."
+    }
+  },
+  "home": {
+    "eyebrow": "Nonogrammes en ligne · gratuit · sans inscription",
+    "title": "Le picross, version moderne",
+    "lead": "Remplissez la grille grâce aux nombres pour révéler une image en pixel art. Puis dessinez vos propres grilles et partagez-les avec la communauté.",
+    "play": "Jouer maintenant",
+    "gallery": "Voir la galerie",
+    "demo": "Aperçu d’une grille de picross de 5 × 5 qui se remplit",
+    "howTitle": "Comment jouer ?",
+    "howLead": "Les règles tiennent en trois phrases.",
+    "steps": [
+      {
+        "title": "Lisez les indices",
+        "text": "Chaque nombre indique la longueur d’un bloc de cases pleines consécutives dans sa ligne ou sa colonne. « 3 1 » signifie : un bloc de 3, un espace, puis un bloc de 1."
+      },
+      {
+        "title": "Remplissez ou marquez",
+        "text": "Cliquez (ou touchez) pour remplir une case, clic droit pour poser une croix sur une case vide, et glissez pour tracer une ligne d’un coup."
+      },
+      {
+        "title": "Révélez l’image",
+        "text": "Quand tous les indices sont satisfaits, la grille est résolue. Pas de devinette : chaque grille se déduit logiquement."
+      }
+    ],
+    "featuresTitle": "Pensé pour jouer partout",
+    "features": [
+      {
+        "title": "Des grilles pour tous",
+        "text": "De 3 × 3 pour s’échauffer jusqu’à 15 × 15 pour les experts, avec des grilles de départ et celles de la communauté."
+      },
+      {
+        "title": "Un éditeur intégré",
+        "text": "Dessinez votre motif : les indices sont calculés automatiquement. Envoyez-le, il rejoint la galerie après validation."
+      },
+      {
+        "title": "Fluide sur mobile",
+        "text": "Glisser au doigt, plateau adapté à l’écran, annulation illimitée, thème clair ou sombre et jeu au clavier."
+      },
+      {
+        "title": "Gratuit et open source",
+        "text": "Aucune publicité, aucun compte requis pour jouer. Le code est public sur GitHub."
+      }
+    ],
+    "faqTitle": "Questions fréquentes",
+    "faq": [
+      {
+        "q": "Qu’est-ce qu’un picross ?",
+        "a": "Le picross, ou nonogramme, est un jeu de logique japonais : à partir des nombres affichés en bordure d’une grille, on détermine quelles cases noircir pour faire apparaître une image."
+      },
+      {
+        "q": "Faut-il un compte pour jouer ?",
+        "a": "Non. Un compte sert seulement à créer des grilles et à aimer celles des autres."
+      },
+      {
+        "q": "Comment créer ma propre grille ?",
+        "a": "Connectez-vous, ouvrez l’éditeur, choisissez la taille (de 3 à 15 cases) et dessinez. Les indices se calculent tout seuls."
+      },
+      {
+        "q": "Ma grille est-elle publiée tout de suite ?",
+        "a": "Elle est visible dans votre compte immédiatement, puis publiée dans la galerie après une rapide validation pour écarter les grilles vides ou inappropriées."
+      },
+      {
+        "q": "Peut-on jouer sans souris ?",
+        "a": "Oui : au doigt sur mobile et tablette, ou au clavier (flèches, espace pour remplir, X pour marquer, Ctrl+Z pour annuler)."
+      }
+    ],
+    "ctaTitle": "Prêt à résoudre votre première grille ?",
+    "ctaText": "Une grille au hasard, tout de suite, sans inscription."
+  }
+}

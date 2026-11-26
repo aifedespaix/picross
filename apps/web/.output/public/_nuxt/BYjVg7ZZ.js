@@ -1,0 +1,2 @@
+//# allFunctionsCalledOnLoad
+import{L as e,N as t,O as n,h as r,l as i}from"#entry";import"./BoIGozAS.js";import{t as a}from"./Dycp2hLX.js";var o=t({__name:`login`,setup(t){let{t:o}=i();return r({title:()=>o(`nav.login`),meta:[{name:`robots`,content:`noindex, nofollow`}]}),(t,r)=>(e(),n(a,{mode:`login`}))}});export{o as default};

@@ -12,6 +12,8 @@ export default tseslint.config(
       '**/coverage/**',
       'apps/api/drizzle/**',
       'apps/web/public/**',
+      '**/.nuxt/**',
+      '**/.output/**',
     ],
   },
   js.configs.recommended,
@@ -31,6 +33,8 @@ export default tseslint.config(
       ],
       'vue/multi-word-component-names': 'off',
       'vue/block-lang': ['error', { script: { lang: 'ts' } }],
+      // TypeScript vérifie déjà les identifiants ; Nuxt auto-importe composables et helpers.
+      'no-undef': 'off',
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
     },

@@ -1,0 +1,1 @@
+import{_ as e,g as t,i as n,s as r}from"#entry";var i=t(t=>{let i=n(),a=r();if(!i.isLoggedIn)return e({path:a(`login`),query:{redirect:t.fullPath}})});export{i as default};

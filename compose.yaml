@@ -1,10 +1,10 @@
-# Déploiement : un seul compose pour le front (nginx) et l'API (Node), SQLite sur un volume.
+# Déploiement : un seul compose pour le front Nuxt (SSR) et l'API Node, SQLite sur un volume.
 #
 #   docker compose up -d --build           (variables : voir .env.example)
 #   docker compose -f compose.yaml -f compose.local.yaml up --build   (test local sur :8080)
 #
-# Seul « web » doit être exposé publiquement (domaine → service web, port 80). L'API n'est
-# joignable que depuis le réseau du compose, via le proxy /api de nginx.
+# Seul « web » doit être exposé publiquement (domaine → service web, port 3000). L'API n'est
+# joignable que depuis le réseau du compose, via le proxy /api de Nuxt. Guide : DEPLOY.md.
 
 name: picross
 
@@ -22,7 +22,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       # true : les grilles créées sont publiées sans modération.
       AUTO_VALIDATE: ${AUTO_VALIDATE:-false}
-      # Derrière nginx/Traefik : on lit l'IP réelle dans X-Forwarded-For (rate limiting).
+      # Derrière Nuxt/Traefik : on lit l'IP réelle dans X-Forwarded-For (rate limiting).
       TRUST_PROXY: 'true'
       # Mettre false uniquement pour tester en HTTP simple (cf. compose.local.yaml).
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
@@ -39,8 +39,13 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    environment:
+      # URL publique, SANS slash final : sert aux canonical, hreflang, sitemap, Open Graph.
+      NUXT_PUBLIC_SITE_URL: ${SITE_URL:?définissez SITE_URL (ex. https://picross.mondomaine.fr)}
+      # Adresse interne de l'API (réseau du compose).
+      NUXT_API_URL: http://api:3000
     expose:
-      - '80'
+      - '3000'
 
 volumes:
   picross-data:

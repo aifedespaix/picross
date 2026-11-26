@@ -1,0 +1,235 @@
+{
+  "app": {
+    "name": "Picross",
+    "skip": "Skip to content"
+  },
+  "nav": {
+    "play": "Play",
+    "gallery": "Gallery",
+    "create": "Create",
+    "profile": "Account",
+    "admin": "Moderation",
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "settings": "Settings",
+    "main": "Main navigation",
+    "account": "Account"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "back": "Back",
+    "more": "Show more",
+    "size": "{width} × {height}",
+    "by": "by {author}",
+    "builtin": "Built-in puzzle"
+  },
+  "game": {
+    "title": "Puzzle",
+    "cells": "Cells",
+    "time": "Time",
+    "tool": "Tool",
+    "fill": "Fill",
+    "cross": "Mark (cross)",
+    "undo": "Undo",
+    "reset": "Clear",
+    "next": "Next puzzle",
+    "random": "Random puzzle",
+    "new": "New",
+    "boardLabel": "Picross board, {width} columns by {height} rows. Arrow keys to move, space to fill, X to mark, Ctrl+Z to undo.",
+    "cell": "row {row}, column {col}",
+    "state": {
+      "blank": "empty",
+      "filled": "filled",
+      "crossed": "marked"
+    },
+    "offline": "Server unreachable: playing an offline puzzle.",
+    "loadError": "Could not load this puzzle.",
+    "help": "Left click: fill · Right click: cross · Drag to draw a line.",
+    "helpTouch": "Tap to fill, drag to draw a line. Switch to the cross with the tool below."
+  },
+  "win": {
+    "title": "Well done!",
+    "text": "Puzzle “{title}” solved in {time}.",
+    "like": "Like",
+    "liked": "Liked",
+    "loginToLike": "Log in to like this puzzle."
+  },
+  "gallery": {
+    "title": "Gallery",
+    "search": "Search puzzles",
+    "sort": "Sort",
+    "recent": "Newest",
+    "popular": "Most liked",
+    "empty": "No puzzle found.",
+    "play": "Play",
+    "count": "{count} puzzle | {count} puzzles"
+  },
+  "create": {
+    "title": "Create a puzzle",
+    "intro": "Draw the pattern: clues are computed automatically. At least a third of the cells must be filled.",
+    "name": "Title",
+    "cols": "Columns",
+    "rows": "Rows",
+    "link": "Link columns and rows (square grid)",
+    "clear": "Clear all",
+    "submit": "Submit puzzle",
+    "tooEmpty": "Fill more cells ({done} / {min} minimum).",
+    "sent": "Puzzle submitted!",
+    "sentPending": "It will be visible to everyone once an administrator approves it.",
+    "sentPublic": "It is published and visible to everyone.",
+    "seeProfile": "See my puzzles",
+    "again": "Create another"
+  },
+  "profile": {
+    "title": "Account",
+    "hello": "Hello {name}",
+    "mine": "My puzzles",
+    "none": "You haven’t created any puzzle yet.",
+    "pending": "Awaiting approval",
+    "published": "Published",
+    "likes": "{count} like | {count} likes",
+    "confirmDelete": "Permanently delete “{title}”?"
+  },
+  "admin": {
+    "title": "Moderation",
+    "pending": "Puzzles to approve",
+    "all": "All puzzles",
+    "validate": "Approve",
+    "unvalidate": "Unpublish",
+    "none": "Nothing to moderate.",
+    "preview": "Preview"
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "registerTitle": "Create an account",
+    "email": "Email",
+    "name": "Username",
+    "password": "Password",
+    "passwordHint": "At least 8 characters",
+    "submitLogin": "Log in",
+    "submitRegister": "Sign up",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already registered?",
+    "show": "Show password",
+    "hide": "Hide password"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "language": "Language",
+    "sound": "Sound effects"
+  },
+  "errors": {
+    "email": "Enter a valid email address.",
+    "name": "Username must be {min} to {max} characters.",
+    "password": "Password must be at least {min} characters.",
+    "passwordRequired": "Enter your password.",
+    "title": "Title must be {min} to {max} characters.",
+    "map": "The grid is not valid.",
+    "invalid_credentials": "Wrong email or password.",
+    "email_taken": "This email is already in use.",
+    "name_taken": "This username is already taken.",
+    "too_many_requests": "Too many attempts. Try again in a few minutes.",
+    "network": "Server unreachable. Check your connection.",
+    "forbidden": "Not allowed.",
+    "unauthenticated": "Log in to continue.",
+    "not_found": "Not found.",
+    "unknown": "Something went wrong. Please try again.",
+    "notFoundPage": "This page does not exist."
+  },
+  "footer": {
+    "tagline": "free, open-source nonograms",
+    "nav": "Footer links"
+  },
+  "seo": {
+    "home": {
+      "title": "Free online Picross — nonograms to solve and create",
+      "description": "Play picross (nonograms) for free: solve pixel-art puzzles, create your own and share them. Works on mobile, tablet and desktop, no sign-up needed."
+    },
+    "gallery": {
+      "title": "Picross puzzle gallery",
+      "description": "Browse the community's picross puzzles: search, sort by popularity and play for free."
+    },
+    "play": {
+      "title": "Picross “{title}” — {width} × {height} puzzle",
+      "description": "Solve the picross puzzle “{title}” ({width} × {height}) online for free. Play with a mouse, your finger or the keyboard."
+    }
+  },
+  "home": {
+    "eyebrow": "Online nonograms · free · no sign-up",
+    "title": "Picross, the modern way",
+    "lead": "Fill the grid using the numbers to reveal a pixel-art picture. Then draw your own puzzles and share them with the community.",
+    "play": "Play now",
+    "gallery": "Browse the gallery",
+    "demo": "Preview of a 5 × 5 picross puzzle being filled in",
+    "howTitle": "How to play",
+    "howLead": "The rules fit in three sentences.",
+    "steps": [
+      {
+        "title": "Read the clues",
+        "text": "Each number is the length of a run of consecutive filled cells in its row or column. “3 1” means: a run of 3, a gap, then a run of 1."
+      },
+      {
+        "title": "Fill or mark",
+        "text": "Click (or tap) to fill a cell, right-click to put a cross on an empty one, and drag to draw a whole line at once."
+      },
+      {
+        "title": "Reveal the picture",
+        "text": "When every clue is satisfied, the puzzle is solved. No guessing: each puzzle can be deduced logically."
+      }
+    ],
+    "featuresTitle": "Made to play anywhere",
+    "features": [
+      {
+        "title": "Puzzles for everyone",
+        "text": "From 3 × 3 to warm up to 15 × 15 for experts, with built-in puzzles and the community's."
+      },
+      {
+        "title": "Built-in editor",
+        "text": "Draw your pattern: clues are computed automatically. Submit it and it joins the gallery after review."
+      },
+      {
+        "title": "Smooth on mobile",
+        "text": "Finger dragging, board fitted to your screen, unlimited undo, light or dark theme and keyboard play."
+      },
+      {
+        "title": "Free and open source",
+        "text": "No ads, no account needed to play. The code is public on GitHub."
+      }
+    ],
+    "faqTitle": "Frequently asked questions",
+    "faq": [
+      {
+        "q": "What is picross?",
+        "a": "Picross, or nonogram, is a Japanese logic puzzle: from the numbers around a grid, you work out which cells to fill to reveal a picture."
+      },
+      {
+        "q": "Do I need an account to play?",
+        "a": "No. An account is only needed to create puzzles and like other people's."
+      },
+      {
+        "q": "How do I create my own puzzle?",
+        "a": "Log in, open the editor, pick a size (3 to 15 cells) and draw. Clues are computed for you."
+      },
+      {
+        "q": "Is my puzzle published right away?",
+        "a": "It is visible in your account immediately, then published in the gallery after a quick review to filter out empty or inappropriate puzzles."
+      },
+      {
+        "q": "Can I play without a mouse?",
+        "a": "Yes: with your finger on mobile and tablet, or with the keyboard (arrows, space to fill, X to mark, Ctrl+Z to undo)."
+      }
+    ],
+    "ctaTitle": "Ready to solve your first puzzle?",
+    "ctaText": "A random puzzle, right now, no sign-up."
+  }
+}

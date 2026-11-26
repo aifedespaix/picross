@@ -15,12 +15,18 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/web apps/web
+# L'URL publique du site (NUXT_PUBLIC_SITE_URL) est lue au démarrage : pas besoin de la fournir ici.
 RUN pnpm --filter @picross/web build
 
-# --- Serveur statique + reverse proxy vers l'API ------------------------------------------------
-FROM nginx:1.29-alpine AS runtime
-COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /repo/apps/web/dist /usr/share/nginx/html
-EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://127.0.0.1/healthz >/dev/null || exit 1
+# --- Serveur Nuxt (SSR) : la sortie .output est autonome, sans node_modules ---------------------
+FROM node:22-slim AS runtime
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000
+WORKDIR /app
+COPY --from=build /repo/apps/web/.output ./.output
+USER node
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/robots.txt').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", ".output/server/index.mjs"]

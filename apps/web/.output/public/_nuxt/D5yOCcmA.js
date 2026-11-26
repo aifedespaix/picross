@@ -1,0 +1,1 @@
+import{_ as e,g as t,i as n,s as r}from"#entry";var i=t(()=>{let t=n(),i=r();if(!t.isAdmin)return e(i(`index`))});export{i as default};
