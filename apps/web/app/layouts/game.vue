@@ -7,7 +7,8 @@ import SettingsDialog from '@/components/SettingsDialog.vue';
 /** Mise en page de jeu : plein écran, sans en-tête, pied de page ni barre d'onglets. */
 const { t } = useI18n();
 const localePath = useLocalePath();
-const settingsOpen = ref(false);
+/** Partagé avec la page (touche « ? »). */
+const settingsOpen = useState('settings-open', () => false);
 const corruption = useCorruptionStore();
 </script>
 

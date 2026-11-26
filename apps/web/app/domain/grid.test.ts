@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeClues, fromBits } from '@picross/shared';
 import {
+  autoCross,
   clueStatus,
   countFilled,
   createGrid,
@@ -80,5 +81,39 @@ describe('clueStatus', () => {
       false,
     ]);
     expect(clueStatus(['blank', 'blank'], [1])).toEqual([false]);
+  });
+});
+
+describe('clueStatus depuis la fin', () => {
+  it('grise le dernier indice quand son bloc est posé en premier', () => {
+    expect(clueStatus(['blank', 'blank', 'blank', 'filled', 'filled'], [1, 2])).toEqual([
+      false,
+      true,
+    ]);
+    expect(clueStatus(['filled', 'blank', 'blank', 'blank', 'blank'], [2, 1])).toEqual([
+      false,
+      false,
+    ]);
+  });
+});
+
+describe('autoCross', () => {
+  const clues = { rows: [[2], [1]], cols: [[1], [2], [0]] };
+
+  it('croise les cases vides d’une ligne résolue, pas des autres', () => {
+    const grid = gridFromBits([
+      [1, 1, 0],
+      [0, 0, 0],
+    ]);
+    const next = autoCross(grid, clues);
+    expect(next[0]).toEqual(['filled', 'filled', 'crossed']);
+    // La colonne 0 (indice 1) est elle aussi résolue : sa case vide est croisée.
+    expect(next[1]).toEqual(['crossed', 'blank', 'blank']);
+    expect(grid[0]).toEqual(['filled', 'filled', 'blank']); // la grille d'origine n'est pas modifiée
+  });
+
+  it('renvoie la même grille si aucune ligne n’est résolue', () => {
+    const grid = createGrid(3, 2);
+    expect(autoCross(grid, clues)).toBe(grid);
   });
 });

@@ -33,7 +33,7 @@ function onBackdropClick(event: MouseEvent) {
   <dialog
     ref="dialog"
     :aria-labelledby="titleId"
-    class="m-auto w-[min(92vw,26rem)] rounded-3xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-ink/50 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    class="m-auto max-h-[90dvh] w-[min(92vw,26rem)] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-ink/50 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
     @cancel.prevent="emit('close')"
     @click="onBackdropClick"
   >

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore, type ThemeChoice } from '@/stores/settings';
+import { hasVibration } from '@/utils/haptics';
 import BaseDialog from './BaseDialog.vue';
 
 defineProps<{ open: boolean }>();
@@ -8,6 +9,19 @@ defineEmits<{ close: [] }>();
 
 const { t, locale, locales, setLocale } = useI18n();
 const settings = useSettingsStore();
+const canVibrate = ref(false);
+onMounted(() => {
+  canVibrate.value = hasVibration();
+});
+const shortcuts = [
+  ['Ctrl + Z', 'settings.keyUndo'],
+  ['Ctrl + Y', 'settings.keyRedo'],
+  ['T', 'settings.keyTool'],
+  ['← ↑ ↓ →', 'settings.keyMove'],
+  ['Espace', 'settings.keyFill'],
+  ['X', 'settings.keyCross'],
+  ['?', 'settings.keyHelp'],
+] as const;
 const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
 </script>
 
@@ -64,6 +78,28 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
         <input v-model="settings.showStats" type="checkbox" class="size-5 accent-demon" />
         <span class="text-sm font-medium">{{ t('settings.stats') }}</span>
       </label>
+      <label v-if="canVibrate" class="flex cursor-pointer items-center gap-3">
+        <input v-model="settings.haptics" type="checkbox" class="size-5 accent-demon" />
+        <span class="text-sm font-medium">{{ t('settings.haptics') }}</span>
+      </label>
+      <label class="flex cursor-pointer items-start gap-3">
+        <input v-model="settings.leftHanded" type="checkbox" class="mt-0.5 size-5 accent-demon" />
+        <span>
+          <span class="block text-sm font-medium">{{ t('settings.leftHanded') }}</span>
+          <span class="block text-xs text-slate-500 dark:text-slate-400">{{
+            t('settings.leftHandedHint')
+          }}</span>
+        </span>
+      </label>
+      <label class="flex cursor-pointer items-start gap-3">
+        <input v-model="settings.autoCross" type="checkbox" class="mt-0.5 size-5 accent-demon" />
+        <span>
+          <span class="block text-sm font-medium">{{ t('settings.autoCross') }}</span>
+          <span class="block text-xs text-slate-500 dark:text-slate-400">{{
+            t('settings.autoCrossHint')
+          }}</span>
+        </span>
+      </label>
       <label class="flex cursor-pointer items-start gap-3">
         <input v-model="settings.corruption" type="checkbox" class="mt-0.5 size-5 accent-demon" />
         <span>
@@ -73,6 +109,23 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
           }}</span>
         </span>
       </label>
+
+      <details class="text-sm">
+        <summary class="cursor-pointer font-medium">{{ t('settings.shortcuts') }}</summary>
+        <dl
+          class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-600 dark:text-slate-300"
+        >
+          <template v-for="[keys, label] in shortcuts" :key="label">
+            <dt>
+              <kbd
+                class="rounded border border-slate-300 px-1.5 py-0.5 text-xs dark:border-slate-600"
+                >{{ keys }}</kbd
+              >
+            </dt>
+            <dd>{{ t(label) }}</dd>
+          </template>
+        </dl>
+      </details>
     </div>
   </BaseDialog>
 </template>

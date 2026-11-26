@@ -69,11 +69,65 @@ export function isSolved(grid: Grid, clues: Clues): boolean {
   );
 }
 
+interface Run {
+  start: number;
+  length: number;
+}
+
+function runsWithPosition(line: readonly CellState[]): Run[] {
+  const runs: Run[] = [];
+  line.forEach((state, index) => {
+    if (state !== 'filled') return;
+    const last = runs.at(-1);
+    if (last && last.start + last.length === index) last.length++;
+    else runs.push({ start: index, length: 1 });
+  });
+  return runs;
+}
+
 /**
- * Pour chaque indice, `true` si le bloc correspondant (dans l'ordre) est déjà posé avec la bonne
- * longueur : l'indice est alors grisé pour guider le joueur.
+ * Pour chaque indice, `true` si le bloc correspondant est déjà posé avec la bonne longueur :
+ * l'indice est alors grisé pour guider le joueur. On compte depuis le début de la ligne (bloc de
+ * même rang) comme depuis la fin : poser d'abord le dernier bloc grise aussi son indice, à
+ * condition qu'il soit à un endroit où cet indice peut se trouver.
  */
 export function clueStatus(line: readonly CellState[], clues: readonly number[]): boolean[] {
-  const runs = lineRuns(line);
-  return clues.map((value, index) => runs[index] === value);
+  const runs = runsWithPosition(line);
+  // Position la plus à gauche où chaque indice peut commencer.
+  const earliest: number[] = [];
+  clues.reduce((offset, value, index) => {
+    earliest[index] = offset;
+    return offset + value + 1;
+  }, 0);
+  return clues.map((value, index) => {
+    if (runs[index]?.length === value) return true;
+    for (let j = index; j < clues.length; j++) {
+      const run = runs[runs.length - (clues.length - j)];
+      if (!run || run.length !== clues[j] || run.start < (earliest[j] ?? 0)) return false;
+    }
+    return true;
+  });
+}
+
+/**
+ * Marque d'une croix les cases vides de chaque ligne et colonne déjà résolue (les cases restantes
+ * y sont forcément vides). Renvoie la même grille si rien ne change.
+ */
+export function autoCross(grid: Grid, clues: Clues): Grid {
+  let next: Grid | null = null;
+  const cross = (row: number, col: number) => {
+    next ??= cloneGrid(grid);
+    next[row]![col] = 'crossed';
+  };
+  clues.rows.forEach((rowClues, row) => {
+    const line = grid[row] ?? [];
+    if (!isLineSolved(line, rowClues)) return;
+    line.forEach((state, col) => state === 'blank' && cross(row, col));
+  });
+  clues.cols.forEach((colClues, col) => {
+    const line = getColumn(grid, col);
+    if (!isLineSolved(line, colClues)) return;
+    line.forEach((state, row) => state === 'blank' && cross(row, col));
+  });
+  return next ?? grid;
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useEventListener } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/api/client';
 import BaseDialog from '@/components/BaseDialog.vue';
@@ -23,9 +24,12 @@ const whisper = computed(() => (corruption.stage === 'pure' ? null : corruption.
 
 const status = ref<'loading' | 'ready' | 'error'>('ready');
 const offline = ref(false);
-const winOpen = ref(false);
-/** Action en attente de confirmation (perte de la progression). */
-const confirming = ref<'erase' | 'new' | null>(null);
+/** Confirmation avant d'abandonner une partie en cours. */
+const confirmNew = ref(false);
+/** Pastille « Grille effacée · Annuler » (l'effacement est annulable, donc sans modale). */
+const erasedToast = ref(false);
+let erasedTimer: ReturnType<typeof setTimeout> | undefined;
+const settingsOpen = useState('settings-open', () => false);
 const liking = ref(false);
 
 const puzzle = computed(() => game.puzzle.value);
@@ -56,19 +60,20 @@ async function fetchPuzzle(id?: string, exclude?: string): Promise<Fetched> {
 
 function apply(result: Fetched) {
   offline.value = result.offline;
-  winOpen.value = false;
   if (!result.puzzle) {
     status.value = 'error';
     return;
   }
   game.start(result.puzzle);
   status.value = 'ready';
+  hideErased();
 }
 
 /** Chargements suivants (grille suivante, navigation) : côté client. */
 async function load(id?: string, exclude?: string) {
   status.value = 'loading';
   apply(await fetchPuzzle(id, exclude));
+  game.restore();
   // L'URL pointe vers la grille jouée : on peut la partager ou rafraîchir la page.
   if (!id && puzzle.value && !puzzle.value.local) {
     await navigateTo(
@@ -85,6 +90,8 @@ const { data: initial } = await useAsyncData(`puzzle:${routeId.value ?? 'random'
 if (initial.value) apply(initial.value);
 
 onMounted(async () => {
+  // Reprise de la partie et de l'outil mémorisés : après l'hydratation, pour rester identique au HTML serveur.
+  game.restore();
   if (!routeId.value && puzzle.value && !puzzle.value.local) {
     await navigateTo(
       { path: localePath({ name: 'play-id', params: { id: puzzle.value.id } }) },
@@ -98,13 +105,6 @@ watch(routeId, (id) => {
   if (!id) load();
 });
 
-watch(
-  () => game.won.value,
-  (won) => {
-    if (won) winOpen.value = true;
-  },
-);
-
 const next = () => load(undefined, puzzle.value?.id);
 
 const hasProgress = computed(() => game.filled.value > 0 || game.board.canUndo.value);
@@ -116,23 +116,80 @@ const isBlank = computed(() =>
 function askNew() {
   if (status.value === 'loading') return;
   if (game.won.value || !hasProgress.value) next();
-  else confirming.value = 'new';
+  else confirmNew.value = true;
 }
-function askErase() {
+function confirmNewGame() {
+  confirmNew.value = false;
+  next();
+}
+
+function hideErased() {
+  clearTimeout(erasedTimer);
+  erasedToast.value = false;
+}
+/** Efface tout de suite : c'est annulable (pastille, ou bouton Annuler). */
+function erase() {
   if (isBlank.value) return;
-  if (game.won.value) game.clear();
-  else confirming.value = 'erase';
+  const replay = game.won.value;
+  game.clear();
+  if (replay) return;
+  erasedToast.value = true;
+  clearTimeout(erasedTimer);
+  erasedTimer = setTimeout(hideErased, 5000);
 }
-function confirmAction() {
-  const action = confirming.value;
-  confirming.value = null;
-  if (action === 'erase') game.clear();
-  else if (action === 'new') next();
+function undoErase() {
+  game.undo();
+  hideErased();
 }
 
 function toggleTool() {
   game.board.tool.value = game.board.tool.value === 'filled' ? 'crossed' : 'filled';
 }
+
+// Annuler : un appui = un coup ; maintenu, il remonte l'historique.
+let holdDelay: ReturnType<typeof setTimeout> | undefined;
+let holdRepeat: ReturnType<typeof setInterval> | undefined;
+function stopHold() {
+  clearTimeout(holdDelay);
+  clearInterval(holdRepeat);
+}
+function undoDown(event: PointerEvent) {
+  if (event.button > 0 || !game.undo()) return;
+  stopHold();
+  holdDelay = setTimeout(() => {
+    holdRepeat = setInterval(() => game.undo() || stopHold(), 90);
+  }, 450);
+}
+/** Activation au clavier (Entrée, Espace) : pas de pointeur, un seul coup. */
+function undoKey(event: MouseEvent) {
+  if (event.detail === 0) game.undo();
+}
+onBeforeUnmount(() => {
+  stopHold();
+  clearTimeout(erasedTimer);
+});
+
+// Raccourcis clavier (hors champs de saisie et fenêtres ouvertes).
+useEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.defaultPrevented || event.altKey) return;
+  const target = event.target as HTMLElement | null;
+  if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+  if (document.querySelector('dialog[open]')) return;
+  const key = event.key.toLowerCase();
+  const mod = event.ctrlKey || event.metaKey;
+  if (mod && key === 'z') {
+    event.preventDefault();
+    if (event.shiftKey) game.redo();
+    else game.undo();
+  } else if (mod && key === 'y') {
+    event.preventDefault();
+    game.redo();
+  } else if (!mod && key === 't') {
+    toggleTool();
+  } else if (!mod && event.key === '?') {
+    settingsOpen.value = true;
+  }
+});
 
 async function toggleLike() {
   const current = puzzle.value;
@@ -170,7 +227,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
+  <div class="relative flex h-full flex-col">
     <h1 class="sr-only">{{ puzzle?.title ?? t('nav.play') }}</h1>
 
     <!-- Bandeau discret : temps/cases (si activés dans les réglages), murmure, hors ligne. -->
@@ -194,153 +251,220 @@ useSeoMeta({
       </p>
     </div>
 
-    <!-- Plateau : occupe tout l'espace restant, sans défilement. -->
-    <section class="relative min-h-0 flex-1" :aria-busy="status === 'loading'">
-      <div
-        class="absolute inset-0 px-2 transition-opacity duration-200"
-        :class="status === 'loading' && puzzle ? 'opacity-40' : ''"
-      >
-        <div v-if="status === 'error'" class="grid h-full place-content-center gap-3 text-center">
-          <p>{{ t('game.loadError') }}</p>
-          <button type="button" class="btn btn-primary" @click="load(routeId)">
-            {{ t('common.retry') }}
-          </button>
+    <!-- Plateau + commandes. En paysage sur petit écran, les commandes passent sur le côté. -->
+    <div
+      class="flex min-h-0 flex-1 flex-col short:flex-row"
+      :class="settings.leftHanded ? 'short:flex-row-reverse' : ''"
+    >
+      <!-- Plateau : occupe tout l'espace restant, sans défilement. -->
+      <section class="relative min-h-0 min-w-0 flex-1" :aria-busy="status === 'loading'">
+        <div
+          class="absolute inset-0 px-2 transition-opacity duration-200"
+          :class="status === 'loading' && puzzle ? 'opacity-40' : ''"
+        >
+          <div v-if="status === 'error'" class="grid h-full place-content-center gap-3 text-center">
+            <p>{{ t('game.loadError') }}</p>
+            <button type="button" class="btn btn-primary" @click="load(routeId)">
+              {{ t('common.retry') }}
+            </button>
+          </div>
+          <Board
+            v-else-if="puzzle"
+            :cells="game.board.cells.value"
+            :row-clues="game.clues.value.rows"
+            :col-clues="game.clues.value.cols"
+            :tool="game.board.tool.value"
+            :interactive="!game.won.value && status !== 'loading'"
+            allow-cross
+            show-progress
+            @stroke-start="
+              (pos, tool) => {
+                hideErased();
+                game.board.begin(pos, tool);
+              }
+            "
+            @stroke-move="game.board.move"
+            @stroke-end="game.board.end"
+            @stroke-cancel="game.board.cancel()"
+            @cell-action="(pos, tool) => game.board.toggleAt(pos, tool)"
+            @undo="game.undo()"
+          />
         </div>
-        <Board
-          v-else-if="puzzle"
-          :cells="game.board.cells.value"
-          :row-clues="game.clues.value.rows"
-          :col-clues="game.clues.value.cols"
-          :tool="game.board.tool.value"
-          :interactive="!game.won.value && status !== 'loading'"
-          allow-cross
-          show-progress
-          @stroke-start="(pos, tool) => game.board.begin(pos, tool)"
-          @stroke-move="game.board.move"
-          @stroke-end="game.board.end"
-          @cell-action="(pos, tool) => game.board.toggleAt(pos, tool)"
-          @undo="game.undo()"
-        />
-      </div>
-      <!-- Retour immédiat : un chargement, même court, ne ressemble jamais à un blocage. -->
+        <!-- Retour immédiat : un chargement, même court, ne ressemble jamais à un blocage. -->
+        <div
+          v-if="status === 'loading'"
+          class="absolute inset-0 z-10 grid place-items-center"
+          role="status"
+        >
+          <span
+            class="size-9 animate-spin rounded-full border-[3px] border-slate-300 border-t-demon motion-reduce:animate-none dark:border-slate-600 dark:border-t-demon"
+            aria-hidden="true"
+          />
+          <span class="sr-only">{{ t('game.loadingNext') }}</span>
+        </div>
+      </section>
+
+      <!-- Grille résolue : une barre, pas une fenêtre — l'image reste visible et rien ne bloque. -->
       <div
-        v-if="status === 'loading'"
-        class="absolute inset-0 z-10 grid place-items-center"
+        v-if="puzzle && game.won.value"
+        class="flex shrink-0 flex-col gap-3 px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] short:w-64 short:justify-center"
         role="status"
       >
-        <span
-          class="size-9 animate-spin rounded-full border-[3px] border-slate-300 border-t-demon dark:border-slate-600 dark:border-t-demon"
-          aria-hidden="true"
-        />
-        <span class="sr-only">{{ t('game.loadingNext') }}</span>
+        <div class="flex items-center gap-3">
+          <div class="w-12 shrink-0"><WinReveal :map="puzzle.map" /></div>
+          <div class="min-w-0">
+            <p class="font-semibold">
+              {{ t('win.title') }}
+              <span class="font-normal text-slate-500 dark:text-slate-400">
+                · {{ t('game.winBar', { time: formatDuration(game.elapsed.value) }) }}
+              </span>
+            </p>
+            <p class="text-xs text-slate-500 italic dark:text-slate-400">
+              {{ game.mistakes.value === 0 ? t('win.whisperClean') : t('win.whisperDirty') }}
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            v-if="!puzzle.local && auth.isLoggedIn"
+            type="button"
+            class="btn px-3"
+            :disabled="liking"
+            :aria-pressed="puzzle.likedByMe"
+            :aria-label="puzzle.likedByMe ? t('win.liked') : t('win.like')"
+            :title="puzzle.likedByMe ? t('win.liked') : t('win.like')"
+            @click="toggleLike"
+          >
+            <Icon
+              name="heart"
+              :filled="puzzle.likedByMe"
+              :class="puzzle.likedByMe ? 'text-red-500' : ''"
+            />
+            <span class="tabular-nums">{{ puzzle.likes }}</span>
+          </button>
+          <NuxtLink
+            v-else-if="!puzzle.local"
+            :to="localePath('login')"
+            class="ghost"
+            :aria-label="t('win.loginToLike')"
+            :title="t('win.loginToLike')"
+          >
+            <Icon name="heart" />
+          </NuxtLink>
+          <button
+            type="button"
+            class="ghost"
+            :aria-label="t('game.reset')"
+            :title="t('game.reset')"
+            @click="erase"
+          >
+            <Icon name="reset" />
+          </button>
+          <button type="button" class="btn btn-primary flex-1" autofocus @click="next">
+            <Icon name="shuffle" /> {{ t('game.next') }}
+          </button>
+        </div>
       </div>
-    </section>
 
-    <!-- Commandes : discrètes, à portée de pouce. -->
-    <div
-      v-if="puzzle"
-      class="flex shrink-0 items-center justify-center gap-2 px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-    >
-      <button
-        type="button"
-        class="ghost"
-        :disabled="!game.board.canUndo.value || game.won.value"
-        :aria-label="t('game.undo')"
-        :title="t('game.undo')"
-        @click="game.undo()"
+      <!-- Commandes : discrètes, à portée de pouce. -->
+      <div
+        v-else-if="puzzle"
+        class="flex shrink-0 items-center justify-center gap-1 px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] short:flex-col short:px-2 short:pb-2"
+        :class="settings.leftHanded ? 'flex-row-reverse' : ''"
       >
-        <Icon name="undo" />
-      </button>
-      <button
-        type="button"
-        class="ghost"
-        :disabled="isBlank"
-        :aria-label="t('game.reset')"
-        :title="t('game.reset')"
-        @click="askErase"
-      >
-        <Icon name="reset" />
-      </button>
-      <!-- Un seul bouton : il affiche l'outil actif et bascule vers l'autre au toucher. -->
-      <button
-        type="button"
-        class="btn mx-2 min-w-32"
-        :aria-label="
-          t('game.toolTo', {
-            tool: t(game.board.tool.value === 'filled' ? 'game.cross' : 'game.fill'),
-          })
-        "
-        :title="t('game.tool')"
-        @click="toggleTool"
-      >
-        <Icon :name="game.board.tool.value === 'filled' ? 'pencil' : 'x'" />
-        {{ t(game.board.tool.value === 'filled' ? 'game.fill' : 'game.cross') }}
-      </button>
-      <button
-        type="button"
-        class="ghost"
-        :disabled="status === 'loading'"
-        :aria-label="t('game.new')"
-        :title="t('game.new')"
-        @click="askNew"
-      >
-        <Icon name="shuffle" />
-      </button>
+        <button
+          type="button"
+          class="ghost select-none"
+          :disabled="!game.board.canUndo.value"
+          :aria-label="t('game.undo')"
+          :title="t('game.undo')"
+          @pointerdown="undoDown"
+          @pointerup="stopHold"
+          @pointerleave="stopHold"
+          @pointercancel="stopHold"
+          @click="undoKey"
+        >
+          <Icon name="undo" />
+        </button>
+        <button
+          type="button"
+          class="ghost"
+          :disabled="!game.board.canRedo.value"
+          :aria-label="t('game.redo')"
+          :title="t('game.redo')"
+          @click="game.redo()"
+        >
+          <Icon name="redo" />
+        </button>
+        <button
+          type="button"
+          class="ghost"
+          :disabled="isBlank"
+          :aria-label="t('game.reset')"
+          :title="t('game.reset')"
+          @click="erase"
+        >
+          <Icon name="reset" />
+        </button>
+        <!-- Un seul bouton : il affiche l'outil actif et bascule vers l'autre au toucher. -->
+        <button
+          type="button"
+          class="btn mx-1 min-w-28 short:mx-0 short:min-w-0 short:px-2"
+          :aria-label="
+            t('game.toolTo', {
+              tool: t(game.board.tool.value === 'filled' ? 'game.cross' : 'game.fill'),
+            })
+          "
+          :title="t('game.tool')"
+          @click="toggleTool"
+        >
+          <Icon :name="game.board.tool.value === 'filled' ? 'pencil' : 'x'" />
+          <span class="short:hidden">{{
+            t(game.board.tool.value === 'filled' ? 'game.fill' : 'game.cross')
+          }}</span>
+        </button>
+        <button
+          type="button"
+          class="ghost"
+          :disabled="status === 'loading'"
+          :aria-label="t('game.new')"
+          :title="t('game.new')"
+          @click="askNew"
+        >
+          <Icon name="shuffle" />
+        </button>
+      </div>
     </div>
 
-    <BaseDialog
-      :open="confirming !== null"
-      :title="confirming === 'erase' ? t('game.eraseTitle') : t('game.newTitle')"
-      @close="confirming = null"
+    <!-- Effacement annulable : plus rapide qu'une confirmation, et sans risque. -->
+    <div
+      class="pointer-events-none absolute inset-x-0 bottom-20 z-20 flex justify-center px-3 short:bottom-3"
     >
-      <p class="mb-5 text-sm text-slate-600 dark:text-slate-300">
-        {{ confirming === 'erase' ? t('game.eraseText') : t('game.newText') }}
-      </p>
-      <div class="grid grid-cols-2 gap-2">
-        <button type="button" class="btn" @click="confirming = null">
-          {{ t('common.cancel') }}
-        </button>
-        <button type="button" class="btn btn-primary" autofocus @click="confirmAction">
-          {{ t('game.confirm') }}
+      <div
+        v-if="erasedToast"
+        class="pointer-events-auto flex items-center gap-3 rounded-2xl bg-ink py-1.5 pr-1.5 pl-4 text-sm text-pearl shadow-lg dark:bg-pearl dark:text-ink"
+        role="status"
+      >
+        {{ t('game.erased') }}
+        <button
+          type="button"
+          class="rounded-xl bg-white/15 px-3 py-1.5 font-medium hover:bg-white/25 dark:bg-ink/10 dark:hover:bg-ink/20"
+          @click="undoErase"
+        >
+          {{ t('game.undo') }}
         </button>
       </div>
-    </BaseDialog>
+    </div>
 
-    <BaseDialog :open="winOpen" :title="t('win.title')" @close="winOpen = false">
-      <WinReveal v-if="puzzle" :map="puzzle.map" class="mb-4" />
-      <p class="mb-1" role="status">
-        {{
-          t('win.text', { title: puzzle?.title ?? '', time: formatDuration(game.elapsed.value) })
-        }}
-      </p>
-      <p class="mb-4 text-sm text-slate-500 italic dark:text-slate-400">
-        {{ game.mistakes.value === 0 ? t('win.whisperClean') : t('win.whisperDirty') }}
-      </p>
-      <div class="flex flex-col gap-2">
-        <button
-          v-if="puzzle && !puzzle.local"
-          type="button"
-          class="btn"
-          :disabled="!auth.isLoggedIn || liking"
-          :aria-pressed="puzzle.likedByMe"
-          @click="toggleLike"
-        >
-          <Icon
-            name="heart"
-            :filled="puzzle.likedByMe"
-            :class="puzzle.likedByMe ? 'text-red-500' : ''"
-          />
-          {{ puzzle.likedByMe ? t('win.liked') : t('win.like') }} · {{ puzzle.likes }}
+    <BaseDialog :open="confirmNew" :title="t('game.newTitle')" @close="confirmNew = false">
+      <p class="mb-5 text-sm text-slate-600 dark:text-slate-300">{{ t('game.newText') }}</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" class="btn" @click="confirmNew = false">
+          {{ t('common.cancel') }}
         </button>
-        <p v-if="puzzle && !puzzle.local && !auth.isLoggedIn" class="text-sm text-slate-500">
-          <NuxtLink :to="localePath('login')" class="underline">{{
-            t('win.loginToLike')
-          }}</NuxtLink>
-        </p>
-        <button type="button" class="btn btn-primary" autofocus @click="next">
-          <Icon name="shuffle" /> {{ t('game.next') }}
+        <button type="button" class="btn btn-primary" autofocus @click="confirmNewGame">
+          {{ t('game.confirm') }}
         </button>
-        <button type="button" class="btn" @click="winOpen = false">{{ t('common.close') }}</button>
       </div>
     </BaseDialog>
   </div>

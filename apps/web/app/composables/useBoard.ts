@@ -9,6 +9,8 @@ export interface BoardOptions {
   locked?: Ref<boolean>;
   /** Appelé à chaque modification, avec le nouvel état de chaque case modifiée (pour le son). */
   onPaint?: (states: CellState[]) => void;
+  /** Complète chaque grille calculée par un trait (ex. croix automatiques) ; doit être pure. */
+  transform?: (grid: Grid) => Grid;
   /** Appelé après chaque modification de la grille. */
   onChange?: (grid: Grid) => void;
 }
@@ -31,11 +33,14 @@ function changedStates(before: Grid, after: Grid): CellState[] {
 export function useBoard(initial: Grid, options: BoardOptions = {}) {
   const cells = shallowRef<Grid>(initial);
   const history = shallowRef<Grid[]>([]);
+  /** États annulés, que « rétablir » peut rejouer ; vidé dès qu'une nouvelle modification est faite. */
+  const future = shallowRef<Grid[]>([]);
   const tool = ref<Tool>('filled');
   let stroke: Stroke | null = null;
   let lastKey = '';
 
   const canUndo = computed(() => history.value.length > 0);
+  const canRedo = computed(() => future.value.length > 0);
   const isLocked = () => options.locked?.value === true;
 
   function commit(next: Grid) {
@@ -55,7 +60,7 @@ export function useBoard(initial: Grid, options: BoardOptions = {}) {
     const key = `${pos.row}:${pos.col}`;
     if (key === lastKey) return;
     lastKey = key;
-    const next = strokeTo(stroke, pos);
+    const next = (options.transform ?? ((grid) => grid))(strokeTo(stroke, pos));
     if (!gridsEqual(next, cells.value)) {
       options.onPaint?.(changedStates(cells.value, next));
       commit(next);
@@ -65,8 +70,17 @@ export function useBoard(initial: Grid, options: BoardOptions = {}) {
   function end() {
     if (stroke && !gridsEqual(stroke.snapshot, cells.value)) {
       history.value = [...history.value.slice(-(HISTORY_LIMIT - 1)), stroke.snapshot];
+      future.value = [];
     }
     stroke = null;
+  }
+
+  /** Abandonne le trait en cours (ex. un second doigt arrive : c'était un pincement). */
+  function cancel() {
+    if (!stroke) return;
+    const { snapshot } = stroke;
+    stroke = null;
+    if (!gridsEqual(snapshot, cells.value)) commit(snapshot);
   }
 
   /** Action sur une seule case (clavier). */
@@ -79,21 +93,49 @@ export function useBoard(initial: Grid, options: BoardOptions = {}) {
     const previous = history.value.at(-1);
     if (!previous || isLocked()) return false;
     history.value = history.value.slice(0, -1);
+    future.value = [...future.value, cells.value];
     commit(cloneGrid(previous));
+    return true;
+  }
+
+  function redo(): boolean {
+    const following = future.value.at(-1);
+    if (!following || isLocked()) return false;
+    future.value = future.value.slice(0, -1);
+    history.value = [...history.value.slice(-(HISTORY_LIMIT - 1)), cells.value];
+    commit(cloneGrid(following));
     return true;
   }
 
   /** Mémorise l'état courant pour qu'une modification globale (redimensionnement…) soit annulable. */
   function checkpoint() {
     history.value = [...history.value.slice(-(HISTORY_LIMIT - 1)), cells.value];
+    future.value = [];
   }
 
   /** Remplace la grille (nouvelle partie, redimensionnement…). */
   function load(grid: Grid, { keepHistory = false } = {}) {
     stroke = null;
-    if (!keepHistory) history.value = [];
+    if (!keepHistory) {
+      history.value = [];
+      future.value = [];
+    }
     commit(grid);
   }
 
-  return { cells, tool, canUndo, begin, move, end, toggleAt, undo, checkpoint, load };
+  return {
+    cells,
+    tool,
+    canUndo,
+    canRedo,
+    begin,
+    move,
+    end,
+    cancel,
+    toggleAt,
+    undo,
+    redo,
+    checkpoint,
+    load,
+  };
 }

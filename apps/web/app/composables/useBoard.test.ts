@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
-import { createGrid } from '@/domain/grid';
+import { createGrid, type Grid } from '@/domain/grid';
 import { useBoard } from './useBoard';
 
 describe('useBoard', () => {
@@ -67,5 +67,41 @@ describe('useBoard', () => {
     expect(board.cells.value).toHaveLength(5);
     board.undo();
     expect(board.cells.value).toHaveLength(3);
+  });
+
+  it('rétablit une modification annulée, jusqu’à la prochaine modification', () => {
+    const board = useBoard(createGrid(3, 1));
+    board.toggleAt({ row: 0, col: 0 });
+    board.toggleAt({ row: 0, col: 1 });
+    board.undo();
+    expect(board.canRedo.value).toBe(true);
+    expect(board.redo()).toBe(true);
+    expect(board.cells.value[0]).toEqual(['filled', 'filled', 'blank']);
+    board.undo();
+    board.toggleAt({ row: 0, col: 2 });
+    expect(board.canRedo.value).toBe(false);
+  });
+
+  it('abandonne un trait en cours sans laisser de trace', () => {
+    const board = useBoard(createGrid(4, 1));
+    board.begin({ row: 0, col: 0 });
+    board.move({ row: 0, col: 2 });
+    board.cancel();
+    board.end();
+    expect(board.cells.value[0]).toEqual(['blank', 'blank', 'blank', 'blank']);
+    expect(board.canUndo.value).toBe(false);
+  });
+
+  it('applique la transformation au trait, et une seule annulation défait le tout', () => {
+    // Exemple : une case pleine en colonne 0 croise la colonne 3.
+    const transform = (grid: Grid): Grid =>
+      grid.map((row) =>
+        row.map((cell, col) => (col === 3 && row[0] === 'filled' ? 'crossed' : cell)),
+      );
+    const board = useBoard(createGrid(4, 1), { transform });
+    board.toggleAt({ row: 0, col: 0 });
+    expect(board.cells.value[0]).toEqual(['filled', 'blank', 'blank', 'crossed']);
+    board.undo();
+    expect(board.cells.value[0]).toEqual(['blank', 'blank', 'blank', 'blank']);
   });
 });

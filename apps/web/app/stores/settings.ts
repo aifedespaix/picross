@@ -19,11 +19,15 @@ export const useSettingsStore = defineStore('settings', () => {
   });
   /** Temps et cases remplies pendant la partie : masqués par défaut pour rester concentré. */
   const showStats = useCookie<boolean>('picross_stats', { ...COOKIE, default: () => false });
+  const haptics = useCookie<boolean>('picross_haptics', { ...COOKIE, default: () => true });
+  const leftHanded = useCookie<boolean>('picross_left', { ...COOKIE, default: () => false });
+  /** Croise automatiquement les cases restantes d'une ligne ou colonne résolue. */
+  const autoCross = useCookie<boolean>('picross_autocross', { ...COOKIE, default: () => false });
   const prefersDark = usePreferredDark();
 
   const isDark = computed(
     () => theme.value === 'dark' || (theme.value === 'system' && prefersDark.value),
   );
 
-  return { theme, sound, corruption, showStats, isDark };
+  return { theme, sound, corruption, showStats, haptics, leftHanded, autoCross, isDark };
 });

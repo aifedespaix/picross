@@ -3,6 +3,9 @@
 /* Le thème sombre suit la classe `dark` posée sur <html> (voir stores/settings.ts). */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Téléphone en paysage : peu de hauteur, la barre de commandes passe sur le côté. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 32rem));
+
 @theme {
   /* Palette tirée du logo : le noir du trait, le blanc du chien, le rouge de ses yeux.
      Règle d'or : le rouge « démon » reste rare (accent, jamais un aplat). */
@@ -96,8 +99,10 @@
   .card {
     @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900;
   }
-  .whisper {
-    animation: whisper-in 1.6s ease-out both;
+  @media (prefers-reduced-motion: no-preference) {
+    .whisper {
+      animation: whisper-in 1.6s ease-out both;
+    }
   }
   @keyframes whisper-in {
     from {
