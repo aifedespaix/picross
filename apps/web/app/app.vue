@@ -52,6 +52,8 @@ useSeoMeta({
 </script>
 
 <template>
+  <!-- Barre de progression des navigations : indique que le clic a bien été pris en compte. -->
+  <NuxtLoadingIndicator color="#e31014" :height="3" :throttle="0" />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

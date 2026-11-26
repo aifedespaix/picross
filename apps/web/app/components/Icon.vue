@@ -2,6 +2,8 @@
 /** Icônes (tracés de 24×24, style « outline »). Décoratives : masquées aux lecteurs d'écran. */
 const PATHS = {
   undo: ['M3 7v6h6', 'M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'],
+  redo: ['M21 7v6h-6', 'M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7'],
+  shrink: ['M4 14h6v6', 'M20 10h-6V4', 'm14 10 7-7', 'm3 21 7-7'],
   reset: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8', 'M3 3v5h5'],
   x: ['M18 6 6 18', 'm6 6 12 12'],
   pencil: [

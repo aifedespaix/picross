@@ -51,7 +51,18 @@
     "offline": "Server unreachable: playing an offline puzzle.",
     "loadError": "Could not load this puzzle.",
     "help": "Left click: fill · Right click: cross · Drag to draw a line.",
-    "helpTouch": "Tap to fill, drag to draw a line. Switch to the cross with the tool below."
+    "helpTouch": "Tap to fill, drag to draw a line. Switch to the cross with the tool below.",
+    "eraseTitle": "Clear the board?",
+    "eraseText": "Every cell of this puzzle will be erased.",
+    "newTitle": "New puzzle?",
+    "newText": "The current game will be abandoned.",
+    "toolTo": "Switch to {tool}",
+    "loadingNext": "Loading puzzle…",
+    "confirm": "Confirm",
+    "redo": "Redo",
+    "resetZoom": "Back to full view",
+    "erased": "Board cleared",
+    "winBar": "Solved in {time}"
   },
   "win": {
     "title": "Well done!",
@@ -132,7 +143,21 @@
     "language": "Language",
     "sound": "Sound effects",
     "corruption": "Mood: the demon",
-    "corruptionHint": "The background reddens as you make mistakes. It senses them, without telling you where."
+    "corruptionHint": "The background reddens as you make mistakes. It senses them, without telling you where.",
+    "stats": "Show time and filled cells",
+    "haptics": "Vibration",
+    "leftHanded": "Left-handed mode",
+    "leftHandedHint": "Puts the controls on the left-hand side.",
+    "autoCross": "Auto-cross",
+    "autoCrossHint": "Marks the remaining cells of a solved row or column.",
+    "shortcuts": "Keyboard shortcuts",
+    "keyUndo": "Undo",
+    "keyRedo": "Redo",
+    "keyTool": "Switch fill / cross",
+    "keyMove": "Move the cursor",
+    "keyFill": "Fill the cell",
+    "keyCross": "Mark the cell",
+    "keyHelp": "Open settings"
   },
   "errors": {
     "email": "Enter a valid email address.",

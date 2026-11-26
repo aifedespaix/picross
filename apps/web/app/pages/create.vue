@@ -228,6 +228,7 @@ useSeoMeta({ title: () => t('nav.create'), robots: 'noindex, nofollow' });
         @stroke-start="(pos, tool) => board.begin(pos, tool)"
         @stroke-move="board.move"
         @stroke-end="board.end"
+        @stroke-cancel="board.cancel()"
         @cell-action="(pos, tool) => board.toggleAt(pos, tool)"
         @undo="board.undo()"
       />

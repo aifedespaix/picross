@@ -51,7 +51,18 @@
     "offline": "Serveur injoignable : grille hors ligne.",
     "loadError": "Impossible de charger cette grille.",
     "help": "Clic gauche : remplir · Clic droit : croix · Glissez pour tracer une ligne.",
-    "helpTouch": "Touchez pour remplir, glissez pour tracer une ligne. Basculez sur la croix avec l’outil ci-dessous."
+    "helpTouch": "Touchez pour remplir, glissez pour tracer une ligne. Basculez sur la croix avec l’outil ci-dessous.",
+    "eraseTitle": "Effacer la grille ?",
+    "eraseText": "Toutes les cases de cette grille seront effacées.",
+    "newTitle": "Nouvelle grille ?",
+    "newText": "La partie en cours sera abandonnée.",
+    "toolTo": "Passer à {tool}",
+    "loadingNext": "Chargement de la grille…",
+    "confirm": "Confirmer",
+    "redo": "Rétablir",
+    "resetZoom": "Revenir à la vue d’ensemble",
+    "erased": "Grille effacée",
+    "winBar": "Résolue en {time}"
   },
   "win": {
     "title": "Bravo !",
@@ -132,7 +143,21 @@
     "language": "Langue",
     "sound": "Effets sonores",
     "corruption": "Ambiance : le démon",
-    "corruptionHint": "Le fond rougit à mesure que vous faites des erreurs. Il les sent, sans vous dire où."
+    "corruptionHint": "Le fond rougit à mesure que vous faites des erreurs. Il les sent, sans vous dire où.",
+    "stats": "Afficher le temps et les cases",
+    "haptics": "Vibrations",
+    "leftHanded": "Mode gaucher",
+    "leftHandedHint": "Place les commandes du côté de la main gauche.",
+    "autoCross": "Croix automatiques",
+    "autoCrossHint": "Marque les cases restantes d’une ligne ou colonne résolue.",
+    "shortcuts": "Raccourcis clavier",
+    "keyUndo": "Annuler",
+    "keyRedo": "Rétablir",
+    "keyTool": "Basculer remplir / croix",
+    "keyMove": "Déplacer le curseur",
+    "keyFill": "Remplir la case",
+    "keyCross": "Marquer la case",
+    "keyHelp": "Ouvrir les réglages"
   },
   "errors": {
     "email": "Entrez une adresse email valide.",

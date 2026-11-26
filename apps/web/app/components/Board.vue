@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { clampPos } from '@/domain/geometry';
 import { clueStatus, getColumn, type CellState, type Grid, type Pos } from '@/domain/grid';
 import type { Tool } from '@/domain/stroke';
+import { IDENTITY, panBy, zoomAt, type Layout, type View } from '@/domain/zoom';
 import ClueLine from './ClueLine.vue';
+import Icon from './Icon.vue';
 
 const props = defineProps<{
   cells: Grid;
@@ -23,6 +25,8 @@ const emit = defineEmits<{
   strokeStart: [pos: Pos, tool: Tool];
   strokeMove: [pos: Pos];
   strokeEnd: [];
+  /** Un second doigt est arrivé : le trait commencé était un pincement, pas un dessin. */
+  strokeCancel: [];
   cellAction: [pos: Pos, tool: Tool];
   undo: [];
 }>();
@@ -51,6 +55,8 @@ const colDone = computed(() =>
 );
 
 // --- Pointeur -------------------------------------------------------------
+const frameEl = ref<HTMLElement>();
+const boardEl = ref<HTMLElement>();
 const gridEl = ref<HTMLElement>();
 const hover = ref<Pos | null>(null);
 const cursor = ref<Pos>({ row: 0, col: 0 });
@@ -58,6 +64,59 @@ const focused = ref(false);
 /** Le curseur clavier n'est visible que si on navigue au clavier (pas après un clic). */
 const keyboardMode = ref(false);
 let dragging = false;
+let mouseDrag = true;
+
+// --- Zoom (pincement à deux doigts, Ctrl + molette) --------------------------
+const view = ref<View>({ ...IDENTITY });
+const zoomed = computed(() => view.value.scale > 1.001);
+const pointers = new Map<number, { x: number; y: number }>();
+let pinch: { dist: number; x: number; y: number } | null = null;
+
+function layout(): Layout | null {
+  const frame = frameEl.value;
+  const board = boardEl.value;
+  if (!frame || !board) return null;
+  return {
+    board: {
+      left: board.offsetLeft,
+      top: board.offsetTop,
+      width: board.offsetWidth,
+      height: board.offsetHeight,
+    },
+    frame: { width: frame.clientWidth, height: frame.clientHeight },
+  };
+}
+
+function relativeToFrame(clientX: number, clientY: number) {
+  const rect = frameEl.value?.getBoundingClientRect();
+  return { x: clientX - (rect?.left ?? 0), y: clientY - (rect?.top ?? 0) };
+}
+
+function resetZoom() {
+  view.value = { ...IDENTITY };
+}
+// Une autre grille (ou un autre format) repart à l'échelle 1.
+watch([width, height], resetZoom);
+
+function pinchState() {
+  const [a, b] = [...pointers.values()];
+  if (!a || !b) return null;
+  return { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+function onWheel(event: WheelEvent) {
+  const l = layout();
+  if (!l || !props.interactive) return;
+  if (event.ctrlKey) {
+    // Pincement du pavé tactile (ou Ctrl + molette) : zoom autour du curseur.
+    event.preventDefault();
+    const center = relativeToFrame(event.clientX, event.clientY);
+    view.value = zoomAt(view.value, Math.exp(-event.deltaY * 0.01), center, l);
+  } else if (zoomed.value) {
+    event.preventDefault();
+    view.value = panBy(view.value, -event.deltaX, -event.deltaY, l);
+  }
+}
 
 function posFromEvent(event: PointerEvent): Pos | null {
   const rect = gridEl.value?.getBoundingClientRect();
@@ -76,26 +135,62 @@ function posFromEvent(event: PointerEvent): Pos | null {
 
 function onPointerDown(event: PointerEvent) {
   if (!props.interactive || (event.pointerType === 'mouse' && event.button > 2)) return;
+  event.preventDefault();
+  try {
+    gridEl.value?.setPointerCapture?.(event.pointerId);
+  } catch {
+    // pointeur déjà relâché : sans capture, le glissé suit quand même via les coordonnées
+  }
+  pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (pointers.size >= 2) {
+    // Deuxième doigt : on abandonne le trait du premier et on passe en zoom / déplacement.
+    if (dragging) {
+      dragging = false;
+      emit('strokeCancel');
+    }
+    hover.value = null;
+    pinch = pinchState();
+    return;
+  }
   const pos = posFromEvent(event);
   if (!pos) return;
-  event.preventDefault();
   keyboardMode.value = false;
-  gridEl.value?.setPointerCapture?.(event.pointerId);
+  mouseDrag = event.pointerType === 'mouse';
   dragging = true;
   cursor.value = pos;
+  // Au doigt, la case est cachée : on éclaire sa ligne et sa colonne (et leurs indices).
+  if (!mouseDrag) hover.value = pos;
   const secondary = event.pointerType === 'mouse' && event.button === 2;
   emit('strokeStart', pos, secondary && props.allowCross ? 'crossed' : props.tool);
 }
 
 function onPointerMove(event: PointerEvent) {
+  if (pointers.has(event.pointerId)) {
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  }
+  if (pinch) {
+    const now = pinchState();
+    const l = layout();
+    if (now && l) {
+      const center = relativeToFrame(pinch.x, pinch.y);
+      let next = zoomAt(view.value, now.dist / pinch.dist, center, l);
+      next = panBy(next, now.x - pinch.x, now.y - pinch.y, l);
+      view.value = next;
+      pinch = now;
+    }
+    return;
+  }
   const pos = posFromEvent(event);
-  if (event.pointerType === 'mouse') hover.value = pos;
+  if (event.pointerType === 'mouse' || dragging) hover.value = pos;
   if (dragging && pos) emit('strokeMove', pos);
 }
 
-function endDrag() {
+function endDrag(event?: PointerEvent) {
+  if (event) pointers.delete(event.pointerId);
+  if (pointers.size < 2) pinch = null;
   if (!dragging) return;
   dragging = false;
+  if (!mouseDrag) hover.value = null;
   emit('strokeEnd');
 }
 
@@ -134,7 +229,7 @@ function onKeyDown(event: KeyboardEvent) {
     const state = props.cells[row]?.[col];
     if (state && state !== 'blank') emit('cellAction', cursor.value, state);
     event.preventDefault();
-  } else if (key === 'z' && (event.ctrlKey || event.metaKey)) {
+  } else if (key === 'z' && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
     emit('undo');
     event.preventDefault();
   }
@@ -159,8 +254,16 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
 </script>
 
 <template>
-  <div class="board-frame">
-    <div class="board" :style="vars">
+  <div ref="frameEl" class="board-frame" :class="{ 'has-zoom': zoomed }">
+    <div
+      ref="boardEl"
+      class="board"
+      :class="{ 'is-zoomed': zoomed }"
+      :style="{
+        ...vars,
+        transform: zoomed ? `translate(${view.x}px, ${view.y}px) scale(${view.scale})` : undefined,
+      }"
+    >
       <div class="board-col-clues" aria-hidden="true">
         <ClueLine
           v-for="(clues, col) in colClues"
@@ -194,6 +297,7 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
         @pointerup="endDrag"
         @pointercancel="endDrag"
         @lostpointercapture="endDrag"
+        @wheel="onWheel"
         @pointerleave="hover = null"
         @contextmenu.prevent
         @keydown="onKeyDown"
@@ -225,6 +329,16 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
         </div>
       </div>
     </div>
+    <button
+      v-if="zoomed"
+      type="button"
+      class="zoom-reset btn btn-icon"
+      :aria-label="t('game.resetZoom')"
+      :title="t('game.resetZoom')"
+      @click="resetZoom"
+    >
+      <Icon name="shrink" />
+    </button>
   </div>
 </template>
 
@@ -237,16 +351,29 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
   height: 100%;
   display: grid;
   place-items: center;
+  position: relative;
+}
+/* Rogner seulement quand on zoome ; au repos, rien ne doit être coupé. */
+.board-frame.has-zoom {
+  overflow: hidden;
+}
+
+.zoom-reset {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 5;
+  opacity: 0.85;
 }
 
 .board {
   --cell: clamp(
     12px,
     min(
-      calc(100cqw / (var(--cols) + var(--row-slots) * 0.6)),
-      calc(100cqh / (var(--rows) + var(--col-slots) * 0.6))
+      calc(100cqw / (var(--cols) + var(--row-slots) * 0.6 + 0.5)),
+      calc(100cqh / (var(--rows) + var(--col-slots) * 0.6 + 0.3))
     ),
-    56px
+    72px
   );
   display: grid;
   grid-template-columns: auto calc(var(--cell) * var(--cols));
@@ -257,6 +384,10 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  transform-origin: 0 0;
+}
+.board.is-zoomed {
+  will-change: transform;
 }
 
 .board-col-clues {
