@@ -284,7 +284,7 @@ useSeoMeta({
     </div>
 
     <BaseDialog :open="winOpen" :title="t('win.title')" @close="winOpen = false">
-      <WinReveal v-if="puzzle" :map="puzzle.map" :clean="game.mistakes.value === 0" class="mb-4" />
+      <WinReveal v-if="puzzle" :map="puzzle.map" class="mb-4" />
       <p class="mb-1" role="status">
         {{
           t('win.text', { title: puzzle?.title ?? '', time: formatDuration(game.elapsed.value) })

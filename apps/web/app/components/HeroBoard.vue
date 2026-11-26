@@ -11,7 +11,7 @@ const PATTERN = [
 ];
 const clues = computeClues(fromBits(PATTERN));
 let order = 0;
-/** La dernière case remplie est le « pixel rond » rouge : la signature du logo. */
+/** La dernière case remplie est le « pixel rond » : la signature du logo (même couleur que les autres). */
 const DEMON = PATTERN.flat().filter(Boolean).length - 1;
 const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
 </script>
@@ -98,32 +98,12 @@ const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
   @apply bg-ink dark:bg-pearl;
 }
 .cell.demon {
-  @apply rounded-full bg-demon dark:bg-demon;
+  @apply rounded-full;
 }
 @media (prefers-reduced-motion: no-preference) {
   .cell.on {
     animation: fill 9s infinite both;
     animation-delay: calc(var(--i) * 0.28s);
-  }
-  .cell.demon {
-    animation-name: fill-demon;
-  }
-}
-@keyframes fill-demon {
-  0%,
-  8% {
-    background-color: var(--empty);
-    transform: scale(0.85);
-  }
-  14%,
-  82% {
-    background-color: var(--color-demon);
-    transform: scale(1);
-  }
-  92%,
-  100% {
-    background-color: var(--empty);
-    transform: scale(0.85);
   }
 }
 @keyframes fill {

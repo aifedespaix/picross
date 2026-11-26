@@ -2,10 +2,10 @@
 import { computed } from 'vue';
 
 /**
- * Révélation de l'image résolue, puis le twist : un pixel devient rond, rouge… et regarde.
- * Grille parfaite : un seul œil. Grille avec erreurs : le démon ouvre les deux.
+ * Révélation de l'image résolue, puis le twist : un seul pixel devient rond. Rien d'autre ne
+ * change : c'est le détail du logo.
  */
-const props = defineProps<{ map: readonly (readonly number[])[]; clean: boolean }>();
+const props = defineProps<{ map: readonly (readonly number[])[] }>();
 
 const height = computed(() => props.map.length);
 const width = computed(() => props.map[0]?.length ?? 0);
@@ -39,16 +39,11 @@ function nearest(fx: number, fy: number, exclude = -1): number {
   return best;
 }
 
-const eyes = computed(() => {
-  const first = nearest(props.clean ? 0.5 : 0.36, 0.34);
-  if (props.clean || first < 0) return [first].filter((i) => i >= 0);
-  const second = nearest(0.64, 0.34, first);
-  return [first, second].filter((i) => i >= 0);
-});
+const round = computed(() => nearest(0.5, 0.34));
 
 // L'image apparaît en ~1,4 s ; l'œil s'ouvre juste après.
 const STEP = computed(() => Math.min(0.03, 1.4 / Math.max(1, total.value)));
-const eyeDelay = computed(() => `${(total.value * STEP.value + 0.5).toFixed(2)}s`);
+const roundDelay = computed(() => `${(total.value * STEP.value + 0.5).toFixed(2)}s`);
 </script>
 
 <template>
@@ -56,13 +51,13 @@ const eyeDelay = computed(() => `${(total.value * STEP.value + 0.5).toFixed(2)}s
     class="reveal"
     role="img"
     :aria-label="$t('win.reveal')"
-    :style="{ '--cols': width, '--rows': height, '--eye-delay': eyeDelay }"
+    :style="{ '--cols': width, '--rows': height, '--round-delay': roundDelay }"
   >
     <span
       v-for="(cell, index) in cells"
       :key="index"
       class="px"
-      :class="{ on: cell.on, eye: eyes.includes(index) }"
+      :class="{ on: cell.on, round: index === round }"
       :style="cell.on ? { '--i': cell.order, '--step': `${STEP}s` } : undefined"
     />
   </div>
@@ -81,7 +76,7 @@ const eyeDelay = computed(() => `${(total.value * STEP.value + 0.5).toFixed(2)}s
 .px.on {
   @apply bg-ink dark:bg-pearl;
 }
-.px.eye {
+.px.round {
   @apply rounded-full;
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -89,17 +84,13 @@ const eyeDelay = computed(() => `${(total.value * STEP.value + 0.5).toFixed(2)}s
     animation: pop 0.35s ease-out both;
     animation-delay: calc(var(--i) * var(--step));
   }
-  .px.eye {
+  .px.round {
     animation:
       pop 0.35s ease-out both,
-      open 0.9s ease-in-out both,
+      morph 0.6s ease-in-out both,
       gaze 2.4s ease-in-out infinite;
-    animation-delay: calc(var(--i) * var(--step)), var(--eye-delay), calc(var(--eye-delay) + 0.9s);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .px.eye {
-    background-color: var(--color-demon);
+    animation-delay:
+      calc(var(--i) * var(--step)), var(--round-delay), calc(var(--round-delay) + 0.6s);
   }
 }
 @keyframes pop {
@@ -112,19 +103,17 @@ const eyeDelay = computed(() => `${(total.value * STEP.value + 0.5).toFixed(2)}s
     transform: scale(1);
   }
 }
-/* Le pixel noir vire au rouge en devenant rond. */
-@keyframes open {
+@keyframes morph {
   from {
-    background-color: currentColor;
+    border-radius: 0;
   }
   to {
-    background-color: var(--color-demon);
-    transform: scale(1.25);
+    border-radius: 9999px;
   }
 }
 @keyframes gaze {
   50% {
-    transform: scale(1.4);
+    transform: scale(1.12);
   }
 }
 </style>

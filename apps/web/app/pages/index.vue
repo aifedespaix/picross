@@ -102,14 +102,10 @@ useSchemaOrg([
       </p>
       <ol class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
         <li v-for="(step, index) in steps" :key="step.title" class="text-center md:text-left">
-          <!-- Chaque numéro est un pixel : le dernier est le pixel rond, rouge. -->
+          <!-- Chaque numéro est un pixel : le dernier est le pixel rond. -->
           <span
-            class="mb-4 inline-grid size-11 place-items-center font-semibold"
-            :class="
-              index === steps.length - 1
-                ? 'rounded-full bg-demon text-white'
-                : 'rounded-md bg-ink text-pearl dark:bg-pearl dark:text-ink'
-            "
+            class="mb-4 inline-grid size-11 place-items-center bg-ink font-semibold text-pearl dark:bg-pearl dark:text-ink"
+            :class="index === steps.length - 1 ? 'rounded-full' : 'rounded-md'"
             aria-hidden="true"
           >
             {{ index + 1 }}
