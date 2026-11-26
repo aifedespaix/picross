@@ -5,6 +5,7 @@ import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/api/client';
 import EmptyGrid from '@/components/EmptyGrid.vue';
+import Icon from '@/components/Icon.vue';
 import PuzzleListItem from '@/components/PuzzleListItem.vue';
 
 const PAGE = 24;
@@ -72,6 +73,14 @@ useSeoMeta({
       <p class="text-sm text-slate-500 dark:text-slate-400" aria-live="polite">
         {{ t('gallery.count', total) }}
       </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <NuxtLink :to="localePath('play-id')" class="btn">
+        <Icon name="shuffle" /> {{ t('gallery.random') }}
+      </NuxtLink>
+      <NuxtLink :to="localePath('journey')" class="btn">
+        <Icon name="map" /> {{ t('nav.journey') }}
+      </NuxtLink>
     </div>
 
     <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">

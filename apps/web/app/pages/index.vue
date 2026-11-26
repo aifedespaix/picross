@@ -81,9 +81,12 @@ useSchemaOrg([
         </p>
         <div class="mt-9 flex flex-wrap justify-center gap-3">
           <NuxtLink
-            :to="localePath('play-id')"
+            :to="localePath('journey')"
             class="btn btn-primary min-h-12 rounded-full px-7 text-base"
           >
+            <Icon name="map" /> {{ t('home.journey') }}
+          </NuxtLink>
+          <NuxtLink :to="localePath('play-id')" class="btn min-h-12 rounded-full px-7 text-base">
             <Icon name="pencil" /> {{ t('home.play') }}
           </NuxtLink>
           <NuxtLink :to="localePath('gallery')" class="btn min-h-12 rounded-full px-7 text-base">

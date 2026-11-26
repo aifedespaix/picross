@@ -6,6 +6,7 @@ import {
   rateDifficulty,
   STARTER_PUZZLES,
   starterBits,
+  type StarterPuzzle,
   type PicrossDetail,
 } from '@picross/shared';
 import { computed, ref, shallowRef, watch } from 'vue';
@@ -32,15 +33,10 @@ export type PlayablePuzzle = Pick<
   local?: boolean;
 };
 
-/** Grille locale (mode hors ligne) : l'une des grilles livrées avec l'application, dans la langue `lang`. */
-export function localPuzzle(exclude?: string, lang: 'fr' | 'en' = 'fr'): PlayablePuzzle {
-  const choices = STARTER_PUZZLES.map((puzzle, index) => ({ puzzle, id: `local-${index}` })).filter(
-    (item) => item.id !== exclude,
-  );
-  const { puzzle, id } = choices[Math.floor(Math.random() * choices.length)]!;
+function toPlayable(puzzle: StarterPuzzle, lang: 'fr' | 'en'): PlayablePuzzle {
   const map = starterBits(puzzle.rows);
   return {
-    id,
+    id: `local-${puzzle.slug}`,
     title: puzzle[lang],
     map,
     difficulty: rateDifficulty(fromBits(map)).level,
@@ -49,6 +45,18 @@ export function localPuzzle(exclude?: string, lang: 'fr' | 'en' = 'fr'): Playabl
     likedByMe: false,
     local: true,
   };
+}
+
+/** Grille locale au hasard (mode hors ligne) parmi celles livrées avec l'application. */
+export function localPuzzle(exclude?: string, lang: 'fr' | 'en' = 'fr'): PlayablePuzzle {
+  const choices = STARTER_PUZZLES.filter((puzzle) => `local-${puzzle.slug}` !== exclude);
+  return toPlayable(choices[Math.floor(Math.random() * choices.length)]!, lang);
+}
+
+/** Grille locale précise (parcours) : `id` est de la forme `local-<slug>`. */
+export function localPuzzleById(id: string, lang: 'fr' | 'en' = 'fr'): PlayablePuzzle | null {
+  const puzzle = STARTER_PUZZLES.find((item) => `local-${item.slug}` === id);
+  return puzzle ? toPlayable(puzzle, lang) : null;
 }
 
 /** Logique d'une partie : plateau, minuteur, détection de victoire, sons, sauvegarde. */

@@ -5,8 +5,16 @@ import { ApiError } from '@/api/client';
 import BaseDialog from '@/components/BaseDialog.vue';
 import Board from '@/components/Board.vue';
 import Icon from '@/components/Icon.vue';
+import StarRating from '@/components/StarRating.vue';
 import WinReveal from '@/components/WinReveal.vue';
-import { localPuzzle, usePlayableGame, type PlayablePuzzle } from '@/composables/usePlayableGame';
+import { useJourney } from '@/composables/useJourney';
+import {
+  localPuzzle,
+  localPuzzleById,
+  usePlayableGame,
+  type PlayablePuzzle,
+} from '@/composables/usePlayableGame';
+import { findStep, starsFor, type Stars } from '@/domain/journey';
 import { useAuthStore } from '@/stores/auth';
 import { useCorruptionStore } from '@/stores/corruption';
 import { useSettingsStore } from '@/stores/settings';
@@ -32,7 +40,11 @@ let erasedTimer: ReturnType<typeof setTimeout> | undefined;
 const settingsOpen = useState('settings-open', () => false);
 const liking = ref(false);
 
+const journey = useJourney();
 const puzzle = computed(() => game.puzzle.value);
+/** Parcours : la grille jouée compte pour la progression (et propose la suite). */
+const journeyMode = computed(() => route.query.parcours === '1');
+const earned = ref<Stars | null>(null);
 const routeId = computed(() => (typeof route.params.id === 'string' ? route.params.id : undefined));
 
 interface Fetched {
@@ -42,6 +54,12 @@ interface Fetched {
 
 /** Récupère une grille ; bascule sur une grille locale si l'API est injoignable ou vide. */
 async function fetchPuzzle(id?: string, exclude?: string): Promise<Fetched> {
+  const lang = locale.value === 'en' ? 'en' : 'fr';
+  // Grilles livrées avec l'application (parcours) : aucun appel réseau.
+  if (id?.startsWith('local-')) {
+    const local = localPuzzleById(id, lang);
+    if (local) return { puzzle: local, offline: false };
+  }
   try {
     return {
       puzzle: id ? await api.getPicross(id) : await api.randomPicross(exclude),
@@ -52,7 +70,7 @@ async function fetchPuzzle(id?: string, exclude?: string): Promise<Fetched> {
     const noPuzzleYet = !id && error instanceof ApiError && error.status === 404;
     if (!unreachable && !noPuzzleYet) return { puzzle: null, offline: false };
     return {
-      puzzle: localPuzzle(exclude, locale.value === 'en' ? 'en' : 'fr'),
+      puzzle: localPuzzle(exclude, lang),
       offline: unreachable,
     };
   }
@@ -90,6 +108,7 @@ const { data: initial } = await useAsyncData(`puzzle:${routeId.value ?? 'random'
 if (initial.value) apply(initial.value);
 
 onMounted(async () => {
+  if (journeyMode.value) journey.load();
   // Reprise de la partie et de l'outil mémorisés : après l'hydratation, pour rester identique au HTML serveur.
   game.restore();
   if (!routeId.value && puzzle.value && !puzzle.value.local) {
@@ -106,6 +125,45 @@ watch(routeId, (id) => {
 });
 
 const next = () => load(undefined, puzzle.value?.id);
+
+// Parcours : une grille résolue enregistre ses étoiles (la meilleure performance est conservée).
+watch(
+  () => game.won.value,
+  (won) => {
+    const current = puzzle.value;
+    if (!won || !journeyMode.value || !current?.local) {
+      earned.value = null;
+      return;
+    }
+    if (!journey.ready.value) journey.load();
+    earned.value = starsFor(game.mistakes.value);
+    journey.complete(current.id.slice('local-'.length), earned.value, game.elapsed.value);
+  },
+);
+
+/** Suite du parcours : la grille suivante directement, ou la carte (bifurcation, fin de chapitre). */
+const afterWin = computed(() => {
+  const current = puzzle.value;
+  if (!journeyMode.value || !current?.local || !game.won.value) return null;
+  const views = journey.views.value;
+  const view = findStep(views, current.id.slice('local-'.length));
+  const following = view ? views[view.position + 1] : undefined;
+  if (following && following.step.kind !== 'fork' && following.status === 'open') {
+    return { label: t('journey.nextLevel'), level: following.step.levels[0] };
+  }
+  return { label: t('journey.toMap'), level: null };
+});
+function continueJourney() {
+  const target = afterWin.value?.level;
+  if (!target) return navigateTo(localePath('journey'));
+  return navigateTo(
+    localePath({
+      name: 'play-id',
+      params: { id: `local-${target.slug}` },
+      query: { parcours: '1' },
+    }),
+  );
+}
 
 const hasProgress = computed(() => game.filled.value > 0 || game.board.canUndo.value);
 const isBlank = computed(() =>
@@ -222,7 +280,8 @@ useSeoMeta({
       height: puzzle.value?.map.length ?? 0,
     }),
   ogType: 'website',
-  robots: () => (routeId.value ? 'index, follow' : 'noindex, follow'),
+  robots: () =>
+    routeId.value && !routeId.value.startsWith('local-') ? 'index, follow' : 'noindex, follow',
 });
 </script>
 
@@ -315,6 +374,7 @@ useSeoMeta({
           <div class="min-w-0">
             <p class="font-semibold">
               {{ t('win.title') }}
+              <StarRating v-if="earned" :stars="earned" class="ml-1 align-middle" />
               <span class="font-normal text-slate-500 dark:text-slate-400">
                 · {{ t('game.winBar', { time: formatDuration(game.elapsed.value) }) }}
               </span>
@@ -360,7 +420,25 @@ useSeoMeta({
           >
             <Icon name="reset" />
           </button>
-          <button type="button" class="btn btn-primary flex-1" autofocus @click="next">
+          <NuxtLink
+            v-if="afterWin?.level"
+            :to="localePath('journey')"
+            class="ghost"
+            :aria-label="t('journey.toMap')"
+            :title="t('journey.toMap')"
+          >
+            <Icon name="map" />
+          </NuxtLink>
+          <button
+            v-if="afterWin"
+            type="button"
+            class="btn btn-primary flex-1"
+            autofocus
+            @click="continueJourney"
+          >
+            <Icon :name="afterWin.level ? 'pencil' : 'map'" /> {{ afterWin.label }}
+          </button>
+          <button v-else type="button" class="btn btn-primary flex-1" autofocus @click="next">
             <Icon name="shuffle" /> {{ t('game.next') }}
           </button>
         </div>
@@ -423,7 +501,17 @@ useSeoMeta({
             t(game.board.tool.value === 'filled' ? 'game.fill' : 'game.cross')
           }}</span>
         </button>
+        <NuxtLink
+          v-if="journeyMode"
+          :to="localePath('journey')"
+          class="ghost"
+          :aria-label="t('game.backToMap')"
+          :title="t('game.backToMap')"
+        >
+          <Icon name="map" />
+        </NuxtLink>
         <button
+          v-else
           type="button"
           class="ghost"
           :disabled="status === 'loading'"

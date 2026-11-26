@@ -7,6 +7,9 @@ import SettingsDialog from '@/components/SettingsDialog.vue';
 /** Mise en page de jeu : plein écran, sans en-tête, pied de page ni barre d'onglets. */
 const { t } = useI18n();
 const localePath = useLocalePath();
+const route = useRoute();
+/** En parcours, le logo ramène à la carte plutôt qu'à l'accueil. */
+const home = computed(() => localePath(route.query.parcours === '1' ? 'journey' : 'index'));
 /** Partagé avec la page (touche « ? »). */
 const settingsOpen = useState('settings-open', () => false);
 const corruption = useCorruptionStore();
@@ -22,7 +25,7 @@ const corruption = useCorruptionStore();
 
     <!-- Seuls accès hors du jeu : discrets, dans les coins. -->
     <NuxtLink
-      :to="localePath('index')"
+      :to="home"
       class="absolute top-2 left-2 z-20 grid size-9 place-items-center rounded-xl opacity-50 transition-opacity hover:opacity-100 focus-visible:opacity-100"
       :aria-label="t('app.name')"
     >

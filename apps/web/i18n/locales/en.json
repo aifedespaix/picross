@@ -5,7 +5,7 @@
   },
   "nav": {
     "play": "Play",
-    "gallery": "Gallery",
+    "gallery": "Library",
     "create": "Create",
     "profile": "Account",
     "admin": "Moderation",
@@ -14,7 +14,8 @@
     "logout": "Log out",
     "settings": "Settings",
     "main": "Main navigation",
-    "account": "Account"
+    "account": "Account",
+    "journey": "Journey"
   },
   "common": {
     "cancel": "Cancel",
@@ -62,7 +63,8 @@
     "redo": "Redo",
     "resetZoom": "Back to full view",
     "erased": "Board cleared",
-    "winBar": "Solved in {time}"
+    "winBar": "Solved in {time}",
+    "backToMap": "Back to the map"
   },
   "win": {
     "title": "Well done!",
@@ -83,7 +85,8 @@
     "empty": "No puzzle found. Not yet.",
     "play": "Play",
     "count": "{count} puzzle | {count} puzzles",
-    "easiest": "Easiest first"
+    "easiest": "Easiest first",
+    "random": "Random puzzle"
   },
   "create": {
     "title": "Create a puzzle",
@@ -193,6 +196,10 @@
     "play": {
       "title": "Picross “{title}” — {width} × {height} puzzle",
       "description": "Solve the picross puzzle “{title}” ({width} × {height}) online for free. Play with a mouse, your finger or the keyboard."
+    },
+    "journey": {
+      "title": "Journey — picross with progressive difficulty",
+      "description": "Solve 100+ picross puzzles in order: chapters, forks, bosses and stars. Free, no sign-up."
     }
   },
   "home": {
@@ -261,7 +268,8 @@
       }
     ],
     "ctaTitle": "Ready to solve your first puzzle?",
-    "ctaText": "A random puzzle, right now, no sign-up."
+    "ctaText": "A random puzzle, right now, no sign-up.",
+    "journey": "Start the journey"
   },
   "difficulty": {
     "label": "Difficulty",
@@ -275,5 +283,69 @@
     "calm": "Breathe. You’re almost there.",
     "uneasy": "Breathe. I’m waiting.",
     "dark": "You hesitated. I saw it."
+  },
+  "journey": {
+    "title": "Journey",
+    "lead": "Solve the puzzles in order, from the simplest to the most fearsome. Every path hides a picture… and something more.",
+    "levelsDone": "{done} / {total} puzzles",
+    "start": "Start",
+    "continue": "Continue",
+    "library": "Free library",
+    "libraryHint": "to pick puzzles without following the path.",
+    "chapter": "Chapter {n}",
+    "chapterDone": "Done",
+    "locked": "Finish “{previous}” to open this chapter.",
+    "level": "Level {n}",
+    "mystery": "Mystery puzzle",
+    "boss": "Chapter boss",
+    "fork": "The path splits: one puzzle is enough to move on, both to clear everything.",
+    "lockedHint": "Clear the previous step to unlock this puzzle.",
+    "play": "Play",
+    "replay": "Replay",
+    "starsOf": "{n} star(s) out of 3",
+    "status": {
+      "locked": "locked",
+      "open": "ready to play",
+      "done": "solved"
+    },
+    "finaleTitle": "The path is complete.",
+    "finaleText": "{stars} stars out of {max}. There are more to earn: replay puzzles without a single mistake.",
+    "reset": "Reset my progress",
+    "resetText": "Your stars and solved puzzles will be erased from this device.",
+    "resetConfirm": "Erase everything",
+    "nextLevel": "Next level",
+    "toMap": "Back to the map",
+    "chapterCleared": "Chapter complete!",
+    "newBest": "Best result",
+    "chapters": {
+      "awakening": {
+        "title": "Awakening",
+        "text": "The first pixel. Everything is calm, everything is pure."
+      },
+      "whisper": {
+        "title": "The Whisper",
+        "text": "Something whispers between the lines."
+      },
+      "eyes": {
+        "title": "The Eyes",
+        "text": "Someone is watching. Two red dots, far away."
+      },
+      "pack": {
+        "title": "The Pack",
+        "text": "There are several of them. Don’t slip."
+      },
+      "threshold": {
+        "title": "The Threshold",
+        "text": "The last door before the depths."
+      },
+      "bite": {
+        "title": "The Bite",
+        "text": "Every mistake leaves a mark."
+      },
+      "demon": {
+        "title": "The Demon",
+        "text": "He was waiting for you. Perfect, or nearly."
+      }
+    }
   }
 }

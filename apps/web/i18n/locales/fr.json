@@ -5,7 +5,7 @@
   },
   "nav": {
     "play": "Jouer",
-    "gallery": "Galerie",
+    "gallery": "Bibliothèque",
     "create": "Créer",
     "profile": "Mon compte",
     "admin": "Modération",
@@ -14,7 +14,8 @@
     "logout": "Se déconnecter",
     "settings": "Réglages",
     "main": "Navigation principale",
-    "account": "Mon compte"
+    "account": "Mon compte",
+    "journey": "Parcours"
   },
   "common": {
     "cancel": "Annuler",
@@ -62,7 +63,8 @@
     "redo": "Rétablir",
     "resetZoom": "Revenir à la vue d’ensemble",
     "erased": "Grille effacée",
-    "winBar": "Résolue en {time}"
+    "winBar": "Résolue en {time}",
+    "backToMap": "Retour à la carte"
   },
   "win": {
     "title": "Bravo !",
@@ -83,7 +85,8 @@
     "empty": "Aucune grille trouvée. Pas encore.",
     "play": "Jouer",
     "count": "{count} grille | {count} grilles",
-    "easiest": "Plus faciles d’abord"
+    "easiest": "Plus faciles d’abord",
+    "random": "Grille au hasard"
   },
   "create": {
     "title": "Créer une grille",
@@ -193,6 +196,10 @@
     "play": {
       "title": "Picross « {title} » — grille {width} × {height}",
       "description": "Résolvez la grille de picross « {title} » ({width} × {height}) en ligne gratuitement. Jouable à la souris, au doigt ou au clavier."
+    },
+    "journey": {
+      "title": "Parcours — picross à difficulté progressive",
+      "description": "Résolvez plus de 100 grilles de picross dans l’ordre : chapitres, bifurcations, boss et étoiles. Gratuit, sans inscription."
     }
   },
   "home": {
@@ -261,7 +268,8 @@
       }
     ],
     "ctaTitle": "Prêt à résoudre votre première grille ?",
-    "ctaText": "Une grille au hasard, tout de suite, sans inscription."
+    "ctaText": "Une grille au hasard, tout de suite, sans inscription.",
+    "journey": "Commencer le parcours"
   },
   "difficulty": {
     "label": "Difficulté",
@@ -275,5 +283,69 @@
     "calm": "Respire. Tu y es presque.",
     "uneasy": "Respire. Je t’attends.",
     "dark": "Tu as hésité. Je l’ai vu."
+  },
+  "journey": {
+    "title": "Parcours",
+    "lead": "Résolvez les grilles dans l’ordre, de la plus simple à la plus redoutable. Chaque chemin cache une image… et quelque chose de plus.",
+    "levelsDone": "{done} / {total} grilles",
+    "start": "Commencer",
+    "continue": "Continuer",
+    "library": "Bibliothèque libre",
+    "libraryHint": "pour choisir vos grilles sans suivre le chemin.",
+    "chapter": "Chapitre {n}",
+    "chapterDone": "Terminé",
+    "locked": "Terminez « {previous} » pour ouvrir ce chapitre.",
+    "level": "Niveau {n}",
+    "mystery": "Grille mystère",
+    "boss": "Boss du chapitre",
+    "fork": "Le chemin se sépare : une seule grille suffit pour avancer, les deux pour tout terminer.",
+    "lockedHint": "Franchissez l’étape précédente pour débloquer cette grille.",
+    "play": "Jouer",
+    "replay": "Rejouer",
+    "starsOf": "{n} étoile(s) sur 3",
+    "status": {
+      "locked": "verrouillé",
+      "open": "à jouer",
+      "done": "résolu"
+    },
+    "finaleTitle": "Le chemin est terminé.",
+    "finaleText": "{stars} étoiles sur {max}. Il en reste à gagner : rejouez les grilles sans la moindre erreur.",
+    "reset": "Réinitialiser ma progression",
+    "resetText": "Vos étoiles et vos grilles résolues seront effacées de cet appareil.",
+    "resetConfirm": "Tout effacer",
+    "nextLevel": "Niveau suivant",
+    "toMap": "Retour à la carte",
+    "chapterCleared": "Chapitre terminé !",
+    "newBest": "Meilleur résultat",
+    "chapters": {
+      "awakening": {
+        "title": "L’Éveil",
+        "text": "Le premier pixel. Tout est calme, tout est pur."
+      },
+      "whisper": {
+        "title": "Le Murmure",
+        "text": "Quelque chose chuchote entre les lignes."
+      },
+      "eyes": {
+        "title": "Les Yeux",
+        "text": "On vous observe. Deux points rouges, au loin."
+      },
+      "pack": {
+        "title": "La Meute",
+        "text": "Ils sont plusieurs. Ne vous trompez pas."
+      },
+      "threshold": {
+        "title": "Le Seuil",
+        "text": "La dernière porte avant le fond."
+      },
+      "bite": {
+        "title": "La Morsure",
+        "text": "Chaque erreur laisse une trace."
+      },
+      "demon": {
+        "title": "Le Démon",
+        "text": "Il vous attendait. Parfait, ou presque."
+      }
+    }
   }
 }

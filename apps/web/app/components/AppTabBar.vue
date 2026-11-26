@@ -15,7 +15,7 @@ interface Tab {
 }
 
 const tabs = computed<Tab[]>(() => [
-  { to: localePath('play-id'), label: t('nav.play'), icon: 'pencil' },
+  { to: localePath('journey'), label: t('nav.journey'), icon: 'map' },
   { to: localePath('gallery'), label: t('nav.gallery'), icon: 'grid' },
   { to: localePath('create'), label: t('nav.create'), icon: 'plus' },
   ...(auth.isAdmin

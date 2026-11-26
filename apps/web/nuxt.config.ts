@@ -115,6 +115,7 @@ export default defineNuxtConfig({
     customRoutes: 'config',
     pages: {
       'play/[[id]]': { fr: '/jouer/[[id]]', en: '/play/[[id]]' },
+      journey: { fr: '/parcours', en: '/journey' },
       gallery: { fr: '/galerie', en: '/gallery' },
       create: { fr: '/creer', en: '/create' },
       profile: { fr: '/compte', en: '/account' },
