@@ -5,8 +5,10 @@ import BaseDialog from '@/components/BaseDialog.vue';
 import Board from '@/components/Board.vue';
 import DifficultyBadge from '@/components/DifficultyBadge.vue';
 import Icon from '@/components/Icon.vue';
+import WinReveal from '@/components/WinReveal.vue';
 import { localPuzzle, usePlayableGame, type PlayablePuzzle } from '@/composables/usePlayableGame';
 import { useAuthStore } from '@/stores/auth';
+import { useCorruptionStore } from '@/stores/corruption';
 import { formatDuration } from '@/utils/format';
 
 const { t, locale } = useI18n();
@@ -15,6 +17,8 @@ const route = useRoute();
 const localePath = useLocalePath();
 const auth = useAuthStore();
 const game = usePlayableGame();
+const corruption = useCorruptionStore();
+const whisper = computed(() => (corruption.stage === 'pure' ? null : corruption.stage));
 
 const status = ref<'loading' | 'ready' | 'error'>('ready');
 const offline = ref(false);
@@ -173,6 +177,15 @@ useSeoMeta({
             </dd>
           </div>
         </dl>
+        <!-- Un murmure qui dérape, de plus en plus près à mesure que la corruption monte. -->
+        <p
+          v-if="whisper && !game.won.value"
+          :key="whisper"
+          class="whisper text-sm text-slate-500 italic dark:text-slate-400"
+          :class="{ 'text-demon dark:text-demon': whisper === 'dark' }"
+        >
+          {{ t(`whisper.${whisper}`) }}
+        </p>
       </template>
     </div>
 
@@ -271,10 +284,14 @@ useSeoMeta({
     </div>
 
     <BaseDialog :open="winOpen" :title="t('win.title')" @close="winOpen = false">
-      <p class="mb-4" role="status">
+      <WinReveal v-if="puzzle" :map="puzzle.map" :clean="game.mistakes.value === 0" class="mb-4" />
+      <p class="mb-1" role="status">
         {{
           t('win.text', { title: puzzle?.title ?? '', time: formatDuration(game.elapsed.value) })
         }}
+      </p>
+      <p class="mb-4 text-sm text-slate-500 italic dark:text-slate-400">
+        {{ game.mistakes.value === 0 ? t('win.whisperClean') : t('win.whisperDirty') }}
       </p>
       <div class="flex flex-col gap-2">
         <button

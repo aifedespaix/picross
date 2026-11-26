@@ -58,7 +58,10 @@
     "text": "Grille « {title} » résolue en {time}.",
     "like": "J’aime",
     "liked": "Aimée",
-    "loginToLike": "Connectez-vous pour aimer cette grille."
+    "loginToLike": "Connectez-vous pour aimer cette grille.",
+    "whisperClean": "Parfait. Presque trop parfait.",
+    "whisperDirty": "Tu as trébuché. Je n’ai rien oublié.",
+    "reveal": "Image révélée"
   },
   "gallery": {
     "title": "Galerie",
@@ -66,7 +69,7 @@
     "sort": "Tri",
     "recent": "Plus récentes",
     "popular": "Plus aimées",
-    "empty": "Aucune grille trouvée.",
+    "empty": "Aucune grille trouvée. Pas encore.",
     "play": "Jouer",
     "count": "{count} grille | {count} grilles",
     "easiest": "Plus faciles d’abord"
@@ -127,7 +130,9 @@
     "light": "Clair",
     "dark": "Sombre",
     "language": "Langue",
-    "sound": "Effets sonores"
+    "sound": "Effets sonores",
+    "corruption": "Ambiance : le démon",
+    "corruptionHint": "Le fond rougit à mesure que vous faites des erreurs. Il les sent, sans vous dire où."
   },
   "errors": {
     "email": "Entrez une adresse email valide.",
@@ -145,7 +150,7 @@
     "unauthenticated": "Connectez-vous pour continuer.",
     "not_found": "Introuvable.",
     "unknown": "Une erreur est survenue. Réessayez.",
-    "notFoundPage": "Cette page n’existe pas."
+    "notFoundPage": "Cette page n’existe pas. Ou plus."
   },
   "footer": {
     "tagline": "nonogrammes gratuits et open source",
@@ -240,5 +245,10 @@
     "medium": "Moyen",
     "hard": "Difficile",
     "expert": "Expert"
+  },
+  "whisper": {
+    "calm": "Respire. Tu y es presque.",
+    "uneasy": "Respire. Je t’attends.",
+    "dark": "Tu as hésité. Je l’ai vu."
   }
 }

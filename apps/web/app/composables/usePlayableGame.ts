@@ -9,8 +9,9 @@ import {
   type PicrossDetail,
 } from '@picross/shared';
 import { computed, ref, shallowRef } from 'vue';
-import { countFilled, createGrid, isSolved, type CellState } from '@/domain/grid';
+import { countFilled, createGrid, isSolved, type CellState, type Grid } from '@/domain/grid';
 import { useBoard } from './useBoard';
+import { useCorruptionStore } from '@/stores/corruption';
 import { useSound } from './useSound';
 
 /** Grille jouable : soit renvoyée par l'API, soit locale (mode hors ligne). */
@@ -43,10 +44,14 @@ export function localPuzzle(exclude?: string, lang: 'fr' | 'en' = 'fr'): Playabl
 /** Logique d'une partie : plateau, minuteur, détection de victoire, sons. */
 export function usePlayableGame() {
   const { play } = useSound();
+  const corruption = useCorruptionStore();
   const puzzle = shallowRef<PlayablePuzzle | null>(null);
   const won = ref(false);
   const startedAt = ref<number | null>(null);
   const elapsed = ref(0);
+  /** Nombre de fois où une case fausse a été remplie (0 = partie parfaite). */
+  const mistakes = ref(0);
+  let wrongNow = 0;
 
   const solution = computed(() => (puzzle.value ? fromBits(puzzle.value.map) : []));
   const clues = computed(() => computeClues(solution.value));
@@ -66,14 +71,33 @@ export function usePlayableGame() {
         startedAt.value = Date.now();
         timer.resume(); // le minuteur ne tourne qu'après le premier coup (et jamais pendant le SSR)
       }
+      const wrong = countWrong(grid);
+      if (wrong > wrongNow) {
+        mistakes.value += wrong - wrongNow;
+        corruption.bump();
+      }
+      wrongNow = wrong;
       if (isSolved(grid, clues.value)) {
         won.value = true;
+        corruption.purify(mistakes.value === 0);
         timer.pause();
         elapsed.value = Date.now() - (startedAt.value ?? Date.now());
         play('win');
       }
     },
   });
+
+  /** Cases remplies qui ne font pas partie de l'image. */
+  function countWrong(grid: Grid): number {
+    const map = puzzle.value?.map ?? [];
+    let wrong = 0;
+    grid.forEach((line, row) =>
+      line.forEach((state, col) => {
+        if (state === 'filled' && !map[row]?.[col]) wrong++;
+      }),
+    );
+    return wrong;
+  }
 
   const timer = useIntervalFn(
     () => {
@@ -87,6 +111,8 @@ export function usePlayableGame() {
 
   function reset() {
     won.value = false;
+    mistakes.value = 0;
+    wrongNow = 0;
     startedAt.value = null;
     elapsed.value = 0;
     timer.pause();
@@ -105,5 +131,5 @@ export function usePlayableGame() {
     if (board.undo()) play(Math.random() > 0.5 ? 'undo' : 'undo2');
   }
 
-  return { puzzle, board, won, elapsed, clues, target, filled, start, reset, undo };
+  return { puzzle, board, won, mistakes, elapsed, clues, target, filled, start, reset, undo };
 }

@@ -53,14 +53,14 @@ const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
     --empty: var(--color-slate-900);
     --fill: var(--color-pearl);
   }
-  --cell: clamp(2.25rem, 9vw, 3.5rem);
+  --cell: clamp(2.5rem, 12vw, 4.25rem);
   display: grid;
   grid-template-columns: auto calc(var(--cell) * 5);
   grid-template-rows: auto calc(var(--cell) * 5);
   grid-template-areas:
     '. cols'
     'rows cells';
-  @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900;
+  @apply rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900;
 }
 .col-clues {
   grid-area: cols;

@@ -58,7 +58,10 @@
     "text": "Puzzle “{title}” solved in {time}.",
     "like": "Like",
     "liked": "Liked",
-    "loginToLike": "Log in to like this puzzle."
+    "loginToLike": "Log in to like this puzzle.",
+    "whisperClean": "Perfect. Almost too perfect.",
+    "whisperDirty": "You stumbled. I forgot nothing.",
+    "reveal": "Revealed picture"
   },
   "gallery": {
     "title": "Gallery",
@@ -66,7 +69,7 @@
     "sort": "Sort",
     "recent": "Newest",
     "popular": "Most liked",
-    "empty": "No puzzle found.",
+    "empty": "No puzzle found. Not yet.",
     "play": "Play",
     "count": "{count} puzzle | {count} puzzles",
     "easiest": "Easiest first"
@@ -127,7 +130,9 @@
     "light": "Light",
     "dark": "Dark",
     "language": "Language",
-    "sound": "Sound effects"
+    "sound": "Sound effects",
+    "corruption": "Mood: the demon",
+    "corruptionHint": "The background reddens as you make mistakes. It senses them, without telling you where."
   },
   "errors": {
     "email": "Enter a valid email address.",
@@ -145,7 +150,7 @@
     "unauthenticated": "Log in to continue.",
     "not_found": "Not found.",
     "unknown": "Something went wrong. Please try again.",
-    "notFoundPage": "This page does not exist."
+    "notFoundPage": "This page does not exist. Not anymore."
   },
   "footer": {
     "tagline": "free, open-source nonograms",
@@ -240,5 +245,10 @@
     "medium": "Medium",
     "hard": "Hard",
     "expert": "Expert"
+  },
+  "whisper": {
+    "calm": "Breathe. You’re almost there.",
+    "uneasy": "Breathe. I’m waiting.",
+    "dark": "You hesitated. I saw it."
   }
 }

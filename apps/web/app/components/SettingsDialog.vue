@@ -60,6 +60,15 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
         <input v-model="settings.sound" type="checkbox" class="size-5 accent-demon" />
         <span class="text-sm font-medium">{{ t('settings.sound') }}</span>
       </label>
+      <label class="flex cursor-pointer items-start gap-3">
+        <input v-model="settings.corruption" type="checkbox" class="mt-0.5 size-5 accent-demon" />
+        <span>
+          <span class="block text-sm font-medium">{{ t('settings.corruption') }}</span>
+          <span class="block text-xs text-slate-500 dark:text-slate-400">{{
+            t('settings.corruptionHint')
+          }}</span>
+        </span>
+      </label>
     </div>
   </BaseDialog>
 </template>

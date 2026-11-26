@@ -63,6 +63,21 @@ const tabs = computed<Tab[]>(() => [
 .tab[aria-current='page'] .tab-dot {
   @apply scale-100 opacity-100;
 }
+/* Le pixel bat de plus en plus vite quand la corruption monte. */
+@media (prefers-reduced-motion: no-preference) {
+  .tab[aria-current='page'] .tab-dot {
+    animation: beat calc(3s - var(--corruption, 0) * 2.2s) ease-in-out infinite;
+  }
+}
+@keyframes beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(calc(1.15 + var(--corruption, 0) * 0.6));
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .tab-dot {
     transition: none;
