@@ -92,7 +92,7 @@ const items = computed<NavItem[]>(() => [
 <style scoped>
 @reference '../assets/css/main.css';
 .nav-link {
-  @apply inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white;
+  @apply inline-flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white;
 }
 .nav-link.router-link-exact-active,
 .nav-link[aria-current='page'] {

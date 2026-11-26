@@ -4,6 +4,7 @@ import { refDebounced } from '@vueuse/core';
 import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/api/client';
+import EmptyGrid from '@/components/EmptyGrid.vue';
 import PuzzleListItem from '@/components/PuzzleListItem.vue';
 
 const PAGE = 24;
@@ -67,7 +68,7 @@ useSeoMeta({
 <template>
   <div class="mx-auto max-w-3xl space-y-4 p-4">
     <div class="flex items-baseline justify-between gap-4">
-      <h1 class="text-2xl font-bold">{{ t('gallery.title') }}</h1>
+      <h1 class="display text-3xl sm:text-4xl">{{ t('gallery.title') }}</h1>
       <p class="text-sm text-slate-500 dark:text-slate-400" aria-live="polite">
         {{ t('gallery.count', total) }}
       </p>
@@ -116,9 +117,13 @@ useSeoMeta({
         >
       </PuzzleListItem>
     </ul>
-    <p v-else-if="!loading && !error" class="py-8 text-center text-slate-500">
-      {{ t('gallery.empty') }}
-    </p>
+    <div
+      v-else-if="!loading && !error"
+      class="flex flex-col items-center gap-4 py-12 text-center text-slate-500"
+    >
+      <EmptyGrid />
+      <p>{{ t('gallery.empty') }}</p>
+    </div>
     <p v-if="loading" class="py-4 text-center text-slate-500" role="status">
       {{ t('common.loading') }}
     </p>

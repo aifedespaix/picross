@@ -59,11 +59,11 @@ useSeoMeta({ title: () => t('admin.title'), robots: 'noindex, nofollow' });
 
 <template>
   <div class="mx-auto max-w-3xl space-y-4 p-4">
-    <h1 class="text-2xl font-bold">{{ t('admin.title') }}</h1>
+    <h1 class="display text-3xl sm:text-4xl">{{ t('admin.title') }}</h1>
 
     <div
       role="radiogroup"
-      class="inline-grid grid-cols-2 gap-1 rounded-xl bg-slate-200 p-1 dark:bg-slate-800"
+      class="inline-grid grid-cols-2 gap-1 rounded-2xl bg-slate-200 p-1 dark:bg-slate-800"
     >
       <button
         v-for="option in ['pending', 'all'] as const"
@@ -71,7 +71,7 @@ useSeoMeta({ title: () => t('admin.title'), robots: 'noindex, nofollow' });
         type="button"
         role="radio"
         :aria-checked="status === option"
-        class="min-h-10 rounded-lg px-4 text-sm font-medium"
+        class="min-h-10 rounded-xl px-4 text-sm font-medium"
         :class="
           status === option
             ? 'bg-white text-ink shadow-sm dark:bg-slate-600 dark:text-white'

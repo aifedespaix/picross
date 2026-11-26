@@ -4,6 +4,7 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/api/client';
 import Icon from '@/components/Icon.vue';
+import EmptyGrid from '@/components/EmptyGrid.vue';
 import PuzzleListItem from '@/components/PuzzleListItem.vue';
 import { useAuthStore } from '@/stores/auth';
 
@@ -48,7 +49,9 @@ useSeoMeta({ title: () => t('profile.title'), robots: 'noindex, nofollow' });
   <div class="mx-auto max-w-3xl space-y-6 p-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold">{{ t('profile.hello', { name: auth.user?.name }) }}</h1>
+        <h1 class="display text-3xl sm:text-4xl">
+          {{ t('profile.hello', { name: auth.user?.name }) }}
+        </h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ auth.user?.email }}</p>
       </div>
       <button type="button" class="btn" @click="logout">
@@ -65,7 +68,13 @@ useSeoMeta({ title: () => t('profile.title'), robots: 'noindex, nofollow' });
       </div>
       <p v-if="error" class="field-error" role="alert">{{ error }}</p>
       <p v-if="loading" role="status" class="text-slate-500">{{ t('common.loading') }}</p>
-      <p v-else-if="!items.length && !error" class="text-slate-500">{{ t('profile.none') }}</p>
+      <div
+        v-else-if="!items.length && !error"
+        class="flex flex-col items-center gap-4 py-10 text-center text-slate-500"
+      >
+        <EmptyGrid />
+        <p>{{ t('profile.none') }}</p>
+      </div>
       <ul class="space-y-2">
         <PuzzleListItem v-for="puzzle in items" :key="puzzle.id" :puzzle="puzzle" show-status>
           <NuxtLink :to="localePath({ name: 'play-id', params: { id: puzzle.id } })" class="btn">{{

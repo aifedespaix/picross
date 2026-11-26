@@ -153,7 +153,7 @@ useSeoMeta({
     <div class="space-y-2 lg:col-start-2 lg:row-start-1 lg:pt-4">
       <template v-if="puzzle">
         <div>
-          <h1 class="truncate text-xl font-bold">{{ puzzle.title }}</h1>
+          <h1 class="display truncate text-2xl">{{ puzzle.title }}</h1>
           <p class="text-sm text-slate-500 dark:text-slate-400">
             {{ t('common.size', { width: puzzle.map[0]?.length, height: puzzle.map.length }) }}
             ·
@@ -191,7 +191,7 @@ useSeoMeta({
 
     <!-- Plateau -->
     <section
-      class="h-[min(calc(100vw-1.5rem),calc(100svh-21rem-var(--tabbar-h)))] min-h-64 w-full lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-[calc(100svh-5.5rem)]"
+      class="rounded-3xl bg-white p-2 shadow-sm ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 h-[min(calc(100vw-1.5rem),calc(100svh-21rem-var(--tabbar-h)))] min-h-64 w-full lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-[calc(100svh-5.5rem)]"
     >
       <p
         v-if="status === 'loading'"
@@ -232,7 +232,7 @@ useSeoMeta({
         <div
           role="radiogroup"
           :aria-label="t('game.tool')"
-          class="grid grid-cols-2 gap-1 rounded-xl bg-slate-200 p-1 dark:bg-slate-800"
+          class="grid grid-cols-2 gap-1 rounded-2xl bg-slate-200 p-1 dark:bg-slate-800"
         >
           <button
             v-for="tool in tools"
@@ -240,7 +240,7 @@ useSeoMeta({
             type="button"
             role="radio"
             :aria-checked="game.board.tool.value === tool.id"
-            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-2 text-sm font-medium transition-colors"
+            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-2 text-sm font-medium transition-colors"
             :class="
               game.board.tool.value === tool.id
                 ? 'bg-white text-ink shadow-sm dark:bg-slate-600 dark:text-white'

@@ -98,7 +98,7 @@ useSeoMeta({ title: () => t('nav.create'), robots: 'noindex, nofollow' });
     <aside class="order-1 w-full space-y-4 lg:order-2 lg:w-80 lg:shrink-0 lg:pt-4">
       <template v-if="!created">
         <div>
-          <h1 class="text-xl font-bold">{{ t('create.title') }}</h1>
+          <h1 class="display text-3xl">{{ t('create.title') }}</h1>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t('create.intro') }}</p>
         </div>
 
@@ -198,7 +198,7 @@ useSeoMeta({ title: () => t('nav.create'), robots: 'noindex, nofollow' });
       </template>
 
       <div v-else class="card space-y-3" role="status">
-        <h1 class="text-xl font-bold">{{ t('create.sent') }}</h1>
+        <h1 class="display text-3xl">{{ t('create.sent') }}</h1>
         <p class="text-sm">
           {{ created.validated ? t('create.sentPublic') : t('create.sentPending') }}
         </p>
