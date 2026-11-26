@@ -39,6 +39,13 @@ export const picrosses = sqliteTable(
   {
     id: id(),
     title: text('title').notNull(),
+    /** Titre anglais (grilles livrées avec l'application) ; `null` : on affiche `title` partout. */
+    titleEn: text('title_en'),
+    /** Identifiant stable des grilles livrées avec l'application (`null` pour celles des joueurs). */
+    slug: text('slug').unique(),
+    difficulty: text('difficulty', { enum: ['easy', 'medium', 'hard', 'expert'] })
+      .notNull()
+      .default('medium'),
     /** Solution : JSON `number[][]` (0 / 1). */
     map: text('map').notNull(),
     width: integer('width').notNull(),
@@ -68,6 +75,12 @@ export const likes = sqliteTable(
   // Clé composite : un utilisateur ne peut liker une grille qu'une seule fois.
   (table) => [primaryKey({ columns: [table.userId, table.picrossId] })],
 );
+
+/** Petites valeurs persistantes (version du jeu de grilles livré, etc.). */
+export const meta = sqliteTable('meta', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+});
 
 export type UserRow = typeof users.$inferSelect;
 export type PicrossRow = typeof picrosses.$inferSelect;

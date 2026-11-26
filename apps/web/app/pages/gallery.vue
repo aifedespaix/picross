@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PicrossSummary } from '@picross/shared';
+import { DIFFICULTIES, type Difficulty, type PicrossSummary } from '@picross/shared';
 import { refDebounced } from '@vueuse/core';
 import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -13,7 +13,8 @@ const localePath = useLocalePath();
 
 const search = ref('');
 const debouncedSearch = refDebounced(search, 300);
-const sort = ref<'recent' | 'popular'>('recent');
+const sort = ref<'recent' | 'popular' | 'difficulty'>('difficulty');
+const difficulty = ref<Difficulty | ''>('');
 const items = ref<PicrossSummary[]>([]);
 const total = ref(0);
 const loading = ref(false);
@@ -28,6 +29,7 @@ async function load(reset: boolean) {
     const page = await api.listPicrosses({
       search: debouncedSearch.value.trim(),
       sort: sort.value,
+      difficulty: difficulty.value || undefined,
       limit: PAGE,
       offset: reset ? 0 : items.value.length,
     });
@@ -44,7 +46,7 @@ async function load(reset: boolean) {
 
 // Première page rendue côté serveur (contenu indexable) ; recherche / tri / pagination côté client.
 const { data: initial } = await useAsyncData('gallery-initial', () =>
-  api.listPicrosses({ sort: 'recent', limit: PAGE }).catch(() => null),
+  api.listPicrosses({ sort: 'difficulty', limit: PAGE }).catch(() => null),
 );
 if (initial.value) {
   items.value = initial.value.items;
@@ -52,7 +54,7 @@ if (initial.value) {
 } else {
   onMounted(() => load(true));
 }
-watch([debouncedSearch, sort], () => load(true));
+watch([debouncedSearch, sort, difficulty], () => load(true));
 
 useSeoMeta({
   title: () => t('seo.gallery.title'),
@@ -71,7 +73,7 @@ useSeoMeta({
       </p>
     </div>
 
-    <div class="grid gap-3 sm:grid-cols-[1fr_auto]">
+    <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
       <div>
         <label for="search" class="sr-only">{{ t('gallery.search') }}</label>
         <input
@@ -85,8 +87,18 @@ useSeoMeta({
         />
       </div>
       <div>
+        <label for="difficulty" class="sr-only">{{ t('difficulty.label') }}</label>
+        <select id="difficulty" v-model="difficulty" class="field-input">
+          <option value="">{{ t('difficulty.all') }}</option>
+          <option v-for="level in DIFFICULTIES" :key="level" :value="level">
+            {{ t(`difficulty.${level}`) }}
+          </option>
+        </select>
+      </div>
+      <div>
         <label for="sort" class="sr-only">{{ t('gallery.sort') }}</label>
         <select id="sort" v-model="sort" class="field-input">
+          <option value="difficulty">{{ t('gallery.easiest') }}</option>
           <option value="recent">{{ t('gallery.recent') }}</option>
           <option value="popular">{{ t('gallery.popular') }}</option>
         </select>

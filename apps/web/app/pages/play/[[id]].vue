@@ -3,12 +3,13 @@ import { useI18n } from 'vue-i18n';
 import { ApiError } from '@/api/client';
 import BaseDialog from '@/components/BaseDialog.vue';
 import Board from '@/components/Board.vue';
+import DifficultyBadge from '@/components/DifficultyBadge.vue';
 import Icon from '@/components/Icon.vue';
 import { localPuzzle, usePlayableGame, type PlayablePuzzle } from '@/composables/usePlayableGame';
 import { useAuthStore } from '@/stores/auth';
 import { formatDuration } from '@/utils/format';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const api = useApi();
 const route = useRoute();
 const localePath = useLocalePath();
@@ -40,7 +41,10 @@ async function fetchPuzzle(id?: string, exclude?: string): Promise<Fetched> {
     const unreachable = error instanceof ApiError && error.isNetwork;
     const noPuzzleYet = !id && error instanceof ApiError && error.status === 404;
     if (!unreachable && !noPuzzleYet) return { puzzle: null, offline: false };
-    return { puzzle: localPuzzle(exclude), offline: unreachable };
+    return {
+      puzzle: localPuzzle(exclude, locale.value === 'en' ? 'en' : 'fr'),
+      offline: unreachable,
+    };
   }
 }
 
@@ -150,6 +154,9 @@ useSeoMeta({
             {{ t('common.size', { width: puzzle.map[0]?.length, height: puzzle.map.length }) }}
             ·
             {{ puzzle.author ? t('common.by', { author: puzzle.author }) : t('common.builtin') }}
+          </p>
+          <p class="mt-1 text-slate-600 dark:text-slate-300">
+            <DifficultyBadge :level="puzzle.difficulty" />
           </p>
         </div>
         <dl class="grid grid-cols-2 gap-2 text-sm">

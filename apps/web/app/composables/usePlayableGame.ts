@@ -3,6 +3,7 @@ import {
   computeClues,
   countFilled as countSolution,
   fromBits,
+  rateDifficulty,
   STARTER_PUZZLES,
   starterBits,
   type PicrossDetail,
@@ -15,20 +16,23 @@ import { useSound } from './useSound';
 /** Grille jouable : soit renvoyée par l'API, soit locale (mode hors ligne). */
 export type PlayablePuzzle = Pick<
   PicrossDetail,
-  'id' | 'title' | 'map' | 'author' | 'likes' | 'likedByMe'
+  'id' | 'title' | 'map' | 'author' | 'likes' | 'likedByMe' | 'difficulty'
 > & {
   local?: boolean;
 };
 
-export function localPuzzle(exclude?: string): PlayablePuzzle {
+/** Grille locale (mode hors ligne) : l'une des grilles livrées avec l'application, dans la langue `lang`. */
+export function localPuzzle(exclude?: string, lang: 'fr' | 'en' = 'fr'): PlayablePuzzle {
   const choices = STARTER_PUZZLES.map((puzzle, index) => ({ puzzle, id: `local-${index}` })).filter(
     (item) => item.id !== exclude,
   );
   const { puzzle, id } = choices[Math.floor(Math.random() * choices.length)]!;
+  const map = starterBits(puzzle.rows);
   return {
     id,
-    title: puzzle.title,
-    map: starterBits(puzzle.rows),
+    title: puzzle[lang],
+    map,
+    difficulty: rateDifficulty(fromBits(map)).level,
     author: null,
     likes: 0,
     likedByMe: false,

@@ -1,23 +1,57 @@
-import { STARTER_PUZZLES, starterBits } from '@picross/shared';
-import { picrosses } from './db/schema.ts';
+import { and, eq, isNull, sql } from 'drizzle-orm';
+import { fromBits, rateDifficulty, STARTER_PUZZLES, starterBits } from '@picross/shared';
 import type { Db } from './db/index.ts';
+import { meta, picrosses } from './db/schema.ts';
 
-/** Au premier démarrage, insère les grilles livrées avec l'application pour que le jeu soit jouable tout de suite. */
+/**
+ * À incrémenter quand on ajoute des grilles à `STARTER_PUZZLES` : l'insertion est rejouée au prochain
+ * démarrage, mais seules les grilles dont le `slug` manque en base sont ajoutées (jamais de doublon).
+ * Une grille livrée supprimée par un admin ne réapparaît donc qu'à la prochaine montée de version.
+ */
+export const STARTERS_VERSION = 2;
+const KEY = 'starters_version';
+
+/** Insère les grilles livrées avec l'application pour que le jeu soit jouable tout de suite. */
 export function seedStarterPuzzles(db: Db): number {
-  const existing = db.select({ id: picrosses.id }).from(picrosses).limit(1).get();
-  if (existing) return 0;
-  for (const puzzle of STARTER_PUZZLES) {
-    const bits = starterBits(puzzle.rows);
-    db.insert(picrosses)
-      .values({
-        title: puzzle.title,
-        map: JSON.stringify(bits),
-        width: bits[0]!.length,
-        height: bits.length,
-        validated: true,
-        authorId: null,
-      })
+  const current = Number(db.select().from(meta).where(eq(meta.key, KEY)).get()?.value ?? 0);
+  if (current >= STARTERS_VERSION) return 0;
+
+  return db.transaction((tx) => {
+    // Anciennes grilles de départ (avant les slugs) : sans auteur ni slug, on les remplace.
+    tx.delete(picrosses)
+      .where(and(isNull(picrosses.authorId), isNull(picrosses.slug)))
       .run();
-  }
-  return STARTER_PUZZLES.length;
+
+    const known = new Set(
+      tx
+        .select({ slug: picrosses.slug })
+        .from(picrosses)
+        .all()
+        .map((row) => row.slug),
+    );
+    let inserted = 0;
+    for (const puzzle of STARTER_PUZZLES) {
+      if (known.has(puzzle.slug)) continue;
+      const bits = starterBits(puzzle.rows);
+      tx.insert(picrosses)
+        .values({
+          slug: puzzle.slug,
+          title: puzzle.fr,
+          titleEn: puzzle.en,
+          difficulty: rateDifficulty(fromBits(bits)).level,
+          map: JSON.stringify(bits),
+          width: bits[0]!.length,
+          height: bits.length,
+          validated: true,
+          authorId: null,
+        })
+        .run();
+      inserted++;
+    }
+    tx.insert(meta)
+      .values({ key: KEY, value: String(STARTERS_VERSION) })
+      .onConflictDoUpdate({ target: meta.key, set: { value: sql`excluded.value` } })
+      .run();
+    return inserted;
+  });
 }

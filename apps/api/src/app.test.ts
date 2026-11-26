@@ -5,7 +5,7 @@ import { createDb } from './db/index.ts';
 import { loadEnv } from './env.ts';
 import { seedStarterPuzzles } from './seed.ts';
 
-const MAP = starterBits(STARTER_PUZZLES[0]!.rows);
+const MAP = starterBits(STARTER_PUZZLES.find((p) => p.slug === 'bon-chien')!.rows); // 11 × 11
 
 function setup(overrides: Record<string, string> = {}) {
   const env = loadEnv({ NODE_ENV: 'test', JWT_SECRET: 'x'.repeat(40), ...overrides });
@@ -157,9 +157,48 @@ describe('picrosses', () => {
     expect(list.json.total).toBe(STARTER_PUZZLES.length);
     const random = await http('GET', '/picrosses/random');
     expect(random.status).toBe(200);
-    expect(random.json.map).toHaveLength(10);
+    expect(random.json.map.length).toBeGreaterThanOrEqual(5);
     const other = await http('GET', `/picrosses/random?exclude=${random.json.id}`);
     expect(other.json.id).not.toBe(random.json.id);
+  });
+
+  it('insère les grilles livrées une seule fois, sans doublon', () => {
+    expect(seedStarterPuzzles(ctx.db)).toBe(STARTER_PUZZLES.length);
+    expect(seedStarterPuzzles(ctx.db)).toBe(0);
+  });
+
+  it('sert les titres dans la langue demandée', async () => {
+    seedStarterPuzzles(ctx.db);
+    const http = ctx.client();
+    const fr = await http('GET', '/picrosses?search=Canard');
+    expect(fr.json.items[0].title).toBe('Canard (débogage)');
+    const en = await http('GET', '/picrosses?lang=en&search=duck');
+    expect(en.json.items[0].title).toBe('Rubber duck (debugging)');
+    const unknownLang = await http('GET', '/picrosses?lang=xx&limit=1');
+    expect(unknownLang.status).toBe(200); // langue inconnue : repli sur le français
+  });
+
+  it('trie du plus facile au plus difficile', async () => {
+    seedStarterPuzzles(ctx.db);
+    const { json } = await ctx.client()('GET', '/picrosses?sort=difficulty&limit=50');
+    const ranks = json.items.map((i: { difficulty: string }) =>
+      ['easy', 'medium', 'hard', 'expert'].indexOf(i.difficulty),
+    );
+    expect(ranks).toEqual([...ranks].sort((a: number, b: number) => a - b));
+    expect(json.items[0].difficulty).toBe('easy');
+  });
+
+  it('filtre par difficulté', async () => {
+    seedStarterPuzzles(ctx.db);
+    const http = ctx.client();
+    for (const level of ['easy', 'medium', 'hard', 'expert']) {
+      const res = await http('GET', `/picrosses?difficulty=${level}&limit=50`);
+      expect(res.json.total).toBeGreaterThan(0);
+      expect(res.json.items.every((i: { difficulty: string }) => i.difficulty === level)).toBe(
+        true,
+      );
+    }
+    expect((await http('GET', '/picrosses?difficulty=impossible')).status).toBe(400);
   });
 
   it('404 quand il n’y a aucune grille ou un id invalide', async () => {
@@ -176,8 +215,9 @@ describe('picrosses', () => {
     expect(created.json).toMatchObject({
       validated: false,
       author: 'joueur1',
-      width: 10,
-      height: 10,
+      width: 11,
+      height: 11,
+      difficulty: 'hard',
     });
 
     const stranger = ctx.client();

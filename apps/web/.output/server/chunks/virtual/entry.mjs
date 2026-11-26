@@ -11874,30 +11874,40 @@ async function request(fetcher, method, path, body, query) {
 	}
 }
 var clean = (params) => Object.fromEntries(Object.entries(params).filter(([, value]) => value !== void 0 && value !== ""));
-function createApi(fetcher) {
+/** `getLang` : langue courante de l'interface, pour recevoir les titres des grilles dans la bonne langue. */
+function createApi(fetcher, getLang = () => "fr") {
+	const lang = () => ({ lang: getLang() });
 	return {
 		me: () => request(fetcher, "GET", "/auth/me"),
 		login: (input) => request(fetcher, "POST", "/auth/login", input),
 		register: (input) => request(fetcher, "POST", "/auth/register", input),
 		logout: () => request(fetcher, "POST", "/auth/logout"),
-		listPicrosses: (params = {}) => request(fetcher, "GET", "/picrosses", void 0, clean(params)),
-		myPicrosses: () => request(fetcher, "GET", "/picrosses/mine"),
-		randomPicross: (exclude) => request(fetcher, "GET", "/picrosses/random", void 0, clean({ exclude })),
-		getPicross: (id) => request(fetcher, "GET", `/picrosses/${id}`),
-		createPicross: (input) => request(fetcher, "POST", "/picrosses", input),
+		listPicrosses: (params = {}) => request(fetcher, "GET", "/picrosses", void 0, {
+			...clean(params),
+			...lang()
+		}),
+		myPicrosses: () => request(fetcher, "GET", "/picrosses/mine", void 0, lang()),
+		randomPicross: (exclude) => request(fetcher, "GET", "/picrosses/random", void 0, {
+			...clean({ exclude }),
+			...lang()
+		}),
+		getPicross: (id) => request(fetcher, "GET", `/picrosses/${id}`, void 0, lang()),
+		createPicross: (input) => request(fetcher, "POST", "/picrosses", input, lang()),
 		deletePicross: (id) => request(fetcher, "DELETE", `/picrosses/${id}`),
-		likePicross: (id, liked) => request(fetcher, "PUT", `/picrosses/${id}/like`, { liked }),
-		validatePicross: (id, validated) => request(fetcher, "PUT", `/picrosses/${id}/validation`, { validated })
+		likePicross: (id, liked) => request(fetcher, "PUT", `/picrosses/${id}/like`, { liked }, lang()),
+		validatePicross: (id, validated) => request(fetcher, "PUT", `/picrosses/${id}/validation`, { validated }, lang())
 	};
 }
 // app/composables/useApi.ts
 /**
 * Client d'API. Pendant le rendu serveur on utilise `useRequestFetch()` : la requête est routée en
 * interne (sans HTTP) et les cookies du visiteur sont relayés, donc le SSR voit l'utilisateur connecté.
+* La langue courante est transmise pour recevoir les titres des grilles dans la bonne langue.
 * Doit être appelé dans un contexte Nuxt (setup, plugin, middleware, store).
 */
 function useApi() {
-	return createApi(useRequestFetch());
+	const { $i18n } = useNuxtApp();
+	return createApi(useRequestFetch(), () => $i18n.locale.value);
 }
 
 // ../../node_modules/.pnpm/@vueuse+shared@15.1.0_vue@3.5.46_typescript@5.9.3_/node_modules/@vueuse/shared/dist/index.js
@@ -12524,93 +12534,93 @@ var virtual_nuxt_node_modules_2F_cache_2Fnuxt_2F_nuxt_2Froutes_default = [
 		name: "play-id___fr",
 		path: "/jouer/:id?",
 		meta: __nuxt_page_meta || {},
-		component: memoizeRouteComponent(() => import('../build/_id_-NPXuIGWn.mjs'))
+		component: memoizeRouteComponent(() => import('../build/_id_-DDRPhbzJ.mjs'))
 	},
 	{
 		name: "play-id___en",
 		path: "/en/play/:id?",
 		meta: __nuxt_page_meta || {},
-		component: memoizeRouteComponent(() => import('../build/_id_-NPXuIGWn.mjs'))
+		component: memoizeRouteComponent(() => import('../build/_id_-DDRPhbzJ.mjs'))
 	},
 	{
 		name: "admin___fr",
 		path: "/admin",
 		meta: { "middleware": ["auth", "admin"] },
-		component: memoizeRouteComponent(() => import('../build/admin-Cpw0XpYN.mjs'))
+		component: memoizeRouteComponent(() => import('../build/admin-B4rl-Oel.mjs'))
 	},
 	{
 		name: "admin___en",
 		path: "/en/admin",
 		meta: { "middleware": ["auth", "admin"] },
-		component: memoizeRouteComponent(() => import('../build/admin-Cpw0XpYN.mjs'))
+		component: memoizeRouteComponent(() => import('../build/admin-B4rl-Oel.mjs'))
 	},
 	{
 		name: "create___fr",
 		path: "/creer",
 		meta: { "middleware": "auth" },
-		component: memoizeRouteComponent(() => import('../build/create-CsTwISKD.mjs'))
+		component: memoizeRouteComponent(() => import('../build/create-D_hantBx.mjs'))
 	},
 	{
 		name: "create___en",
 		path: "/en/create",
 		meta: { "middleware": "auth" },
-		component: memoizeRouteComponent(() => import('../build/create-CsTwISKD.mjs'))
+		component: memoizeRouteComponent(() => import('../build/create-D_hantBx.mjs'))
 	},
 	{
 		name: "gallery___fr",
 		path: "/galerie",
-		component: memoizeRouteComponent(() => import('../build/gallery-C_BJxDma.mjs'))
+		component: memoizeRouteComponent(() => import('../build/gallery-DGt8ZSqR.mjs'))
 	},
 	{
 		name: "gallery___en",
 		path: "/en/gallery",
-		component: memoizeRouteComponent(() => import('../build/gallery-C_BJxDma.mjs'))
+		component: memoizeRouteComponent(() => import('../build/gallery-DGt8ZSqR.mjs'))
 	},
 	{
 		name: "login___fr",
 		path: "/connexion",
 		meta: { "middleware": "guest" },
-		component: memoizeRouteComponent(() => import('../build/login-DZJYWHoC.mjs'))
+		component: memoizeRouteComponent(() => import('../build/login-C4YFrlwH.mjs'))
 	},
 	{
 		name: "login___en",
 		path: "/en/login",
 		meta: { "middleware": "guest" },
-		component: memoizeRouteComponent(() => import('../build/login-DZJYWHoC.mjs'))
+		component: memoizeRouteComponent(() => import('../build/login-C4YFrlwH.mjs'))
 	},
 	{
 		name: "profile___fr",
 		path: "/compte",
 		meta: { "middleware": "auth" },
-		component: memoizeRouteComponent(() => import('../build/profile-h2Ns5nus.mjs'))
+		component: memoizeRouteComponent(() => import('../build/profile-DfHmCnyY.mjs'))
 	},
 	{
 		name: "profile___en",
 		path: "/en/account",
 		meta: { "middleware": "auth" },
-		component: memoizeRouteComponent(() => import('../build/profile-h2Ns5nus.mjs'))
+		component: memoizeRouteComponent(() => import('../build/profile-DfHmCnyY.mjs'))
 	},
 	{
 		name: "register___fr",
 		path: "/inscription",
 		meta: { "middleware": "guest" },
-		component: memoizeRouteComponent(() => import('../build/register-fR5oh7te.mjs'))
+		component: memoizeRouteComponent(() => import('../build/register-DC-KHA9I.mjs'))
 	},
 	{
 		name: "register___en",
 		path: "/en/register",
 		meta: { "middleware": "guest" },
-		component: memoizeRouteComponent(() => import('../build/register-fR5oh7te.mjs'))
+		component: memoizeRouteComponent(() => import('../build/register-DC-KHA9I.mjs'))
 	},
 	{
 		name: "index___fr",
 		path: "/",
-		component: memoizeRouteComponent(() => import('../build/pages-DE4ZzkYp.mjs'))
+		component: memoizeRouteComponent(() => import('../build/pages-C3_qsSxi.mjs'))
 	},
 	{
 		name: "index___en",
 		path: "/en",
-		component: memoizeRouteComponent(() => import('../build/pages-DE4ZzkYp.mjs'))
+		component: memoizeRouteComponent(() => import('../build/pages-C3_qsSxi.mjs'))
 	},
 	{
 		name: void 0,
@@ -13689,8 +13699,8 @@ function createNuxtI18nContext(nuxt, vueI18n, defaultLocale, flatJson = false) {
 		}
 		const headers = getLocaleConfig(locale)?.cacheable ? {} : { "Cache-Control": "no-cache" };
 		const url2 = joinURL$1(cdnPrefix(), "/_i18n", {
-			"fr": "78335400",
-			"en": "78335400"
+			"fr": "aba0262c",
+			"en": "aba0262c"
 		}[locale], locale, "messages.json");
 		const messages = await $fetch(url2, { headers });
 		for (const k of deliverable(messages)) i18n.mergeLocaleMessage(k, messages[k]);
@@ -13981,8 +13991,8 @@ var i18n_default = defineNuxtPlugin({
 		const localeConfigs = useLocaleConfigs();
 		localeConfigs.value = event.context.nuxtI18n?.localeConfigs || {};
 		prerenderRoutes(localeCodes.filter(isPrerenderable).map((locale) => `/_i18n/${{
-			"fr": "78335400",
-			"en": "78335400"
+			"fr": "aba0262c",
+			"en": "aba0262c"
 		}[locale]}/${locale}/messages.json`));
 		const i18n = createI18n(optionsI18n);
 		const detectors = useDetectors(event, useI18nDetection(runtimeI18n), runtimeI18n, host);

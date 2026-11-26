@@ -68,11 +68,12 @@
     "popular": "Most liked",
     "empty": "No puzzle found.",
     "play": "Play",
-    "count": "{count} puzzle | {count} puzzles"
+    "count": "{count} puzzle | {count} puzzles",
+    "easiest": "Easiest first"
   },
   "create": {
     "title": "Create a puzzle",
-    "intro": "Draw the pattern: clues are computed automatically. At least a third of the cells must be filled.",
+    "intro": "Draw the pattern: clues are computed automatically. At least a fifth of the cells must be filled, and difficulty is rated for you.",
     "name": "Title",
     "cols": "Columns",
     "rows": "Rows",
@@ -157,7 +158,7 @@
     },
     "gallery": {
       "title": "Picross puzzle gallery",
-      "description": "Browse the community's picross puzzles: search, sort by popularity and play for free."
+      "description": "Over 100 picross puzzles, from easy to expert: search, filter by difficulty and play for free."
     },
     "play": {
       "title": "Picross “{title}” — {width} × {height} puzzle",
@@ -191,7 +192,7 @@
     "features": [
       {
         "title": "Puzzles for everyone",
-        "text": "From 3 × 3 to warm up to 15 × 15 for experts, with built-in puzzles and the community's."
+        "text": "From 3 × 3 to warm up to 15 × 15 for experts: over 100 built-in puzzles, from the gentlest to the most devious, plus the community's."
       },
       {
         "title": "Built-in editor",
@@ -231,5 +232,13 @@
     ],
     "ctaTitle": "Ready to solve your first puzzle?",
     "ctaText": "A random puzzle, right now, no sign-up."
+  },
+  "difficulty": {
+    "label": "Difficulty",
+    "all": "All difficulties",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "expert": "Expert"
   }
 }

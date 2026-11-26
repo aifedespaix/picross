@@ -30,6 +30,18 @@ clavier complet (flèches, `Espace`, `X`, `Ctrl+Z`), minuteur, écran de victoir
 (3×3 à 15×15) avec indices calculés automatiquement, modération par un admin, thème clair/sombre/système,
 sons optionnels, mode hors ligne (grilles de départ) si l'API est injoignable.
 
+## Grilles de départ et difficulté
+
+- **105 grilles** livrées (`packages/shared/src/starters.ts`), du 5×5 au 15×15 : formes (cœur, ancre, château…),
+  objets du quotidien et clins d'œil (« Réunion qui aurait pu être un mail », « Cerbère (trois fois plus gentil) »…).
+  Titres en français et en anglais ; insérées au démarrage de l'API, sans doublon (`slug` stable, version dans la
+  table `meta`) — pour en ajouter : compléter `STARTER_PUZZLES` et incrémenter `STARTERS_VERSION`.
+- **Aucune devinette** : un solveur ligne par ligne (`solver.ts`) vérifie dans les tests que chaque grille livrée se
+  résout par pure logique.
+- **Difficulté** (facile / moyen / difficile / expert) calculée automatiquement par `rateDifficulty` : surface de la
+  grille (≤ 56, ≤ 100, ≤ 150, au-delà), relevée d'un cran si la logique seule ne suffit pas. Appliquée aussi aux
+  grilles créées par les joueurs ; filtre et tri dans la galerie.
+
 ## Stack
 
 | Couche  | Technologies                                                                                                   |

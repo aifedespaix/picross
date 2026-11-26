@@ -7,7 +7,7 @@ const styles = {
   "pages/index.vue": () => import('../build/HeroBoard-styles.BIyLppZ-.mjs').then(interopDefault)
 };
 
-const inlinedCSS = {"layout.Ddb1N2Bz.css":[["components/AppHeader.vue"]],"useBoard.BlrGnIub.css":[["components/ClueLine.vue"],["components/Board.vue"]],"pages.D22YmJcm.css":[["pages/index.vue","components/HeroBoard.vue"]]};
+const inlinedCSS = {"useBoard.BlrGnIub.css":[["components/ClueLine.vue"],["components/Board.vue"]],"layout.Ddb1N2Bz.css":[["components/AppHeader.vue"]],"pages.D22YmJcm.css":[["pages/index.vue","components/HeroBoard.vue"]]};
 
 export { styles as default, inlinedCSS };
 //# sourceMappingURL=styles.mjs.map

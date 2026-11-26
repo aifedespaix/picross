@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PicrossSummary } from '@picross/shared';
 import { useI18n } from 'vue-i18n';
+import DifficultyBadge from './DifficultyBadge.vue';
 import Icon from './Icon.vue';
 
 defineProps<{ puzzle: PicrossSummary; showStatus?: boolean }>();
@@ -17,6 +18,8 @@ const { t, n } = useI18n();
         <span>{{
           puzzle.author ? t('common.by', { author: puzzle.author }) : t('common.builtin')
         }}</span>
+        <span aria-hidden="true">·</span>
+        <DifficultyBadge :level="puzzle.difficulty" />
         <span aria-hidden="true">·</span>
         <span class="inline-flex items-center gap-1">
           <Icon

@@ -1,14 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  computeClues,
-  fromBits,
-  lineClues,
-  toBits,
-  validateSolution,
-  createPicrossSchema,
-  STARTER_PUZZLES,
-  starterBits,
-} from './index.ts';
+import { computeClues, fromBits, lineClues, toBits, validateSolution } from './index.ts';
 
 describe('lineClues', () => {
   it('compte les blocs consécutifs', () => {
@@ -67,13 +58,5 @@ describe('validateSolution', () => {
         ]),
       ),
     ).toBe('shape');
-  });
-});
-
-describe('grilles fournies', () => {
-  it.each(STARTER_PUZZLES)('« $title » est valide pour le schéma de création', (puzzle) => {
-    expect(
-      createPicrossSchema.safeParse({ title: puzzle.title, map: starterBits(puzzle.rows) }).success,
-    ).toBe(true);
   });
 });

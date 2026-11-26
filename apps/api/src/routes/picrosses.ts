@@ -1,9 +1,12 @@
-import { and, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import {
   createPicrossSchema,
+  DIFFICULTIES,
+  fromBits,
   likeSchema,
+  rateDifficulty,
   validateSchema,
   type PicrossDetail,
   type PicrossSummary,
@@ -22,9 +25,15 @@ import { rateLimit } from '../lib/rate-limit.ts';
 
 const idSchema = z.uuid();
 
+const langSchema = z.enum(['fr', 'en']).catch('fr');
+type Lang = z.infer<typeof langSchema>;
+
 const listQuery = z.object({
+  /** Langue des titres (les grilles livrées ont un titre français et anglais). */
+  lang: langSchema,
+  difficulty: z.enum(DIFFICULTIES).optional(),
   search: z.string().trim().max(60).optional(),
-  sort: z.enum(['recent', 'popular']).default('recent'),
+  sort: z.enum(['recent', 'popular', 'difficulty']).default('recent'),
   /** `pending` et `all` sont réservés aux administrateurs. */
   status: z.enum(['validated', 'pending', 'all']).default('validated'),
   limit: z.coerce.number().int().min(1).max(50).default(24),
@@ -43,6 +52,8 @@ export function picrossRoutes({ db, env }: Deps) {
   const columns = (userId: string | undefined) => ({
     id: picrosses.id,
     title: picrosses.title,
+    titleEn: picrosses.titleEn,
+    difficulty: picrosses.difficulty,
     map: picrosses.map,
     width: picrosses.width,
     height: picrosses.height,
@@ -59,9 +70,10 @@ export function picrossRoutes({ db, env }: Deps) {
 
   type Row = ReturnType<ReturnType<typeof base>['all']>[number];
 
-  const toSummary = (row: Row): PicrossSummary => ({
+  const toSummary = (row: Row, lang: Lang): PicrossSummary => ({
     id: row.id,
-    title: row.title,
+    title: lang === 'en' && row.titleEn ? row.titleEn : row.title,
+    difficulty: row.difficulty,
     width: row.width,
     height: row.height,
     validated: row.validated,
@@ -71,8 +83,8 @@ export function picrossRoutes({ db, env }: Deps) {
     createdAt: row.createdAt.toISOString(),
   });
 
-  const toDetail = (row: Row): PicrossDetail => ({
-    ...toSummary(row),
+  const toDetail = (row: Row, lang: Lang): PicrossDetail => ({
+    ...toSummary(row, lang),
     map: JSON.parse(row.map) as PicrossDetail['map'],
   });
 
@@ -91,6 +103,20 @@ export function picrossRoutes({ db, env }: Deps) {
     return row;
   };
 
+  const difficultyRank = sql`case ${picrosses.difficulty} when 'easy' then 0 when 'medium' then 1 when 'hard' then 2 else 3 end`;
+  const order = (sort: 'recent' | 'popular' | 'difficulty') =>
+    sort === 'popular'
+      ? [desc(likeCount), desc(picrosses.createdAt)]
+      : sort === 'difficulty'
+        ? [
+            asc(difficultyRank),
+            asc(sql`${picrosses.width} * ${picrosses.height}`),
+            asc(picrosses.title),
+          ]
+        : [desc(picrosses.createdAt)];
+
+  const langOf = (c: AppContext): Lang => langSchema.parse(c.req.query('lang'));
+
   const createLimit = rateLimit({
     windowMs: 60 * 60_000,
     max: 20,
@@ -105,9 +131,14 @@ export function picrossRoutes({ db, env }: Deps) {
     const conditions: SQL[] = [];
     if (query.status === 'validated') conditions.push(eq(picrosses.validated, true));
     if (query.status === 'pending') conditions.push(eq(picrosses.validated, false));
+    if (query.difficulty) conditions.push(eq(picrosses.difficulty, query.difficulty));
     if (query.search) {
       const escaped = query.search.replace(/[\\%_]/g, '\\$&');
-      conditions.push(sql`${picrosses.title} like ${`%${escaped}%`} escape '\\'`);
+      const pattern = `%${escaped}%`;
+      // On cherche dans les deux langues, quelle que soit celle de l'interface.
+      conditions.push(
+        sql`(${picrosses.title} like ${pattern} escape '\\' or ${picrosses.titleEn} like ${pattern} escape '\\')`,
+      );
     }
     const where = conditions.length ? and(...conditions) : undefined;
 
@@ -119,15 +150,12 @@ export function picrossRoutes({ db, env }: Deps) {
         .get()?.n ?? 0;
     const rows = base(user?.id)
       .where(where)
-      .orderBy(
-        query.sort === 'popular' ? desc(likeCount) : desc(picrosses.createdAt),
-        desc(picrosses.createdAt),
-      )
+      .orderBy(...order(query.sort))
       .limit(query.limit)
       .offset(query.offset)
       .all();
 
-    return c.json({ items: rows.map(toSummary), total });
+    return c.json({ items: rows.map((row) => toSummary(row, query.lang)), total });
   });
 
   app.get('/mine', (c) => {
@@ -136,7 +164,7 @@ export function picrossRoutes({ db, env }: Deps) {
       .where(eq(picrosses.authorId, user.id))
       .orderBy(desc(picrosses.createdAt))
       .all();
-    return c.json({ items: rows.map(toSummary), total: rows.length });
+    return c.json({ items: rows.map((row) => toSummary(row, langOf(c))), total: rows.length });
   });
 
   app.get('/random', (c) => {
@@ -155,10 +183,10 @@ export function picrossRoutes({ db, env }: Deps) {
     const fallback =
       row ?? base(c.get('user')?.id).where(eq(picrosses.validated, true)).limit(1).get();
     if (!fallback) throw new HttpError(404, 'not_found');
-    return c.json(toDetail(fallback));
+    return c.json(toDetail(fallback, langOf(c)));
   });
 
-  app.get('/:id', (c) => c.json(toDetail(getOr404(c, c.req.param('id')))));
+  app.get('/:id', (c) => c.json(toDetail(getOr404(c, c.req.param('id')), langOf(c))));
 
   app.post('/', createLimit, async (c) => {
     const user = requireUser(c);
@@ -171,11 +199,12 @@ export function picrossRoutes({ db, env }: Deps) {
         width: input.map[0]!.length,
         height: input.map.length,
         authorId: user.id,
+        difficulty: rateDifficulty(fromBits(input.map)).level,
         validated: env.autoValidate || user.role === 'admin',
       })
       .returning({ id: picrosses.id })
       .get();
-    return c.json(toSummary(getOr404(c, created.id)), 201);
+    return c.json(toSummary(getOr404(c, created.id), langOf(c)), 201);
   });
 
   app.delete('/:id', (c) => {
@@ -197,7 +226,7 @@ export function picrossRoutes({ db, env }: Deps) {
         .where(and(eq(likes.userId, user.id), eq(likes.picrossId, row.id)))
         .run();
     }
-    return c.json(toSummary(getOr404(c, row.id)));
+    return c.json(toSummary(getOr404(c, row.id), langOf(c)));
   });
 
   app.put('/:id/validation', async (c) => {
@@ -205,7 +234,7 @@ export function picrossRoutes({ db, env }: Deps) {
     const row = getOr404(c, c.req.param('id'));
     const { validated } = await jsonBody(validateSchema)(c);
     db.update(picrosses).set({ validated }).where(eq(picrosses.id, row.id)).run();
-    return c.json(toSummary(getOr404(c, row.id)));
+    return c.json(toSummary(getOr404(c, row.id), langOf(c)));
   });
 
   return app;

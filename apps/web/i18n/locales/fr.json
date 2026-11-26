@@ -68,11 +68,12 @@
     "popular": "Plus aimées",
     "empty": "Aucune grille trouvée.",
     "play": "Jouer",
-    "count": "{count} grille | {count} grilles"
+    "count": "{count} grille | {count} grilles",
+    "easiest": "Plus faciles d’abord"
   },
   "create": {
     "title": "Créer une grille",
-    "intro": "Dessinez le motif : les indices sont calculés automatiquement. Une grille doit être remplie à plus d’un tiers.",
+    "intro": "Dessinez le motif : les indices sont calculés automatiquement. Une grille doit être remplie à plus d’un cinquième, et la difficulté est évaluée toute seule.",
     "name": "Titre",
     "cols": "Colonnes",
     "rows": "Lignes",
@@ -157,7 +158,7 @@
     },
     "gallery": {
       "title": "Galerie de grilles de picross",
-      "description": "Parcourez les grilles de picross de la communauté : recherchez, triez par popularité et jouez gratuitement."
+      "description": "Plus de 100 grilles de picross, du facile à l’expert : recherchez, filtrez par difficulté et jouez gratuitement."
     },
     "play": {
       "title": "Picross « {title} » — grille {width} × {height}",
@@ -191,7 +192,7 @@
     "features": [
       {
         "title": "Des grilles pour tous",
-        "text": "De 3 × 3 pour s’échauffer jusqu’à 15 × 15 pour les experts, avec des grilles de départ et celles de la communauté."
+        "text": "De 3 × 3 pour s’échauffer jusqu’à 15 × 15 pour les experts : plus de 100 grilles de départ, de la plus simple à la plus retorse, et celles de la communauté."
       },
       {
         "title": "Un éditeur intégré",
@@ -231,5 +232,13 @@
     ],
     "ctaTitle": "Prêt à résoudre votre première grille ?",
     "ctaText": "Une grille au hasard, tout de suite, sans inscription."
+  },
+  "difficulty": {
+    "label": "Difficulté",
+    "all": "Toutes difficultés",
+    "easy": "Facile",
+    "medium": "Moyen",
+    "hard": "Difficile",
+    "expert": "Expert"
   }
 }

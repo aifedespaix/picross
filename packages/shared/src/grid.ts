@@ -9,8 +9,8 @@ export type Solution = boolean[][];
 export const MIN_SIZE = 3;
 export const MAX_SIZE = 15;
 
-/** Une grille doit avoir plus d'1/3 de cases pleines pour être intéressante. */
-export const MIN_FILL_RATIO = 1 / 3;
+/** Une grille doit avoir plus d'1/5 de cases pleines pour être intéressante. */
+export const MIN_FILL_RATIO = 0.2;
 
 export function gridWidth(solution: Solution): number {
   return solution[0]?.length ?? 0;

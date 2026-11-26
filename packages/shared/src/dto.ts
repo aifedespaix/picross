@@ -1,3 +1,5 @@
+import type { Difficulty } from './solver.ts';
+
 /** Contrat d'API partagé entre le serveur et le client web. */
 
 export type Role = 'user' | 'admin';
@@ -15,6 +17,7 @@ export interface PicrossSummary {
   width: number;
   height: number;
   likes: number;
+  difficulty: Difficulty;
   validated: boolean;
   /** Pseudo de l'auteur (`null` pour les grilles fournies avec l'application). */
   author: string | null;

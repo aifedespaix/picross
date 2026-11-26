@@ -32,6 +32,7 @@ interface _GlobalComponents {
   BaseDialog: typeof import("../../app/components/BaseDialog.vue")['default']
   Board: typeof import("../../app/components/Board.vue")['default']
   ClueLine: typeof import("../../app/components/ClueLine.vue")['default']
+  DifficultyBadge: typeof import("../../app/components/DifficultyBadge.vue")['default']
   HeroBoard: typeof import("../../app/components/HeroBoard.vue")['default']
   Icon: typeof import("../../app/components/Icon.vue")['default']
   PuzzleListItem: typeof import("../../app/components/PuzzleListItem.vue")['default']
@@ -172,6 +173,7 @@ interface _GlobalComponents {
   LazyBaseDialog: LazyComponent<typeof import("../../app/components/BaseDialog.vue")['default']>
   LazyBoard: LazyComponent<typeof import("../../app/components/Board.vue")['default']>
   LazyClueLine: LazyComponent<typeof import("../../app/components/ClueLine.vue")['default']>
+  LazyDifficultyBadge: LazyComponent<typeof import("../../app/components/DifficultyBadge.vue")['default']>
   LazyHeroBoard: LazyComponent<typeof import("../../app/components/HeroBoard.vue")['default']>
   LazyIcon: LazyComponent<typeof import("../../app/components/Icon.vue")['default']>
   LazyPuzzleListItem: LazyComponent<typeof import("../../app/components/PuzzleListItem.vue")['default']>

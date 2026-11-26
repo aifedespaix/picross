@@ -32,6 +32,7 @@ export const AuthForm: typeof import("../app/components/AuthForm.vue")['default'
 export const BaseDialog: typeof import("../app/components/BaseDialog.vue")['default']
 export const Board: typeof import("../app/components/Board.vue")['default']
 export const ClueLine: typeof import("../app/components/ClueLine.vue")['default']
+export const DifficultyBadge: typeof import("../app/components/DifficultyBadge.vue")['default']
 export const HeroBoard: typeof import("../app/components/HeroBoard.vue")['default']
 export const Icon: typeof import("../app/components/Icon.vue")['default']
 export const PuzzleListItem: typeof import("../app/components/PuzzleListItem.vue")['default']
@@ -172,6 +173,7 @@ export const LazyAuthForm: LazyComponent<typeof import("../app/components/AuthFo
 export const LazyBaseDialog: LazyComponent<typeof import("../app/components/BaseDialog.vue")['default']>
 export const LazyBoard: LazyComponent<typeof import("../app/components/Board.vue")['default']>
 export const LazyClueLine: LazyComponent<typeof import("../app/components/ClueLine.vue")['default']>
+export const LazyDifficultyBadge: LazyComponent<typeof import("../app/components/DifficultyBadge.vue")['default']>
 export const LazyHeroBoard: LazyComponent<typeof import("../app/components/HeroBoard.vue")['default']>
 export const LazyIcon: LazyComponent<typeof import("../app/components/Icon.vue")['default']>
 export const LazyPuzzleListItem: LazyComponent<typeof import("../app/components/PuzzleListItem.vue")['default']>

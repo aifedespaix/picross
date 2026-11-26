@@ -1,5 +1,6 @@
 import type {
   ApiErrorBody,
+  Difficulty,
   CreatePicrossInput,
   LoginInput,
   PicrossDetail,
@@ -51,8 +52,9 @@ export interface PicrossList {
 }
 
 export interface ListParams {
+  difficulty?: Difficulty;
   search?: string;
-  sort?: 'recent' | 'popular';
+  sort?: 'recent' | 'popular' | 'difficulty';
   status?: 'validated' | 'pending' | 'all';
   limit?: number;
   offset?: number;
@@ -63,7 +65,9 @@ const clean = (params: object) =>
     Object.entries(params).filter(([, value]) => value !== undefined && value !== ''),
   );
 
-export function createApi(fetcher: Fetcher) {
+/** `getLang` : langue courante de l'interface, pour recevoir les titres des grilles dans la bonne langue. */
+export function createApi(fetcher: Fetcher, getLang: () => string = () => 'fr') {
+  const lang = () => ({ lang: getLang() });
   return {
     me: () => request<UserDto | null>(fetcher, 'GET', '/auth/me'),
     login: (input: LoginInput) => request<UserDto>(fetcher, 'POST', '/auth/login', input),
@@ -71,18 +75,25 @@ export function createApi(fetcher: Fetcher) {
     logout: () => request<void>(fetcher, 'POST', '/auth/logout'),
 
     listPicrosses: (params: ListParams = {}) =>
-      request<PicrossList>(fetcher, 'GET', '/picrosses', undefined, clean(params)),
-    myPicrosses: () => request<PicrossList>(fetcher, 'GET', '/picrosses/mine'),
+      request<PicrossList>(fetcher, 'GET', '/picrosses', undefined, {
+        ...clean(params),
+        ...lang(),
+      }),
+    myPicrosses: () => request<PicrossList>(fetcher, 'GET', '/picrosses/mine', undefined, lang()),
     randomPicross: (exclude?: string) =>
-      request<PicrossDetail>(fetcher, 'GET', '/picrosses/random', undefined, clean({ exclude })),
-    getPicross: (id: string) => request<PicrossDetail>(fetcher, 'GET', `/picrosses/${id}`),
+      request<PicrossDetail>(fetcher, 'GET', '/picrosses/random', undefined, {
+        ...clean({ exclude }),
+        ...lang(),
+      }),
+    getPicross: (id: string) =>
+      request<PicrossDetail>(fetcher, 'GET', `/picrosses/${id}`, undefined, lang()),
     createPicross: (input: CreatePicrossInput) =>
-      request<PicrossSummary>(fetcher, 'POST', '/picrosses', input),
+      request<PicrossSummary>(fetcher, 'POST', '/picrosses', input, lang()),
     deletePicross: (id: string) => request<void>(fetcher, 'DELETE', `/picrosses/${id}`),
     likePicross: (id: string, liked: boolean) =>
-      request<PicrossSummary>(fetcher, 'PUT', `/picrosses/${id}/like`, { liked }),
+      request<PicrossSummary>(fetcher, 'PUT', `/picrosses/${id}/like`, { liked }, lang()),
     validatePicross: (id: string, validated: boolean) =>
-      request<PicrossSummary>(fetcher, 'PUT', `/picrosses/${id}/validation`, { validated }),
+      request<PicrossSummary>(fetcher, 'PUT', `/picrosses/${id}/validation`, { validated }, lang()),
   };
 }
 

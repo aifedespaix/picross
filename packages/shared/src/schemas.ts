@@ -6,7 +6,7 @@ export const NAME_MAX = 30;
 export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 128;
 export const TITLE_MIN = 3;
-export const TITLE_MAX = 40;
+export const TITLE_MAX = 60;
 
 const bitRow = z
   .array(z.union([z.literal(0), z.literal(1)]))
