@@ -143,15 +143,15 @@ function onKeyDown(event: KeyboardEvent) {
 // --- Rendu des cases ------------------------------------------------------
 function cellClass(state: CellState, row: number, col: number): string[] {
   const classes: string[] = [];
-  if (state === 'filled') classes.push('bg-blue-600 dark:bg-blue-500');
+  if (state === 'filled') classes.push('bg-ink dark:bg-pearl');
   else if (hover.value && (hover.value.row === row || hover.value.col === col))
-    classes.push('bg-blue-50 dark:bg-slate-800');
+    classes.push('bg-slate-100 dark:bg-slate-800');
   else classes.push('bg-white dark:bg-slate-900');
   // Séparateurs plus épais toutes les 5 cases pour compter plus facilement.
   if (col > 0 && col % 5 === 0) classes.push('ml-[2px]');
   if (row > 0 && row % 5 === 0) classes.push('mt-[2px]');
   if (focused.value && keyboardMode.value && cursor.value.row === row && cursor.value.col === col)
-    classes.push('relative z-10 outline-2 -outline-offset-2 outline-amber-500');
+    classes.push('relative z-10 outline-2 -outline-offset-2 outline-demon');
   return classes;
 }
 

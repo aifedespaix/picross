@@ -62,12 +62,12 @@ useSchemaOrg([
   <div>
     <!-- Hero -->
     <section
-      class="overflow-hidden bg-gradient-to-b from-blue-50 to-slate-50 dark:from-slate-900 dark:to-slate-950"
+      class="overflow-hidden bg-gradient-to-b from-white to-pearl dark:from-slate-900 dark:to-ink"
     >
       <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
         <div>
           <p
-            class="mb-3 inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 dark:bg-blue-950 dark:text-blue-200"
+            class="mb-3 inline-block rounded-full bg-ink/5 px-3 py-1 text-sm font-medium text-ink dark:bg-pearl/10 dark:text-pearl"
           >
             {{ t('home.eyebrow') }}
           </p>
@@ -97,7 +97,7 @@ useSchemaOrg([
       <ol class="mt-8 grid gap-4 md:grid-cols-3">
         <li v-for="(step, index) in steps" :key="step.title" class="card">
           <span
-            class="mb-3 grid size-9 place-items-center rounded-full bg-blue-600 font-bold text-white"
+            class="mb-3 grid size-9 place-items-center rounded-full bg-ink font-bold text-pearl dark:bg-pearl dark:text-ink"
             aria-hidden="true"
           >
             {{ index + 1 }}
@@ -144,13 +144,13 @@ useSchemaOrg([
     </section>
 
     <!-- Appel à l'action final -->
-    <section class="bg-blue-600 py-14 text-center text-white">
+    <section class="bg-ink py-14 text-center text-pearl">
       <div class="mx-auto max-w-2xl px-4">
         <h2 class="text-3xl font-bold">{{ t('home.ctaTitle') }}</h2>
-        <p class="mt-2 text-blue-100">{{ t('home.ctaText') }}</p>
+        <p class="mt-2 text-pearl/70">{{ t('home.ctaText') }}</p>
         <NuxtLink
           :to="localePath('play-id')"
-          class="btn mt-6 min-h-12 border-white bg-white px-6 text-base text-blue-700 hover:bg-blue-50"
+          class="btn mt-6 min-h-12 border-pearl bg-pearl px-6 text-base text-ink hover:bg-white"
         >
           <Icon name="pencil" /> {{ t('home.play') }}
         </NuxtLink>

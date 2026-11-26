@@ -137,7 +137,7 @@ useSeoMeta({ title: () => t('nav.create'), robots: 'noindex, nofollow' });
               class="btn btn-icon mb-0.5"
               :class="
                 linked
-                  ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-slate-700 dark:text-blue-300'
+                  ? 'border-ink bg-slate-100 text-ink dark:border-pearl dark:bg-slate-700 dark:text-pearl'
                   : ''
               "
               :aria-pressed="linked"

@@ -117,7 +117,7 @@ async function submit() {
       {{ isRegister ? t('auth.haveAccount') : t('auth.noAccount') }}
       <NuxtLink
         :to="{ path: localePath(isRegister ? 'login' : 'register'), query: route.query }"
-        class="font-medium text-blue-700 underline dark:text-blue-300"
+        class="font-medium text-ink underline decoration-demon underline-offset-4 dark:text-pearl"
       >
         {{ isRegister ? t('nav.login') : t('nav.register') }}
       </NuxtLink>

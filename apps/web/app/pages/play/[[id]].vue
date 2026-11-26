@@ -178,7 +178,7 @@ useSeoMeta({
 
     <!-- Plateau -->
     <section
-      class="h-[min(calc(100vw-1.5rem),calc(100svh-21rem))] min-h-64 w-full lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-[calc(100svh-5.5rem)]"
+      class="h-[min(calc(100vw-1.5rem),calc(100svh-21rem-var(--tabbar-h)))] min-h-64 w-full lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-[calc(100svh-5.5rem)]"
     >
       <p
         v-if="status === 'loading'"
@@ -230,7 +230,7 @@ useSeoMeta({
             class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-2 text-sm font-medium transition-colors"
             :class="
               game.board.tool.value === tool.id
-                ? 'bg-white text-blue-700 shadow-sm dark:bg-slate-600 dark:text-white'
+                ? 'bg-white text-ink shadow-sm dark:bg-slate-600 dark:text-white'
                 : 'text-slate-600 dark:text-slate-300'
             "
             @click="game.board.tool.value = tool.id"

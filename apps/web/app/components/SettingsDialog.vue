@@ -20,7 +20,7 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
           <label
             v-for="choice in THEMES"
             :key="choice"
-            class="btn cursor-pointer has-checked:border-blue-600 has-checked:bg-blue-50 has-checked:text-blue-800 has-focus-visible:outline-2 dark:has-checked:bg-slate-700 dark:has-checked:text-blue-200"
+            class="btn cursor-pointer has-checked:border-ink has-checked:bg-slate-100 has-checked:text-ink has-focus-visible:outline-2 dark:has-checked:border-pearl dark:has-checked:bg-slate-700 dark:has-checked:text-pearl"
           >
             <input
               v-model="settings.theme"
@@ -46,7 +46,7 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
             :aria-pressed="item.code === locale"
             :class="
               item.code === locale
-                ? 'border-blue-600 bg-blue-50 text-blue-800 dark:bg-slate-700 dark:text-blue-200'
+                ? 'border-ink bg-slate-100 text-ink dark:border-pearl dark:bg-slate-700 dark:text-pearl'
                 : ''
             "
             @click="setLocale(item.code)"
@@ -57,7 +57,7 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
       </fieldset>
 
       <label class="flex cursor-pointer items-center gap-3">
-        <input v-model="settings.sound" type="checkbox" class="size-5 accent-blue-600" />
+        <input v-model="settings.sound" type="checkbox" class="size-5 accent-demon" />
         <span class="text-sm font-medium">{{ t('settings.sound') }}</span>
       </label>
     </div>

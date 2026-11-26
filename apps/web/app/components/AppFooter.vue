@@ -8,7 +8,7 @@ const switchLocalePath = useSwitchLocalePath();
 
 <template>
   <footer
-    class="border-t border-slate-200 bg-white py-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
+    class="border-t border-slate-200 bg-white pt-6 pb-[calc(1.5rem+var(--tabbar-h))] text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
   >
     <div
       class="mx-auto flex max-w-6xl flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between"

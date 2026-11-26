@@ -74,7 +74,7 @@ useSeoMeta({ title: () => t('admin.title'), robots: 'noindex, nofollow' });
         class="min-h-10 rounded-lg px-4 text-sm font-medium"
         :class="
           status === option
-            ? 'bg-white text-blue-700 shadow-sm dark:bg-slate-600 dark:text-white'
+            ? 'bg-white text-ink shadow-sm dark:bg-slate-600 dark:text-white'
             : 'text-slate-600 dark:text-slate-300'
         "
         @click="status = option"

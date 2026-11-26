@@ -11,6 +11,8 @@ const PATTERN = [
 ];
 const clues = computeClues(fromBits(PATTERN));
 let order = 0;
+/** La dernière case remplie est le « pixel rond » rouge : la signature du logo. */
+const DEMON = PATTERN.flat().filter(Boolean).length - 1;
 const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
 </script>
 
@@ -33,7 +35,7 @@ const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
           v-for="(slot, c) in row"
           :key="c"
           class="cell"
-          :class="{ on: slot >= 0 }"
+          :class="{ on: slot >= 0, demon: slot === DEMON }"
           :style="slot >= 0 ? { '--i': slot } : undefined"
         />
       </template>
@@ -45,6 +47,12 @@ const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
 @reference '../assets/css/main.css';
 
 .hero-board {
+  --empty: white;
+  --fill: var(--color-ink);
+  @variant dark {
+    --empty: var(--color-slate-900);
+    --fill: var(--color-pearl);
+  }
   --cell: clamp(2.25rem, 9vw, 3.5rem);
   display: grid;
   grid-template-columns: auto calc(var(--cell) * 5);
@@ -87,28 +95,51 @@ const cells = PATTERN.map((row) => row.map((bit) => (bit ? order++ : -1)));
   @apply bg-white dark:bg-slate-900;
 }
 .cell.on {
-  @apply bg-blue-600 dark:bg-blue-500;
+  @apply bg-ink dark:bg-pearl;
+}
+.cell.demon {
+  @apply rounded-full bg-demon dark:bg-demon;
 }
 @media (prefers-reduced-motion: no-preference) {
   .cell.on {
     animation: fill 9s infinite both;
     animation-delay: calc(var(--i) * 0.28s);
   }
+  .cell.demon {
+    animation-name: fill-demon;
+  }
 }
-@keyframes fill {
+@keyframes fill-demon {
   0%,
   8% {
-    background-color: white;
+    background-color: var(--empty);
     transform: scale(0.85);
   }
   14%,
   82% {
-    background-color: var(--color-blue-600);
+    background-color: var(--color-demon);
     transform: scale(1);
   }
   92%,
   100% {
-    background-color: white;
+    background-color: var(--empty);
+    transform: scale(0.85);
+  }
+}
+@keyframes fill {
+  0%,
+  8% {
+    background-color: var(--empty);
+    transform: scale(0.85);
+  }
+  14%,
+  82% {
+    background-color: var(--fill);
+    transform: scale(1);
+  }
+  92%,
+  100% {
+    background-color: var(--empty);
     transform: scale(0.85);
   }
 }

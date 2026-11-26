@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppFooter from '@/components/AppFooter.vue';
+import AppTabBar from '@/components/AppTabBar.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import SettingsDialog from '@/components/SettingsDialog.vue';
 
@@ -18,6 +19,7 @@ const settingsOpen = ref(false);
     <AppHeader @open-settings="settingsOpen = true" />
     <main id="main" class="flex-1"><slot /></main>
     <AppFooter />
+    <AppTabBar />
     <SettingsDialog :open="settingsOpen" @close="settingsOpen = false" />
   </div>
 </template>

@@ -13,7 +13,7 @@ defineProps<{
     class="clue-line flex items-center justify-end rounded-sm font-semibold tabular-nums transition-colors"
     :class="[
       direction === 'col' ? 'flex-col' : 'flex-row px-[calc(var(--cell)*.1)]',
-      active ? 'bg-blue-100 dark:bg-slate-800' : '',
+      active ? 'bg-slate-200 dark:bg-slate-800' : '',
     ]"
   >
     <span

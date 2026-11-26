@@ -33,10 +33,10 @@ const items = computed<NavItem[]>(() => [
         :aria-label="t('app.name')"
       >
         <img :src="logoUrl" alt="" class="size-8" width="32" height="32" />
-        <span class="hidden text-lg font-bold sm:inline">{{ t('app.name') }}</span>
+        <span class="text-lg font-bold">{{ t('app.name') }}</span>
       </NuxtLink>
 
-      <nav :aria-label="t('nav.main')" class="flex flex-1 items-center gap-1">
+      <nav :aria-label="t('nav.main')" class="hidden flex-1 items-center gap-1 sm:flex">
         <NuxtLink
           v-for="item in items"
           :key="item.icon"
@@ -58,6 +58,7 @@ const items = computed<NavItem[]>(() => [
         </NuxtLink>
       </nav>
 
+      <span class="flex-1 sm:hidden" aria-hidden="true" />
       <button
         type="button"
         class="btn btn-icon border-transparent bg-transparent shadow-none"
@@ -70,7 +71,7 @@ const items = computed<NavItem[]>(() => [
       <NuxtLink
         v-if="auth.user"
         :to="localePath('profile')"
-        class="nav-link"
+        class="nav-link hidden sm:inline-flex"
         :aria-label="t('nav.profile')"
       >
         <Icon name="user" />
@@ -79,11 +80,10 @@ const items = computed<NavItem[]>(() => [
       <NuxtLink
         v-else
         :to="localePath('login')"
-        class="btn btn-primary"
+        class="btn btn-primary hidden sm:inline-flex"
         :aria-label="t('nav.login')"
       >
-        <Icon name="user" class="sm:hidden" />
-        <span class="hidden sm:inline">{{ t('nav.login') }}</span>
+        {{ t('nav.login') }}
       </NuxtLink>
     </div>
   </header>
@@ -96,6 +96,6 @@ const items = computed<NavItem[]>(() => [
 }
 .nav-link.router-link-exact-active,
 .nav-link[aria-current='page'] {
-  @apply bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-300;
+  @apply bg-ink/5 text-ink dark:bg-pearl/10 dark:text-pearl;
 }
 </style>

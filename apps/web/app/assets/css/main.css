@@ -4,6 +4,23 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* Palette tirée du logo : le noir du trait, le blanc du chien, le rouge de ses yeux.
+     Règle d'or : le rouge « démon » reste rare (accent, jamais un aplat). */
+  --color-ink: #13110c;
+  --color-pearl: #faf9f6;
+  --color-demon: #e31014;
+  /* Gris « chauds » (teinte du logo) à la place des gris bleutés de Tailwind. */
+  --color-slate-50: #f7f6f3;
+  --color-slate-100: #efede9;
+  --color-slate-200: #e2dfd9;
+  --color-slate-300: #cfcbc3;
+  --color-slate-400: #a29d93;
+  --color-slate-500: #78736a;
+  --color-slate-600: #5a564e;
+  --color-slate-700: #3f3c36;
+  --color-slate-800: #2a2823;
+  --color-slate-900: #1b1914;
+  --color-slate-950: #13110c;
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -15,15 +32,24 @@
     height: 100%;
   }
   body {
-    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-pearl text-ink antialiased dark:bg-ink dark:text-pearl;
     -webkit-tap-highlight-color: transparent;
+  }
+  :root {
+    /* Hauteur de la barre d'onglets du bas (mobile uniquement). */
+    --tabbar-h: 0px;
+  }
+  @media (width < 40rem) {
+    :root {
+      --tabbar-h: calc(4rem + env(safe-area-inset-bottom));
+    }
   }
   button:not(:disabled),
   [role='button'] {
     cursor: pointer;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-blue-600 dark:outline-blue-400;
+    @apply outline-2 outline-offset-2 outline-demon;
   }
 }
 
@@ -32,7 +58,7 @@
     @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-xs transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
   }
   .btn-primary {
-    @apply border-blue-600 bg-blue-600 text-white hover:bg-blue-700 dark:border-blue-500 dark:bg-blue-500 dark:text-white dark:hover:bg-blue-600;
+    @apply border-ink bg-ink text-pearl hover:bg-ink/85 dark:border-pearl dark:bg-pearl dark:text-ink dark:hover:bg-pearl/85;
   }
   .btn-danger {
     @apply border-red-300 text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950;
@@ -41,13 +67,13 @@
     @apply min-h-10 min-w-10 px-2;
   }
   .card {
-    @apply rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900;
+    @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900;
   }
   .field-label {
     @apply mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300;
   }
   .field-input {
-    @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 shadow-xs placeholder:text-slate-400 focus:border-blue-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
+    @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 shadow-xs placeholder:text-slate-400 focus:border-ink dark:focus:border-pearl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
   }
   .field-input[aria-invalid='true'] {
     @apply border-red-500;
