@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22.12" },
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "dev": "pnpm -r --parallel --filter @picross/web --filter @picross/api dev",
     "build": "pnpm -r build",
@@ -14,10 +16,11 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.0",
-    "eslint": "^9.39.0",
+    "@eslint/js": "^10.0.0",
+    "eslint": "^10.15.0",
     "eslint-plugin-vue": "^10.12.1",
-    "globals": "^16.0.0",
+    "globals": "^17.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.10.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.74.0"

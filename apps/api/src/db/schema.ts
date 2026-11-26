@@ -1,7 +1,17 @@
 import { sql } from 'drizzle-orm';
-import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import {
+  index,
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core';
 
-const id = () => text('id').primaryKey().$defaultFn(() => crypto.randomUUID());
+const id = () =>
+  text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID());
 const createdAt = () =>
   integer('created_at', { mode: 'timestamp_ms' })
     .notNull()

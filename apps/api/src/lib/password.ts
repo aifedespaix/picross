@@ -15,7 +15,14 @@ function derive(password: string, salt: Buffer, params: ScryptOptions = PARAMS):
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
   const key = await derive(password, salt);
-  return ['scrypt', PARAMS.N, PARAMS.r, PARAMS.p, salt.toString('base64'), key.toString('base64')].join('$');
+  return [
+    'scrypt',
+    PARAMS.N,
+    PARAMS.r,
+    PARAMS.p,
+    salt.toString('base64'),
+    key.toString('base64'),
+  ].join('$');
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {

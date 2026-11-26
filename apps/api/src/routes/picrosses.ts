@@ -84,7 +84,9 @@ export function picrossRoutes({ db, env }: Deps) {
 
   const getOr404 = (c: AppContext, id: string) => {
     const parsed = idSchema.safeParse(id);
-    const row = parsed.success ? base(c.get('user')?.id).where(eq(picrosses.id, id)).get() : undefined;
+    const row = parsed.success
+      ? base(c.get('user')?.id).where(eq(picrosses.id, id)).get()
+      : undefined;
     if (!row || !canSee(c, row)) throw new HttpError(404, 'not_found');
     return row;
   };
@@ -109,7 +111,12 @@ export function picrossRoutes({ db, env }: Deps) {
     }
     const where = conditions.length ? and(...conditions) : undefined;
 
-    const total = db.select({ n: sql<number>`count(*)` }).from(picrosses).where(where).get()?.n ?? 0;
+    const total =
+      db
+        .select({ n: sql<number>`count(*)` })
+        .from(picrosses)
+        .where(where)
+        .get()?.n ?? 0;
     const rows = base(user?.id)
       .where(where)
       .orderBy(
@@ -135,12 +142,18 @@ export function picrossRoutes({ db, env }: Deps) {
   app.get('/random', (c) => {
     const exclude = idSchema.safeParse(c.req.query('exclude'));
     const row = base(c.get('user')?.id)
-      .where(and(eq(picrosses.validated, true), exclude.success ? ne(picrosses.id, exclude.data) : undefined))
+      .where(
+        and(
+          eq(picrosses.validated, true),
+          exclude.success ? ne(picrosses.id, exclude.data) : undefined,
+        ),
+      )
       .orderBy(sql`random()`)
       .limit(1)
       .get();
     // S'il n'y a qu'une seule grille, on la rejoue plutôt que de renvoyer une erreur.
-    const fallback = row ?? base(c.get('user')?.id).where(eq(picrosses.validated, true)).limit(1).get();
+    const fallback =
+      row ?? base(c.get('user')?.id).where(eq(picrosses.validated, true)).limit(1).get();
     if (!fallback) throw new HttpError(404, 'not_found');
     return c.json(toDetail(fallback));
   });
@@ -180,7 +193,9 @@ export function picrossRoutes({ db, env }: Deps) {
     if (liked) {
       db.insert(likes).values({ userId: user.id, picrossId: row.id }).onConflictDoNothing().run();
     } else {
-      db.delete(likes).where(and(eq(likes.userId, user.id), eq(likes.picrossId, row.id))).run();
+      db.delete(likes)
+        .where(and(eq(likes.userId, user.id), eq(likes.picrossId, row.id)))
+        .run();
     }
     return c.json(toSummary(getOr404(c, row.id)));
   });

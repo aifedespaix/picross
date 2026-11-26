@@ -15,7 +15,14 @@ export function createApp(deps: Deps) {
   if (deps.env.corsOrigin) {
     app.use(cors({ origin: deps.env.corsOrigin, credentials: true }));
   }
-  app.use(bodyLimit({ maxSize: 64 * 1024, onError: () => { throw new HttpError(413, 'payload_too_large'); } }));
+  app.use(
+    bodyLimit({
+      maxSize: 64 * 1024,
+      onError: () => {
+        throw new HttpError(413, 'payload_too_large');
+      },
+    }),
+  );
   app.use(requireJson);
   app.use(sessionMiddleware(deps));
 

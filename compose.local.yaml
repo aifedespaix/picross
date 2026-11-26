@@ -1,0 +1,8 @@
+# Surcharge pour tester en local : http://localhost:8080 (pas de HTTPS => cookie non « Secure »).
+services:
+  api:
+    environment:
+      COOKIE_SECURE: 'false'
+  web:
+    ports:
+      - '8080:80'

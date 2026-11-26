@@ -52,7 +52,9 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     throw new Error('JWT_SECRET est obligatoire en production (openssl rand -base64 48)');
   }
   if (!raw.JWT_SECRET && raw.NODE_ENV !== 'test') {
-    console.warn('[api] JWT_SECRET absent : secret aléatoire, les sessions sautent à chaque redémarrage.');
+    console.warn(
+      '[api] JWT_SECRET absent : secret aléatoire, les sessions sautent à chaque redémarrage.',
+    );
   }
 
   return {

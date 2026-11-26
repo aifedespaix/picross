@@ -43,7 +43,14 @@ describe('computeClues', () => {
 
 describe('validateSolution', () => {
   it('refuse les tailles hors bornes', () => {
-    expect(validateSolution(fromBits([[1, 1], [1, 1]]))).toBe('size');
+    expect(
+      validateSolution(
+        fromBits([
+          [1, 1],
+          [1, 1],
+        ]),
+      ),
+    ).toBe('size');
   });
   it('refuse les grilles trop vides', () => {
     const bits = Array.from({ length: 5 }, () => Array(5).fill(0));
@@ -51,12 +58,22 @@ describe('validateSolution', () => {
     expect(validateSolution(fromBits(bits))).toBe('fill');
   });
   it('refuse les grilles non rectangulaires', () => {
-    expect(validateSolution(fromBits([[1, 1, 1], [1, 1, 1], [1, 1]]))).toBe('shape');
+    expect(
+      validateSolution(
+        fromBits([
+          [1, 1, 1],
+          [1, 1, 1],
+          [1, 1],
+        ]),
+      ),
+    ).toBe('shape');
   });
 });
 
 describe('grilles fournies', () => {
   it.each(STARTER_PUZZLES)('« $title » est valide pour le schéma de création', (puzzle) => {
-    expect(createPicrossSchema.safeParse({ title: puzzle.title, map: starterBits(puzzle.rows) }).success).toBe(true);
+    expect(
+      createPicrossSchema.safeParse({ title: puzzle.title, map: starterBits(puzzle.rows) }).success,
+    ).toBe(true);
   });
 });

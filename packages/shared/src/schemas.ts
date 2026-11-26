@@ -8,7 +8,10 @@ export const PASSWORD_MAX = 128;
 export const TITLE_MIN = 3;
 export const TITLE_MAX = 40;
 
-const bitRow = z.array(z.union([z.literal(0), z.literal(1)])).min(MIN_SIZE).max(MAX_SIZE);
+const bitRow = z
+  .array(z.union([z.literal(0), z.literal(1)]))
+  .min(MIN_SIZE)
+  .max(MAX_SIZE);
 
 /** Matrice 0/1 -> vérifie forme, bornes et remplissage minimal. */
 export const mapSchema = z

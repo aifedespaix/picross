@@ -1,0 +1,46 @@
+# Déploiement : un seul compose pour le front (nginx) et l'API (Node), SQLite sur un volume.
+#
+#   docker compose up -d --build           (variables : voir .env.example)
+#   docker compose -f compose.yaml -f compose.local.yaml up --build   (test local sur :8080)
+#
+# Seul « web » doit être exposé publiquement (domaine → service web, port 80). L'API n'est
+# joignable que depuis le réseau du compose, via le proxy /api de nginx.
+
+name: picross
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # Obligatoire : openssl rand -base64 48
+      JWT_SECRET: ${JWT_SECRET:?définissez JWT_SECRET (openssl rand -base64 48)}
+      # Emails (séparés par des virgules) promus administrateurs à leur connexion.
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      # true : les grilles créées sont publiées sans modération.
+      AUTO_VALIDATE: ${AUTO_VALIDATE:-false}
+      # Derrière nginx/Traefik : on lit l'IP réelle dans X-Forwarded-For (rate limiting).
+      TRUST_PROXY: 'true'
+      # Mettre false uniquement pour tester en HTTP simple (cf. compose.local.yaml).
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    volumes:
+      - picross-data:/data
+    expose:
+      - '3000'
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - '80'
+
+volumes:
+  picross-data:

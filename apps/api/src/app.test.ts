@@ -25,7 +25,9 @@ function setup(overrides: Record<string, string> = {}) {
         body: body === undefined ? undefined : JSON.stringify(body),
       });
       const set = res.headers.get('set-cookie');
-      if (set) cookie = set.startsWith('picross_session=;') || /Max-Age=0/i.test(set) ? '' : set.split(';')[0]!;
+      if (set)
+        cookie =
+          set.startsWith('picross_session=;') || /Max-Age=0/i.test(set) ? '' : set.split(';')[0]!;
       const text = await res.text();
       return { status: res.status, headers: res.headers, json: text ? JSON.parse(text) : null };
     };
@@ -33,7 +35,11 @@ function setup(overrides: Record<string, string> = {}) {
   return { app, db, env, client };
 }
 
-const user = (n = 1) => ({ name: `joueur${n}`, email: `joueur${n}@example.com`, password: 'correct horse' });
+const user = (n = 1) => ({
+  name: `joueur${n}`,
+  email: `joueur${n}@example.com`,
+  password: 'correct horse',
+});
 
 describe('auth', () => {
   let ctx: ReturnType<typeof setup>;
@@ -53,9 +59,12 @@ describe('auth', () => {
     expect((await http('GET', '/auth/me')).json.email).toBe('joueur1@example.com');
 
     await http('POST', '/auth/logout');
-    expect((await http('GET', '/auth/me')).status).toBe(401);
+    expect((await http('GET', '/auth/me')).json).toBeNull();
 
-    const login = await http('POST', '/auth/login', { email: 'JOUEUR1@example.com', password: 'correct horse' });
+    const login = await http('POST', '/auth/login', {
+      email: 'JOUEUR1@example.com',
+      password: 'correct horse',
+    });
     expect(login.status).toBe(200);
   });
 
@@ -71,7 +80,11 @@ describe('auth', () => {
   });
 
   it('valide les champs', async () => {
-    const res = await ctx.client()('POST', '/auth/register', { name: 'a', email: 'nope', password: 'court' });
+    const res = await ctx.client()('POST', '/auth/register', {
+      name: 'a',
+      email: 'nope',
+      password: 'court',
+    });
     expect(res.status).toBe(400);
     expect(Object.keys(res.json.fields).sort()).toEqual(['email', 'name', 'password']);
   });
@@ -80,8 +93,14 @@ describe('auth', () => {
     const http = ctx.client();
     await http('POST', '/auth/register', user());
     await http('POST', '/auth/logout');
-    const wrongPassword = await http('POST', '/auth/login', { email: user().email, password: 'faux faux faux' });
-    const unknown = await http('POST', '/auth/login', { email: 'inconnu@example.com', password: 'faux faux faux' });
+    const wrongPassword = await http('POST', '/auth/login', {
+      email: user().email,
+      password: 'faux faux faux',
+    });
+    const unknown = await http('POST', '/auth/login', {
+      email: 'inconnu@example.com',
+      password: 'faux faux faux',
+    });
     expect(wrongPassword.status).toBe(401);
     expect(unknown.status).toBe(401);
     expect(unknown.json).toEqual(wrongPassword.json);
@@ -91,7 +110,8 @@ describe('auth', () => {
     const http = ctx.client();
     let last = 0;
     for (let i = 0; i < 12; i++) {
-      last = (await http('POST', '/auth/login', { email: 'x@example.com', password: 'whatever' })).status;
+      last = (await http('POST', '/auth/login', { email: 'x@example.com', password: 'whatever' }))
+        .status;
     }
     expect(last).toBe(429);
   });
@@ -112,8 +132,15 @@ describe('auth', () => {
   });
 
   it('ignore un cookie de session forgé', async () => {
-    const res = await ctx.app.request('/api/auth/me', { headers: { cookie: 'picross_session=abc.def.ghi' } });
-    expect(res.status).toBe(401);
+    const forged = { cookie: 'picross_session=abc.def.ghi', 'content-type': 'application/json' };
+    const me = await ctx.app.request('/api/auth/me', { headers: forged });
+    expect(await me.json()).toBeNull();
+    const create = await ctx.app.request('/api/picrosses', {
+      method: 'POST',
+      headers: forged,
+      body: JSON.stringify({ title: 'Ma grille', map: MAP }),
+    });
+    expect(create.status).toBe(401);
   });
 });
 
@@ -146,7 +173,12 @@ describe('picrosses', () => {
     await author('POST', '/auth/register', user(1));
     const created = await author('POST', '/picrosses', { title: 'Ma grille', map: MAP });
     expect(created.status).toBe(201);
-    expect(created.json).toMatchObject({ validated: false, author: 'joueur1', width: 10, height: 10 });
+    expect(created.json).toMatchObject({
+      validated: false,
+      author: 'joueur1',
+      width: 10,
+      height: 10,
+    });
 
     const stranger = ctx.client();
     expect((await stranger('GET', `/picrosses/${created.json.id}`)).status).toBe(404);
@@ -156,15 +188,33 @@ describe('picrosses', () => {
   });
 
   it('exige d’être connecté pour créer', async () => {
-    expect((await ctx.client()('POST', '/picrosses', { title: 'Ma grille', map: MAP })).status).toBe(401);
+    expect(
+      (await ctx.client()('POST', '/picrosses', { title: 'Ma grille', map: MAP })).status,
+    ).toBe(401);
   });
 
   it('refuse les grilles invalides', async () => {
     const http = ctx.client();
     await http('POST', '/auth/register', user());
-    const tooSmall = await http('POST', '/picrosses', { title: 'ok ok', map: [[1, 1], [1, 1]] });
-    const notBits = await http('POST', '/picrosses', { title: 'ok ok', map: [[2, 1, 1], [1, 1, 1], [1, 1, 1]] });
-    const empty = await http('POST', '/picrosses', { title: 'ok ok', map: Array.from({ length: 5 }, () => Array(5).fill(0)) });
+    const tooSmall = await http('POST', '/picrosses', {
+      title: 'ok ok',
+      map: [
+        [1, 1],
+        [1, 1],
+      ],
+    });
+    const notBits = await http('POST', '/picrosses', {
+      title: 'ok ok',
+      map: [
+        [2, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+      ],
+    });
+    const empty = await http('POST', '/picrosses', {
+      title: 'ok ok',
+      map: Array.from({ length: 5 }, () => Array(5).fill(0)),
+    });
     expect([tooSmall.status, notBits.status, empty.status]).toEqual([400, 400, 400]);
   });
 
@@ -173,10 +223,16 @@ describe('picrosses', () => {
     const author = admin.client();
     const mod = admin.client();
     await author('POST', '/auth/register', user(1));
-    await mod('POST', '/auth/register', { name: 'chef', email: 'admin@example.com', password: 'correct horse' });
+    await mod('POST', '/auth/register', {
+      name: 'chef',
+      email: 'admin@example.com',
+      password: 'correct horse',
+    });
     const { json: grid } = await author('POST', '/picrosses', { title: 'À valider', map: MAP });
 
-    expect((await author('PUT', `/picrosses/${grid.id}/validation`, { validated: true })).status).toBe(403);
+    expect(
+      (await author('PUT', `/picrosses/${grid.id}/validation`, { validated: true })).status,
+    ).toBe(403);
     expect((await mod('GET', '/picrosses?status=pending')).json.total).toBe(1);
     expect((await author('GET', '/picrosses?status=pending')).status).toBe(403);
 

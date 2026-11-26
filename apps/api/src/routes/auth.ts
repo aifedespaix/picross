@@ -2,7 +2,7 @@ import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { loginSchema, registerSchema, type UserDto } from '@picross/shared';
 import { users, type UserRow } from '../db/schema.ts';
-import { HttpError, jsonBody, requireUser, type AppEnv, type Deps } from '../lib/http.ts';
+import { HttpError, jsonBody, type AppEnv, type Deps } from '../lib/http.ts';
 import { dummyVerify, hashPassword, verifyPassword } from '../lib/password.ts';
 import { clientIp, rateLimit } from '../lib/rate-limit.ts';
 import { endSession, startSession } from '../lib/session.ts';
@@ -80,7 +80,11 @@ export function authRoutes(deps: Deps) {
     return c.body(null, 204);
   });
 
-  app.get('/me', (c) => c.json(toUserDto(requireUser(c))));
+  /** Utilisateur courant, ou `null` si anonyme (200 plutôt que 401 : ce n'est pas une erreur). */
+  app.get('/me', (c) => {
+    const user = c.get('user');
+    return c.json(user ? toUserDto(user) : null);
+  });
 
   return app;
 }

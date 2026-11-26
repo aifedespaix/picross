@@ -10,7 +10,11 @@ const ALG = 'HS256';
 
 export async function startSession(c: AppContext, { env }: Deps, userId: string) {
   const maxAge = env.sessionDays * 24 * 60 * 60;
-  const token = await sign({ sub: userId, exp: Math.floor(Date.now() / 1000) + maxAge }, env.jwtSecret, ALG);
+  const token = await sign(
+    { sub: userId, exp: Math.floor(Date.now() / 1000) + maxAge },
+    env.jwtSecret,
+    ALG,
+  );
   setCookie(c, COOKIE, token, {
     httpOnly: true, // illisible depuis le JavaScript de la page : pas de vol de session par XSS
     sameSite: 'Lax', // pas envoyé sur les requêtes cross-site : protection CSRF
