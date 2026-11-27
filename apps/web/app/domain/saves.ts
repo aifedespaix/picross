@@ -6,6 +6,8 @@ export interface SavedGame {
   cells: Grid;
   mistakes: number;
   elapsed: number;
+  /** Indices demandés (absent dans les anciennes sauvegardes). */
+  hints?: number;
 }
 
 const KEY = 'picross:games';
@@ -30,7 +32,8 @@ function isSavedGame(value: unknown): value is SavedGame {
     Array.isArray(game.cells) &&
     game.cells.every((row) => Array.isArray(row) && row.every((c) => STATES.includes(c))) &&
     Number.isFinite(game.mistakes) &&
-    Number.isFinite(game.elapsed)
+    Number.isFinite(game.elapsed) &&
+    (game.hints === undefined || Number.isFinite(game.hints))
   );
 }
 

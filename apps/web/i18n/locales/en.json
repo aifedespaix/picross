@@ -151,8 +151,6 @@
     "haptics": "Vibration",
     "leftHanded": "Left-handed mode",
     "leftHandedHint": "Puts the controls on the left-hand side.",
-    "autoCross": "Auto-cross",
-    "autoCrossHint": "Marks the remaining cells of a solved row or column.",
     "shortcuts": "Keyboard shortcuts",
     "keyUndo": "Undo",
     "keyRedo": "Redo",
@@ -160,7 +158,19 @@
     "keyMove": "Move the cursor",
     "keyFill": "Fill the cell",
     "keyCross": "Mark the cell",
-    "keyHelp": "Open settings"
+    "keyHelp": "Open settings",
+    "assist": "Marking help",
+    "assistModes": {
+      "off": "None",
+      "simple": "Simple crosses",
+      "assisted": "Assisted"
+    },
+    "assistHints": {
+      "off": "You place every cross yourself.",
+      "simple": "Crosses the remaining cells of a solved row or column.",
+      "assisted": "Also crosses cells ruled out by your filled cells. No filled cell is ever revealed."
+    },
+    "keyHint": "Ask for a hint"
   },
   "errors": {
     "email": "Enter a valid email address.",
@@ -346,6 +356,41 @@
         "title": "The Demon",
         "text": "He was waiting for you. Perfect, or nearly."
       }
+    }
+  },
+  "hint": {
+    "ask": "Hint (H)",
+    "apply": "Apply",
+    "close": "Close",
+    "used": "Hints used (each counts as a mistake)",
+    "count": "{n} hint | {n} hints",
+    "error": {
+      "row": "A cell is wrong in row {n}.",
+      "col": "A cell is wrong in column {n}."
+    },
+    "empty": {
+      "row": "Row {n} has no filled cell: they are all empty.",
+      "col": "Column {n} has no filled cell: they are all empty."
+    },
+    "full": {
+      "row": "The clues of row {n} fill its whole width, with a single gap between blocks.",
+      "col": "The clues of column {n} fill its whole height, with a single gap between blocks."
+    },
+    "finished": {
+      "row": "Row {n} is complete: the remaining cells must be empty.",
+      "col": "Column {n} is complete: the remaining cells must be empty."
+    },
+    "overlap": {
+      "row": "In row {n}, the block of {clue} is too big to move much: its middle cells must be filled.",
+      "col": "In column {n}, the block of {clue} is too big to move much: its middle cells must be filled."
+    },
+    "logic": {
+      "row": "Look at row {n}: with the cells already placed, a deduction is possible.",
+      "col": "Look at column {n}: with the cells already placed, a deduction is possible."
+    },
+    "reveal": {
+      "row": "No simple deduction left: here is a cell of row {n}.",
+      "col": "No simple deduction left: here is a cell of column {n}."
     }
   }
 }

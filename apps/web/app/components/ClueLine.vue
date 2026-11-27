@@ -5,6 +5,8 @@ defineProps<{
   done?: boolean[];
   direction: 'row' | 'col';
   active?: boolean;
+  /** Mise en avant par un indice. */
+  hinted?: boolean;
 }>();
 </script>
 
@@ -13,7 +15,7 @@ defineProps<{
     class="clue-line flex items-center justify-end rounded-sm font-semibold tabular-nums transition-colors"
     :class="[
       direction === 'col' ? 'flex-col' : 'flex-row px-[calc(var(--cell)*.1)]',
-      active ? 'bg-slate-200 dark:bg-slate-800' : '',
+      hinted ? 'bg-amber-200 dark:bg-amber-800/60' : active ? 'bg-slate-200 dark:bg-slate-800' : '',
     ]"
   >
     <span

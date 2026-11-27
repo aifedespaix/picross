@@ -19,6 +19,8 @@ const props = defineProps<{
   allowCross: boolean;
   /** Grise les indices satisfaits (mode jeu uniquement). */
   showProgress: boolean;
+  /** Ligne ou colonne mise en avant par un indice. */
+  highlight?: { axis: 'row' | 'col'; index: number } | null;
 }>();
 
 const emit = defineEmits<{
@@ -238,7 +240,13 @@ function onKeyDown(event: KeyboardEvent) {
 // --- Rendu des cases ------------------------------------------------------
 function cellClass(state: CellState, row: number, col: number): string[] {
   const classes: string[] = [];
+  const hinted =
+    props.highlight &&
+    (props.highlight.axis === 'row'
+      ? props.highlight.index === row
+      : props.highlight.index === col);
   if (state === 'filled') classes.push('bg-ink dark:bg-pearl');
+  else if (hinted) classes.push('bg-amber-100 dark:bg-amber-900/40');
   else if (hover.value && (hover.value.row === row || hover.value.col === col))
     classes.push('bg-slate-100 dark:bg-slate-800');
   else classes.push('bg-white dark:bg-slate-900');
@@ -272,6 +280,7 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
           :clues="clues"
           :done="colDone[col]"
           :active="hover?.col === col"
+          :hinted="highlight?.axis === 'col' && highlight.index === col"
         />
       </div>
       <div class="board-row-clues" aria-hidden="true">
@@ -282,6 +291,7 @@ const stateLabel = (state: CellState) => t(`game.state.${state}`);
           :clues="clues"
           :done="rowDone[row]"
           :active="hover?.row === row"
+          :hinted="highlight?.axis === 'row' && highlight.index === row"
         />
       </div>
 

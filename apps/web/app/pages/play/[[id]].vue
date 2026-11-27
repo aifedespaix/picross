@@ -136,7 +136,8 @@ watch(
       return;
     }
     if (!journey.ready.value) journey.load();
-    earned.value = starsFor(game.mistakes.value);
+    // Chaque indice demandé compte comme une erreur.
+    earned.value = starsFor(game.mistakes.value + game.hints.value);
     journey.complete(current.id.slice('local-'.length), earned.value, game.elapsed.value);
   },
 );
@@ -164,6 +165,17 @@ function continueJourney() {
     }),
   );
 }
+
+/** Texte de l'indice affiché (la ligne ou colonne est numérotée à partir de 1). */
+const hintText = computed(() => {
+  const hint = game.hint.value;
+  if (!hint) return '';
+  return t(`hint.${hint.reason}.${hint.axis}`, {
+    n: hint.index + 1,
+    clue: hint.clue ?? 0,
+    count: hint.cells.length,
+  });
+});
 
 const hasProgress = computed(() => game.filled.value > 0 || game.board.canUndo.value);
 const isBlank = computed(() =>
@@ -244,6 +256,8 @@ useEventListener('keydown', (event: KeyboardEvent) => {
     game.redo();
   } else if (!mod && key === 't') {
     toggleTool();
+  } else if (!mod && key === 'h') {
+    game.askHint();
   } else if (!mod && event.key === '?') {
     settingsOpen.value = true;
   }
@@ -305,6 +319,9 @@ useSeoMeta({
       >
         {{ t(`whisper.${whisper}`) }}
       </p>
+      <span v-if="puzzle && game.hints.value > 0" :title="t('hint.used')">
+        {{ t('hint.count', game.hints.value) }}
+      </span>
       <p v-if="offline" class="truncate text-amber-700 dark:text-amber-300" role="status">
         {{ t('game.offline') }}
       </p>
@@ -334,6 +351,7 @@ useSeoMeta({
             :col-clues="game.clues.value.cols"
             :tool="game.board.tool.value"
             :interactive="!game.won.value && status !== 'loading'"
+            :highlight="game.hint.value"
             allow-cross
             show-progress
             @stroke-start="
@@ -484,6 +502,16 @@ useSeoMeta({
         >
           <Icon name="reset" />
         </button>
+        <button
+          type="button"
+          class="ghost"
+          :class="game.hint.value ? 'text-amber-500 dark:text-amber-400' : ''"
+          :aria-label="game.hint.value ? t('hint.apply') : t('hint.ask')"
+          :title="game.hint.value ? t('hint.apply') : t('hint.ask')"
+          @click="game.askHint()"
+        >
+          <Icon name="bulb" :filled="!!game.hint.value" />
+        </button>
         <!-- Un seul bouton : il affiche l'outil actif et bascule vers l'autre au toucher. -->
         <button
           type="button"
@@ -520,6 +548,35 @@ useSeoMeta({
           @click="askNew"
         >
           <Icon name="shuffle" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Indice : où regarder et pourquoi ; « Appliquer » joue le coup à la place du joueur. -->
+    <div
+      class="pointer-events-none absolute inset-x-0 bottom-20 z-30 flex justify-center px-3 short:bottom-3"
+    >
+      <div
+        v-if="game.hint.value && !game.won.value"
+        class="pointer-events-auto flex max-w-md items-center gap-2 rounded-2xl bg-amber-100 py-1.5 pr-1.5 pl-4 text-sm text-amber-950 shadow-lg dark:bg-amber-900 dark:text-amber-50"
+        role="status"
+      >
+        <span class="min-w-0">{{ hintText }}</span>
+        <button
+          type="button"
+          class="shrink-0 rounded-xl bg-amber-950/10 px-3 py-1.5 font-medium hover:bg-amber-950/20 dark:bg-white/15 dark:hover:bg-white/25"
+          @click="game.askHint()"
+        >
+          {{ t('hint.apply') }}
+        </button>
+        <button
+          type="button"
+          class="grid size-8 shrink-0 place-items-center rounded-xl hover:bg-amber-950/10 dark:hover:bg-white/15"
+          :aria-label="t('hint.close')"
+          :title="t('hint.close')"
+          @click="game.dismissHint()"
+        >
+          <Icon name="x" />
         </button>
       </div>
     </div>

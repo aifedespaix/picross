@@ -10,6 +10,8 @@ import {
   type PicrossDetail,
 } from '@picross/shared';
 import { computed, ref, shallowRef, watch } from 'vue';
+import { createAssist } from '@/domain/assist';
+import { applyHint, findHint, type Hint } from '@/domain/hint';
 import {
   autoCross,
   countFilled,
@@ -70,6 +72,10 @@ export function usePlayableGame() {
   const elapsed = ref(0);
   /** Nombre de fois où une case fausse a été remplie (0 = partie parfaite). */
   const mistakes = ref(0);
+  /** Indices demandés : chacun compte comme une erreur pour les étoiles. */
+  const hints = ref(0);
+  /** Indice affiché : une nouvelle demande l'applique, toute modification de la grille l'écarte. */
+  const hint = ref<Hint | null>(null);
   let wrongNow = 0;
   /** Pendant la restauration d'une sauvegarde : ni erreur comptée, ni victoire, ni sauvegarde. */
   let restoring = false;
@@ -77,6 +83,7 @@ export function usePlayableGame() {
   const solution = computed(() => (puzzle.value ? fromBits(puzzle.value.map) : []));
   const clues = computed(() => computeClues(solution.value));
   const target = computed(() => countSolution(solution.value));
+  const assist = computed(() => createAssist(clues.value, solution.value));
 
   /** Le minuteur ne tourne qu'après le premier coup (et jamais pendant le SSR). */
   function startTimer() {
@@ -87,7 +94,11 @@ export function usePlayableGame() {
 
   const board = useBoard(createGrid(1, 1), {
     locked: won,
-    transform: (grid) => (settings.autoCross ? autoCross(grid, clues.value) : grid),
+    transform: (grid) => {
+      if (settings.assist === 'off') return grid;
+      const crossed = autoCross(grid, clues.value);
+      return settings.assist === 'assisted' ? assist.value(crossed) : crossed;
+    },
     onPaint(states: CellState[]) {
       startTimer();
       // Un son par case modifiée : une ligne de 6 cases d'un coup s'entend comme 6 cases.
@@ -98,6 +109,7 @@ export function usePlayableGame() {
       if (settings.haptics) vibrate(8);
     },
     onChange(grid) {
+      hint.value = null;
       if (restoring) {
         wrongNow = countWrong(grid);
         return;
@@ -110,7 +122,7 @@ export function usePlayableGame() {
       wrongNow = wrong;
       if (isSolved(grid, clues.value)) {
         won.value = true;
-        corruption.purify(mistakes.value === 0);
+        corruption.purify(mistakes.value + hints.value === 0);
         timer.pause();
         elapsed.value = Date.now() - (startedAt.value ?? Date.now());
         if (puzzle.value) clearGame(puzzle.value.id);
@@ -151,6 +163,7 @@ export function usePlayableGame() {
       cells: board.cells.value,
       mistakes: mistakes.value,
       elapsed: elapsed.value,
+      hints: hints.value,
     });
   }
 
@@ -163,6 +176,8 @@ export function usePlayableGame() {
   function reset() {
     won.value = false;
     mistakes.value = 0;
+    hints.value = 0;
+    hint.value = null;
     wrongNow = 0;
     startedAt.value = null;
     elapsed.value = 0;
@@ -206,12 +221,37 @@ export function usePlayableGame() {
     restoring = true;
     try {
       mistakes.value = saved.mistakes;
+      hints.value = saved.hints ?? 0;
       elapsed.value = saved.elapsed;
       startedAt.value = null;
       board.load(saved.cells);
     } finally {
       restoring = false;
     }
+  }
+
+  /** Première demande : montre la ligne et explique. Seconde : applique l'indice affiché. */
+  function askHint() {
+    if (won.value || !puzzle.value) return;
+    if (hint.value) {
+      const shown = hint.value;
+      board.checkpoint();
+      board.load(applyHint(board.cells.value, shown), { keepHistory: true });
+      startTimer();
+      play(shown.cells.some((cell) => cell.state === 'filled') ? 'fill' : 'cross');
+      if (settings.haptics) vibrate(12);
+      return;
+    }
+    const found = findHint(board.cells.value, clues.value, solution.value);
+    if (!found) return;
+    // Corriger une erreur ne coûte rien de plus : l'erreur est déjà comptée.
+    if (found.reason !== 'error') hints.value++;
+    hint.value = found;
+    persist();
+  }
+
+  function dismissHint() {
+    hint.value = null;
   }
 
   watch(board.tool, (tool) => saveTool(tool));
@@ -233,6 +273,8 @@ export function usePlayableGame() {
     board,
     won,
     mistakes,
+    hints,
+    hint,
     elapsed,
     clues,
     target,
@@ -243,5 +285,7 @@ export function usePlayableGame() {
     clear,
     undo,
     redo,
+    askHint,
+    dismissHint,
   };
 }

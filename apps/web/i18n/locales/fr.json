@@ -151,8 +151,6 @@
     "haptics": "Vibrations",
     "leftHanded": "Mode gaucher",
     "leftHandedHint": "Place les commandes du côté de la main gauche.",
-    "autoCross": "Croix automatiques",
-    "autoCrossHint": "Marque les cases restantes d’une ligne ou colonne résolue.",
     "shortcuts": "Raccourcis clavier",
     "keyUndo": "Annuler",
     "keyRedo": "Rétablir",
@@ -160,7 +158,19 @@
     "keyMove": "Déplacer le curseur",
     "keyFill": "Remplir la case",
     "keyCross": "Marquer la case",
-    "keyHelp": "Ouvrir les réglages"
+    "keyHelp": "Ouvrir les réglages",
+    "assist": "Aide au marquage",
+    "assistModes": {
+      "off": "Aucune",
+      "simple": "Croix simples",
+      "assisted": "Assisté"
+    },
+    "assistHints": {
+      "off": "Vous marquez toutes les croix vous-même.",
+      "simple": "Marque les cases restantes d’une ligne ou colonne résolue.",
+      "assisted": "Marque aussi les cases rendues impossibles par vos cases pleines. Aucune case pleine n’est révélée."
+    },
+    "keyHint": "Demander un indice"
   },
   "errors": {
     "email": "Entrez une adresse email valide.",
@@ -346,6 +356,41 @@
         "title": "Le Démon",
         "text": "Il vous attendait. Parfait, ou presque."
       }
+    }
+  },
+  "hint": {
+    "ask": "Indice (H)",
+    "apply": "Appliquer",
+    "close": "Fermer",
+    "used": "Indices utilisés (chacun compte comme une erreur)",
+    "count": "{n} indice | {n} indices",
+    "error": {
+      "row": "Une case est fausse dans la ligne {n}.",
+      "col": "Une case est fausse dans la colonne {n}."
+    },
+    "empty": {
+      "row": "La ligne {n} n’a aucune case pleine : elles sont toutes vides.",
+      "col": "La colonne {n} n’a aucune case pleine : elles sont toutes vides."
+    },
+    "full": {
+      "row": "Les indices de la ligne {n} remplissent toute sa largeur, avec un seul espace entre les blocs.",
+      "col": "Les indices de la colonne {n} remplissent toute sa hauteur, avec un seul espace entre les blocs."
+    },
+    "finished": {
+      "row": "La ligne {n} est complète : les cases restantes sont forcément vides.",
+      "col": "La colonne {n} est complète : les cases restantes sont forcément vides."
+    },
+    "overlap": {
+      "row": "Dans la ligne {n}, le bloc de {clue} est trop grand pour bouger beaucoup : ses cases centrales sont forcément pleines.",
+      "col": "Dans la colonne {n}, le bloc de {clue} est trop grand pour bouger beaucoup : ses cases centrales sont forcément pleines."
+    },
+    "logic": {
+      "row": "Regardez la ligne {n} : avec les cases déjà posées, une déduction est possible.",
+      "col": "Regardez la colonne {n} : avec les cases déjà posées, une déduction est possible."
+    },
+    "reveal": {
+      "row": "Plus de déduction simple : voici une case de la ligne {n}.",
+      "col": "Plus de déduction simple : voici une case de la colonne {n}."
     }
   }
 }

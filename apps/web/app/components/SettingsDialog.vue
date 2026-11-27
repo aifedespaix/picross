@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useSettingsStore, type ThemeChoice } from '@/stores/settings';
+import { ASSIST_MODES, useSettingsStore, type ThemeChoice } from '@/stores/settings';
 import { hasVibration } from '@/utils/haptics';
 import BaseDialog from './BaseDialog.vue';
 
@@ -20,6 +20,7 @@ const shortcuts = [
   ['← ↑ ↓ →', 'settings.keyMove'],
   ['Espace', 'settings.keyFill'],
   ['X', 'settings.keyCross'],
+  ['H', 'settings.keyHint'],
   ['?', 'settings.keyHelp'],
 ] as const;
 const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
@@ -91,15 +92,28 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
           }}</span>
         </span>
       </label>
-      <label class="flex cursor-pointer items-start gap-3">
-        <input v-model="settings.autoCross" type="checkbox" class="mt-0.5 size-5 accent-demon" />
-        <span>
-          <span class="block text-sm font-medium">{{ t('settings.autoCross') }}</span>
-          <span class="block text-xs text-slate-500 dark:text-slate-400">{{
-            t('settings.autoCrossHint')
-          }}</span>
-        </span>
-      </label>
+      <fieldset class="grid gap-1.5">
+        <legend class="text-sm font-medium">{{ t('settings.assist') }}</legend>
+        <label
+          v-for="mode in ASSIST_MODES"
+          :key="mode"
+          class="flex cursor-pointer items-start gap-3 py-0.5"
+        >
+          <input
+            v-model="settings.assist"
+            type="radio"
+            name="assist"
+            :value="mode"
+            class="mt-0.5 size-5 accent-demon"
+          />
+          <span>
+            <span class="block text-sm">{{ t(`settings.assistModes.${mode}`) }}</span>
+            <span class="block text-xs text-slate-500 dark:text-slate-400">{{
+              t(`settings.assistHints.${mode}`)
+            }}</span>
+          </span>
+        </label>
+      </fieldset>
       <label class="flex cursor-pointer items-start gap-3">
         <input v-model="settings.corruption" type="checkbox" class="mt-0.5 size-5 accent-demon" />
         <span>
