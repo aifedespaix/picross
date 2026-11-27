@@ -44,7 +44,14 @@ export default defineNuxtConfig({
 
   imports: { dirs: ['stores'] },
   css: ['~/assets/css/main.css'],
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+    build: {
+      // Les sons sont chargés par fetch() (Web Audio) : la CSP (`connect-src 'self'`) interdit les URL `data:`,
+      // or Vite inlinerait les petits fichiers. Jamais d'inlining pour l'audio.
+      assetsInlineLimit: (file) => (/\.(mp3|ogg|wav)$/.test(file) ? false : undefined),
+    },
+  },
   build: { transpile: ['@picross/shared'] },
 
   // --- Configuration runtime (surchargeable par variables NUXT_*) ----------------------------

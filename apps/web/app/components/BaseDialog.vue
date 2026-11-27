@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useSound } from '@/composables/useSound';
 import Icon from './Icon.vue';
 
 const props = defineProps<{ open: boolean; title: string }>();
 const emit = defineEmits<{ close: [] }>();
 const { t } = useI18n();
 const dialog = ref<HTMLDialogElement>();
+const { play } = useSound();
 const titleId = `dialog-title-${Math.random().toString(36).slice(2, 8)}`;
 
 // <dialog> natif : focus piégé, fermeture avec Échap et inertie de l'arrière-plan gérés par le navigateur.
@@ -16,8 +18,14 @@ watch(
     await nextTick();
     const el = dialog.value;
     if (!el) return;
-    if (open && !el.open) el.showModal();
-    if (!open && el.open) el.close();
+    if (open && !el.open) {
+      el.showModal();
+      play('open');
+    }
+    if (!open && el.open) {
+      el.close();
+      play('close');
+    }
   },
   { immediate: true },
 );

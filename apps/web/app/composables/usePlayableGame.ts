@@ -11,12 +11,15 @@ import {
 } from '@picross/shared';
 import { computed, ref, shallowRef, watch } from 'vue';
 import { createAssist } from '@/domain/assist';
+import { starsFor } from '@/domain/journey';
 import { applyHint, findHint, type Hint } from '@/domain/hint';
 import {
   autoCross,
   countFilled,
   createGrid,
+  isLineSolved,
   isSolved,
+  getColumn,
   type CellState,
   type Grid,
 } from '@/domain/grid';
@@ -63,12 +66,14 @@ export function localPuzzleById(id: string, lang: 'fr' | 'en' = 'fr'): PlayableP
 
 /** Logique d'une partie : plateau, minuteur, détection de victoire, sons, sauvegarde. */
 export function usePlayableGame() {
-  const { play, playBurst } = useSound();
+  const { play, playBurst, fillRun } = useSound();
   const corruption = useCorruptionStore();
   const settings = useSettingsStore();
   const played = usePlayedFlag();
   const puzzle = shallowRef<PlayablePuzzle | null>(null);
   const won = ref(false);
+  /** Dernière grille d'un chapitre (boss) : sa victoire a sa propre fanfare. */
+  const finale = ref(false);
   const startedAt = ref<number | null>(null);
   const elapsed = ref(0);
   /** Nombre de fois où une case fausse a été remplie (0 = partie parfaite). */
@@ -78,6 +83,8 @@ export function usePlayableGame() {
   /** Indice affiché : une nouvelle demande l'applique, toute modification de la grille l'écarte. */
   const hint = ref<Hint | null>(null);
   let wrongNow = 0;
+  /** Lignes et colonnes résolues (clé `r3` / `c5`) : une qui s'ajoute fait entendre « ligne faite ». */
+  let solvedLines = new Set<string>();
   /** Pendant la restauration d'une sauvegarde : ni erreur comptée, ni victoire, ni sauvegarde. */
   let restoring = false;
 
@@ -107,21 +114,26 @@ export function usePlayableGame() {
       startTimer();
       // Un son par case modifiée : une ligne de 6 cases d'un coup s'entend comme 6 cases.
       const count = (wanted: CellState) => states.filter((state) => state === wanted).length;
-      playBurst('fill', count('filled'));
+      fillRun(count('filled'));
       playBurst('cross', count('crossed'));
       playBurst('clear', count('blank'));
       if (settings.haptics) vibrate(8);
     },
     onChange(grid) {
       hint.value = null;
+      const solved = solvedLinesOf(grid);
+      const gained = [...solved].filter((key) => !solvedLines.has(key)).length;
+      solvedLines = solved;
       if (restoring) {
         wrongNow = countWrong(grid);
         return;
       }
       const wrong = countWrong(grid);
-      if (wrong > wrongNow) {
+      const erred = wrong > wrongNow;
+      if (erred) {
         mistakes.value += wrong - wrongNow;
         corruption.bump();
+        play('error');
       }
       wrongNow = wrong;
       if (isSolved(grid, clues.value)) {
@@ -131,13 +143,27 @@ export function usePlayableGame() {
         timer.pause();
         elapsed.value = Date.now() - (startedAt.value ?? Date.now());
         if (puzzle.value) clearGame(puzzle.value.id);
-        play('win');
+        play(finale.value ? 'boss' : (`win${starsFor(mistakes.value + hints.value)}` as const));
         if (settings.haptics) vibrate([30, 50, 30, 50, 120]);
       } else {
+        // Une ligne qui vient de se compléter (hors erreur, pour ne pas mêler « bravo » et « raté »).
+        if (gained > 0 && !erred) play('line');
         persist();
       }
     },
   });
+
+  /** Lignes (`r<i>`) et colonnes (`c<j>`) dont les blocs correspondent aux indices. */
+  function solvedLinesOf(grid: Grid): Set<string> {
+    const out = new Set<string>();
+    clues.value.rows.forEach((clue, row) => {
+      if (isLineSolved(grid[row] ?? [], clue)) out.add(`r${row}`);
+    });
+    clues.value.cols.forEach((clue, col) => {
+      if (isLineSolved(getColumn(grid, col), clue)) out.add(`c${col}`);
+    });
+    return out;
+  }
 
   /** Cases remplies qui ne font pas partie de l'image. */
   function countWrong(grid: Grid): number {
@@ -191,6 +217,7 @@ export function usePlayableGame() {
     restoring = true;
     try {
       board.load(blankGrid());
+      solvedLines = solvedLinesOf(board.cells.value);
     } finally {
       restoring = false;
     }
@@ -230,6 +257,7 @@ export function usePlayableGame() {
       elapsed.value = saved.elapsed;
       startedAt.value = null;
       board.load(saved.cells);
+      solvedLines = solvedLinesOf(board.cells.value);
     } finally {
       restoring = false;
     }
@@ -252,6 +280,7 @@ export function usePlayableGame() {
     // Corriger une erreur ne coûte rien de plus : l'erreur est déjà comptée.
     if (found.reason !== 'error') hints.value++;
     hint.value = found;
+    play('hint');
     persist();
   }
 
@@ -275,6 +304,7 @@ export function usePlayableGame() {
 
   return {
     puzzle,
+    finale,
     board,
     won,
     mistakes,

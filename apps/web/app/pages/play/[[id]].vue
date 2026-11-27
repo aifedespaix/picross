@@ -125,9 +125,19 @@ function chosenTrack(): MusicTrack {
   }
   return trackForStage(corruption.stage);
 }
+/** Une grille « boss » (dernière du chapitre) a sa propre fanfare. */
+function isBoss(): boolean {
+  const current = puzzle.value;
+  if (!journeyMode.value || !current?.local) return false;
+  return findStep(journey.views.value, current.id.slice('local-'.length))?.step.kind === 'boss';
+}
 watch(
   () => puzzle.value?.id,
-  () => puzzle.value && music.setTrack(chosenTrack()),
+  () => {
+    if (!puzzle.value) return;
+    game.finale.value = isBoss();
+    music.setTrack(chosenTrack());
+  },
 );
 onBeforeUnmount(() => {
   music.stop();
@@ -138,6 +148,7 @@ onMounted(async () => {
   void ambience.start();
   if (puzzle.value) music.setTrack(chosenTrack());
   if (journeyMode.value) journey.load();
+  game.finale.value = isBoss();
   // Reprise de la partie et de l'outil mémorisés : après l'hydratation, pour rester identique au HTML serveur.
   game.restore();
   if (!routeId.value && puzzle.value && !puzzle.value.local) {
@@ -463,6 +474,7 @@ useSeoMeta({
             class="ghost"
             :aria-label="t('game.reset')"
             :title="t('game.reset')"
+            data-silent
             @click="erase"
           >
             <Icon name="reset" />
@@ -503,6 +515,7 @@ useSeoMeta({
           :disabled="!game.board.canUndo.value"
           :aria-label="t('game.undo')"
           :title="t('game.undo')"
+          data-silent
           @pointerdown="undoDown"
           @pointerup="stopHold"
           @pointerleave="stopHold"
@@ -517,6 +530,7 @@ useSeoMeta({
           :disabled="!game.board.canRedo.value"
           :aria-label="t('game.redo')"
           :title="t('game.redo')"
+          data-silent
           @click="game.redo()"
         >
           <Icon name="redo" />
@@ -527,6 +541,7 @@ useSeoMeta({
           :disabled="isBlank"
           :aria-label="t('game.reset')"
           :title="t('game.reset')"
+          data-silent
           @click="erase"
         >
           <Icon name="reset" />
@@ -537,6 +552,7 @@ useSeoMeta({
           :class="game.hint.value ? 'text-amber-500 dark:text-amber-400' : ''"
           :aria-label="game.hint.value ? t('hint.apply') : t('hint.ask')"
           :title="game.hint.value ? t('hint.apply') : t('hint.ask')"
+          data-silent
           @click="game.askHint()"
         >
           <Icon name="bulb" :filled="!!game.hint.value" />
@@ -594,6 +610,7 @@ useSeoMeta({
         <button
           type="button"
           class="shrink-0 rounded-xl bg-amber-950/10 px-3 py-1.5 font-medium hover:bg-amber-950/20 dark:bg-white/15 dark:hover:bg-white/25"
+          data-silent
           @click="game.askHint()"
         >
           {{ t('hint.apply') }}
@@ -603,6 +620,7 @@ useSeoMeta({
           class="grid size-8 shrink-0 place-items-center rounded-xl hover:bg-amber-950/10 dark:hover:bg-white/15"
           :aria-label="t('hint.close')"
           :title="t('hint.close')"
+          data-silent
           @click="game.dismissHint()"
         >
           <Icon name="x" />
@@ -623,6 +641,7 @@ useSeoMeta({
         <button
           type="button"
           class="rounded-xl bg-white/15 px-3 py-1.5 font-medium hover:bg-white/25 dark:bg-ink/10 dark:hover:bg-ink/20"
+          data-silent
           @click="undoErase"
         >
           {{ t('game.undo') }}
