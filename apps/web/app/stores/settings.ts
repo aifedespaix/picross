@@ -1,7 +1,17 @@
 import { usePreferredDark } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-import { sanitizeVolumes, VOLUME_DEFAULTS, type Volumes, type VolumeName } from '@/domain/mix';
+import {
+  effectiveVolumes,
+  isSilent,
+  PRESETS,
+  sanitizeVolumes,
+  VOLUME_DEFAULTS,
+  type Mutes,
+  type PresetName,
+  type Volumes,
+  type VolumeName,
+} from '@/domain/mix';
 
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type AssistMode = 'off' | 'simple' | 'assisted';
@@ -28,8 +38,37 @@ export const useSettingsStore = defineStore('settings', () => {
     }),
   });
   const volumes = computed(() => sanitizeVolumes(rawVolumes.value));
+  /** Bus coupés : le curseur garde sa valeur, rétablir le bus la retrouve. */
+  const rawMutes = useCookie<Mutes>('picross_mutes', { ...COOKIE, default: () => ({}) });
+  const mutes = computed<Mutes>(() =>
+    rawMutes.value && typeof rawMutes.value === 'object' ? rawMutes.value : {},
+  );
+  /** Ce que le mixeur applique : volumes avec les bus coupés à 0. */
+  const mixVolumes = computed(() => effectiveVolumes(volumes.value, mutes.value));
+  const silent = computed(() => isSilent(volumes.value, mutes.value));
+
+  function setMuted(name: VolumeName, muted: boolean) {
+    const next = { ...mutes.value };
+    if (muted) next[name] = true;
+    else delete next[name];
+    rawMutes.value = next;
+  }
+  const toggleMute = (name: VolumeName) => setMuted(name, !mutes.value[name]);
+  /** Bouger un curseur coupé le rétablit (et un général à 0 est remonté s'il n'y a plus rien à entendre). */
   function setVolume(name: VolumeName, value: number) {
     rawVolumes.value = { ...volumes.value, [name]: value };
+    if (mutes.value[name] && value > 0) setMuted(name, false);
+  }
+  /** Coupe ou rétablit tout le son d'un geste (bouton rapide) ; si le général était à 0, il remonte à 60. */
+  function toggleAll() {
+    if (silent.value) {
+      setMuted('master', false);
+      if (volumes.value.master === 0) setVolume('master', 60);
+    } else setMuted('master', true);
+  }
+  function applyPreset(name: PresetName) {
+    rawVolumes.value = { ...PRESETS[name].volumes };
+    rawMutes.value = PRESETS[name].muted ? { master: true } : {};
   }
   const corruption = useCookie<boolean>('picross_corruption_on', {
     ...COOKIE,
@@ -55,5 +94,22 @@ export const useSettingsStore = defineStore('settings', () => {
     () => theme.value === 'dark' || (theme.value === 'system' && prefersDark.value),
   );
 
-  return { theme, volumes, setVolume, corruption, showStats, haptics, leftHanded, assist, isDark };
+  return {
+    theme,
+    volumes,
+    mutes,
+    mixVolumes,
+    silent,
+    setVolume,
+    setMuted,
+    toggleMute,
+    toggleAll,
+    applyPreset,
+    corruption,
+    showStats,
+    haptics,
+    leftHanded,
+    assist,
+    isDark,
+  };
 });

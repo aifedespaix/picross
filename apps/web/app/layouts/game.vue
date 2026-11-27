@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n';
 import logoUrl from '@/assets/picross-icon.svg';
 import Icon from '@/components/Icon.vue';
 import SettingsDialog from '@/components/SettingsDialog.vue';
+import SoundToggle from '@/components/SoundToggle.vue';
 
 /** Mise en page de jeu : plein écran, sans en-tête, pied de page ni barre d'onglets. */
 const { t } = useI18n();
@@ -31,6 +32,9 @@ const corruption = useCorruptionStore();
     >
       <img :src="logoUrl" alt="" class="size-6" width="24" height="24" />
     </NuxtLink>
+    <SoundToggle
+      class="absolute top-2 right-12 z-20 grid size-9 place-items-center rounded-xl text-slate-500 opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100 dark:text-slate-400"
+    />
     <button
       type="button"
       class="absolute top-2 right-2 z-20 grid size-9 place-items-center rounded-xl text-slate-500 opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100 dark:text-slate-400"

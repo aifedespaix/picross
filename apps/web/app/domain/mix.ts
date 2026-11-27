@@ -28,6 +28,39 @@ export const clampVolume = (value: unknown): number => {
 /** Courbe perceptive : le milieu du curseur est nettement plus bas que la moitié du signal ; 0 = silence exact. */
 export const volumeToGain = (value: number): number => (clampVolume(value) / 100) ** 2;
 
+/** Bus coupés (le curseur garde sa valeur : en rétablissant le bus, le joueur retrouve son réglage). */
+export type Mutes = Partial<Record<VolumeName, boolean>>;
+
+/** Volumes réellement appliqués : un bus coupé vaut 0. */
+export function effectiveVolumes(volumes: Volumes, mutes: Mutes): Volumes {
+  const out = { ...volumes };
+  for (const name of VOLUME_NAMES) if (mutes[name]) out[name] = 0;
+  return out;
+}
+
+/** Tout est inaudible : le général est coupé ou à 0. */
+export const isSilent = (volumes: Volumes, mutes: Mutes): boolean =>
+  Boolean(mutes.master) || volumes.master === 0;
+
+/** Réglages rapides : un clic remet tous les curseurs d'aplomb (et rétablit tout ce qui était coupé). */
+export const PRESETS = {
+  normal: { volumes: { ...VOLUME_DEFAULTS }, muted: false },
+  quiet: { volumes: { master: 100, music: 45, ambience: 45, sfx: 70, ui: 60 }, muted: false },
+  silent: { volumes: { ...VOLUME_DEFAULTS }, muted: true },
+} as const satisfies Record<string, { volumes: Volumes; muted: boolean }>;
+export type PresetName = keyof typeof PRESETS;
+
+/** Le préréglage qui correspond exactement aux réglages actuels, s'il y en a un. */
+export function matchPreset(volumes: Volumes, mutes: Mutes): PresetName | null {
+  if (isSilent(volumes, mutes)) return 'silent';
+  const anyMute = VOLUME_NAMES.some((name) => mutes[name]);
+  if (anyMute) return null;
+  for (const name of ['normal', 'quiet'] as const) {
+    if (VOLUME_NAMES.every((bus) => volumes[bus] === PRESETS[name].volumes[bus])) return name;
+  }
+  return null;
+}
+
 /** Niveau d'un bus (sans le volume général, appliqué en aval sur la sortie). */
 export const busGain = (volumes: Volumes, bus: BusName): number =>
   volumeToGain(volumes[bus]) * BUS_TRIM[bus];

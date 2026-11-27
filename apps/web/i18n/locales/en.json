@@ -145,6 +145,21 @@
     "light": "Light",
     "dark": "Dark",
     "language": "Language",
+    "tabs": {
+      "display": "Display",
+      "game": "Game",
+      "audio": "Audio",
+      "keys": "Keyboard"
+    },
+    "presets": {
+      "label": "Audio presets",
+      "normal": "Normal",
+      "quiet": "Quiet",
+      "silent": "Silent"
+    },
+    "soundOff": "Mute sound",
+    "soundOn": "Unmute sound",
+    "audioHint": "Muting a channel keeps its level; unmuting restores it. Effects briefly lower the music so they stay clear.",
     "audio": "Audio",
     "volume": {
       "master": "Master",
@@ -152,6 +167,8 @@
       "ambience": "Ambience",
       "sfx": "Effects",
       "ui": "Interface",
+      "mute": "Mute: {name}",
+      "unmute": "Unmute: {name}",
       "muted": "Muted"
     },
     "corruption": "Mood: the demon",

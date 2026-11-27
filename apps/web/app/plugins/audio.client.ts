@@ -7,7 +7,7 @@ import { getMixer } from '@/utils/audioMixer';
 export default defineNuxtPlugin(() => {
   const settings = useSettingsStore();
   watch(
-    () => settings.volumes,
+    () => settings.mixVolumes,
     (volumes) => getMixer()?.setVolumes(volumes),
     { immediate: true },
   );

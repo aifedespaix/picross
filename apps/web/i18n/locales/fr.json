@@ -145,6 +145,21 @@
     "light": "Clair",
     "dark": "Sombre",
     "language": "Langue",
+    "tabs": {
+      "display": "Affichage",
+      "game": "Jeu",
+      "audio": "Audio",
+      "keys": "Clavier"
+    },
+    "presets": {
+      "label": "Préréglages audio",
+      "normal": "Normal",
+      "quiet": "Discret",
+      "silent": "Silence"
+    },
+    "soundOff": "Couper le son",
+    "soundOn": "Rétablir le son",
+    "audioHint": "Couper un bus garde son réglage ; le rétablir le retrouve. Les effets baissent un instant la musique pour rester lisibles.",
     "audio": "Audio",
     "volume": {
       "master": "Général",
@@ -152,6 +167,8 @@
       "ambience": "Ambiance",
       "sfx": "Effets",
       "ui": "Interface",
+      "mute": "Couper : {name}",
+      "unmute": "Rétablir : {name}",
       "muted": "Coupé"
     },
     "corruption": "Ambiance : le démon",

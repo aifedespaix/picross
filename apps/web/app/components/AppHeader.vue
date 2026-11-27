@@ -59,6 +59,7 @@ const items = computed<NavItem[]>(() => [
       </nav>
 
       <span class="flex-1 sm:hidden" aria-hidden="true" />
+      <SoundToggle class="btn btn-icon border-transparent bg-transparent shadow-none" />
       <button
         type="button"
         class="btn btn-icon border-transparent bg-transparent shadow-none"

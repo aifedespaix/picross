@@ -4,6 +4,10 @@ import {
   busGain,
   masterGain,
   clampVolume,
+  effectiveVolumes,
+  isSilent,
+  matchPreset,
+  PRESETS,
   sanitizeVolumes,
   VOLUME_DEFAULTS,
   volumeToGain,
@@ -41,5 +45,28 @@ describe('mixage', () => {
       music: 40,
       sfx: 100,
     });
+  });
+
+  it('un bus coupé vaut 0 sans perdre son réglage', () => {
+    const volumes = { ...VOLUME_DEFAULTS, music: 60 };
+    expect(effectiveVolumes(volumes, { music: true }).music).toBe(0);
+    expect(effectiveVolumes(volumes, { music: true }).sfx).toBe(100);
+    expect(volumes.music).toBe(60);
+    expect(effectiveVolumes(volumes, {}).music).toBe(60);
+  });
+
+  it('silence : général coupé ou à 0', () => {
+    expect(isSilent(VOLUME_DEFAULTS, {})).toBe(false);
+    expect(isSilent(VOLUME_DEFAULTS, { master: true })).toBe(true);
+    expect(isSilent({ ...VOLUME_DEFAULTS, master: 0 }, {})).toBe(true);
+    expect(isSilent(VOLUME_DEFAULTS, { music: true })).toBe(false);
+  });
+
+  it('reconnaît un préréglage, et rien dès qu’un curseur a bougé ou qu’un bus est coupé', () => {
+    expect(matchPreset(PRESETS.normal.volumes, {})).toBe('normal');
+    expect(matchPreset(PRESETS.quiet.volumes, {})).toBe('quiet');
+    expect(matchPreset(PRESETS.silent.volumes, { master: true })).toBe('silent');
+    expect(matchPreset({ ...VOLUME_DEFAULTS, music: 90 }, {})).toBeNull();
+    expect(matchPreset(VOLUME_DEFAULTS, { sfx: true })).toBeNull();
   });
 });
