@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n';
 import HeroBoard from '@/components/HeroBoard.vue';
 import DemonEyes from '@/components/DemonEyes.vue';
 import Icon from '@/components/Icon.vue';
+import { useMusic } from '@/composables/useMusic';
 
 interface Step {
   title: string;
@@ -16,6 +17,11 @@ interface Faq {
 definePageMeta({ middleware: 'returning' });
 
 const { t, tm, rt, locale } = useI18n();
+
+// La musique de la carte accompagne aussi la présentation (une fois le premier geste fait : voir useMusic).
+const music = useMusic();
+onMounted(() => music.setFamily('map'));
+onBeforeUnmount(() => music.stop());
 const localePath = useLocalePath();
 const site = useSiteConfig();
 

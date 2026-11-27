@@ -1,23 +1,47 @@
 import { useEventListener } from '@vueuse/core';
-import type { MusicTrack } from '@/domain/music';
+import { pickTrack, type MusicFamily, type MusicTrack } from '@/domain/music';
 import { getMixer } from '@/utils/audioMixer';
 import { getAudioContext } from '@/utils/audioContext';
 import awakeningUrl from '@/assets/audio/music/awakening.mp3';
-import biteUrl from '@/assets/audio/music/bite.mp3';
-import demonUrl from '@/assets/audio/music/demon.mp3';
-import eyesUrl from '@/assets/audio/music/eyes.mp3';
-import packUrl from '@/assets/audio/music/pack.mp3';
-import thresholdUrl from '@/assets/audio/music/threshold.mp3';
+import awakeningBUrl from '@/assets/audio/music/awakening-b.mp3';
+import awakeningCUrl from '@/assets/audio/music/awakening-c.mp3';
 import whisperUrl from '@/assets/audio/music/whisper.mp3';
+import whisperBUrl from '@/assets/audio/music/whisper-b.mp3';
+import whisperCUrl from '@/assets/audio/music/whisper-c.mp3';
+import eyesUrl from '@/assets/audio/music/eyes.mp3';
+import eyesBUrl from '@/assets/audio/music/eyes-b.mp3';
+import packUrl from '@/assets/audio/music/pack.mp3';
+import packBUrl from '@/assets/audio/music/pack-b.mp3';
+import thresholdUrl from '@/assets/audio/music/threshold.mp3';
+import thresholdBUrl from '@/assets/audio/music/threshold-b.mp3';
+import biteUrl from '@/assets/audio/music/bite.mp3';
+import biteBUrl from '@/assets/audio/music/bite-b.mp3';
+import demonUrl from '@/assets/audio/music/demon.mp3';
+import demonBUrl from '@/assets/audio/music/demon-b.mp3';
+import mapAUrl from '@/assets/audio/music/map-a.mp3';
+import mapBUrl from '@/assets/audio/music/map-b.mp3';
+import mapCUrl from '@/assets/audio/music/map-c.mp3';
 
 const URLS: Record<MusicTrack, string> = {
   awakening: awakeningUrl,
+  'awakening-b': awakeningBUrl,
+  'awakening-c': awakeningCUrl,
   whisper: whisperUrl,
+  'whisper-b': whisperBUrl,
+  'whisper-c': whisperCUrl,
   eyes: eyesUrl,
+  'eyes-b': eyesBUrl,
   pack: packUrl,
+  'pack-b': packBUrl,
   threshold: thresholdUrl,
+  'threshold-b': thresholdBUrl,
   bite: biteUrl,
+  'bite-b': biteBUrl,
   demon: demonUrl,
+  'demon-b': demonBUrl,
+  'map-a': mapAUrl,
+  'map-b': mapBUrl,
+  'map-c': mapCUrl,
 };
 
 const FADE_S = 1.8;
@@ -33,6 +57,10 @@ const loading = new Map<MusicTrack, Promise<AudioBuffer | null>>();
 let playing: Playing | null = null;
 /** Piste demandée par la page (la musique peut être coupée sans que la demande disparaisse). */
 let wanted: MusicTrack | null = null;
+/** Dernière page à avoir demandé une piste : seule elle peut l'arrêter (une transition de page monte la nouvelle avant de démonter l'ancienne). */
+let owner: symbol | null = null;
+/** Dernière piste jouée de chaque famille : on n'enchaîne pas deux fois la même quand il y a le choix. */
+const lastOfFamily: Partial<Record<MusicFamily, MusicTrack>> = {};
 let unlockArmed = false;
 
 function load(ctx: AudioContext, track: MusicTrack): Promise<AudioBuffer | null> {
@@ -109,6 +137,7 @@ async function sync() {
  * fondu. Rien n'est téléchargé tant qu'aucune piste n'est demandée, et seule la piste en cours est chargée.
  */
 export function useMusic() {
+  const me = Symbol('music');
   if (import.meta.client) {
     // Onglet masqué : silence (et le contexte se repose) ; au retour, la musique reprend.
     useEventListener(document, 'visibilitychange', () => {
@@ -121,12 +150,19 @@ export function useMusic() {
   /** Demande une piste (ou `null` pour le silence) ; la même piste deux fois de suite ne redémarre pas. */
   function setTrack(track: MusicTrack | null) {
     wanted = track;
+    owner = me;
     void sync();
+  }
+  /** Joue une piste de la famille (chapitre, carte) : celle en cours si elle en fait partie, sinon une variante au hasard. */
+  function setFamily(family: MusicFamily) {
+    const track = pickTrack(family, wanted, lastOfFamily[family]);
+    lastOfFamily[family] = track;
+    setTrack(track);
   }
   /** Quitte le jeu : fondu puis silence. */
   function stop() {
-    setTrack(null);
+    if (owner === me) setTrack(null);
   }
 
-  return { setTrack, stop };
+  return { setTrack, setFamily, stop };
 }

@@ -54,7 +54,7 @@ ci-dessus ; les fichiers vivent dans `docs/screenshots/` (WebP, 1600 px de large
 Fonctionnalités : glisser pour tracer une ligne (souris, doigt), clic droit = croix, annulation illimitée,
 clavier complet (flèches, `Espace`, `X`, `Ctrl+Z`), minuteur, écran de victoire, likes, éditeur de grilles
 (3×3 à 15×15) avec indices calculés automatiquement, modération par un admin, thème clair/sombre/système,
-sons et musique de fond optionnels (7 boucles, une par chapitre du parcours, composées en code : `tools/music/`), mode hors ligne (grilles de départ) si l'API est injoignable.
+sons, ambiance et musiques (19 pistes en 8 familles, une par chapitre du parcours) composés en code (`tools/music/`), mixeur à 4 bus avec un volume réglable chacun jusqu'à muet, mode hors ligne (grilles de départ) si l'API est injoignable.
 
 ## Grilles de départ et difficulté
 

@@ -17,7 +17,7 @@ import {
   type PlayablePuzzle,
 } from '@/composables/usePlayableGame';
 import { findStep, starsFor, type Stars } from '@/domain/journey';
-import { chapterIdOfSlug, trackForChapter, trackForStage, type MusicTrack } from '@/domain/music';
+import { chapterIdOfSlug, trackForChapter, trackForStage, type MusicFamily } from '@/domain/music';
 import { useAuthStore } from '@/stores/auth';
 import { useCorruptionStore } from '@/stores/corruption';
 import { useSettingsStore } from '@/stores/settings';
@@ -116,7 +116,7 @@ if (initial.value) apply(initial.value);
  * Musique de la grille : en parcours, celle de son chapitre ; en partie libre, celle que la corruption
  * du moment inspire. Choisie au début de la grille (pas de changement de piste en pleine partie).
  */
-function chosenTrack(): MusicTrack {
+function chosenFamily(): MusicFamily {
   const current = puzzle.value;
   if (journeyMode.value && current?.local) {
     const chapter = chapterIdOfSlug(getChapters(), current.id.slice('local-'.length));
@@ -136,7 +136,7 @@ watch(
   () => {
     if (!puzzle.value) return;
     game.finale.value = isBoss();
-    music.setTrack(chosenTrack());
+    music.setFamily(chosenFamily());
   },
 );
 onBeforeUnmount(() => {
@@ -146,7 +146,7 @@ onBeforeUnmount(() => {
 
 onMounted(async () => {
   void ambience.start();
-  if (puzzle.value) music.setTrack(chosenTrack());
+  if (puzzle.value) music.setFamily(chosenFamily());
   if (journeyMode.value) journey.load();
   game.finale.value = isBoss();
   // Reprise de la partie et de l'outil mémorisés : après l'hydratation, pour rester identique au HTML serveur.

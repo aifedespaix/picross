@@ -7,10 +7,13 @@ import JourneyChapter from '@/components/JourneyChapter.vue';
 import PixelThumb from '@/components/PixelThumb.vue';
 import StarRating from '@/components/StarRating.vue';
 import { useJourney } from '@/composables/useJourney';
+import { useMusic } from '@/composables/useMusic';
 import { chapterDone, firstToPlay, levelStatus, type Level, type StepView } from '@/domain/journey';
 import { formatDuration } from '@/utils/format';
 
 const { t, locale } = useI18n();
+const music = useMusic();
+onBeforeUnmount(() => music.stop());
 const localePath = useLocalePath();
 const journey = useJourney();
 const { chapters, progress, views, current, summary, ready } = journey;
@@ -61,6 +64,7 @@ function doReset() {
 }
 
 onMounted(() => {
+  music.setFamily('map');
   journey.load();
   const view = current.value;
   const slug = currentLevel.value?.slug;

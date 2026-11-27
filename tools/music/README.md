@@ -1,31 +1,53 @@
-# Musiques de fond du jeu
+# Sons du jeu : musiques, ambiance, effets
 
-Sept boucles instrumentales, **composées en code** (numpy/scipy, déterministes), avec le moteur de synthèse de la
-chaîne AIFE Factory (`engine.py` et `common.py` sont des copies de `aife-factory/audio-bank/service/synth/`).
-Aucune IA pour la musique. `loop.py` ajoute ce qu'il faut à un jeu : **boucle sans couture** (la réverbération de la
-dernière mesure est repliée sur la première), niveau commun de −19 dBFS RMS.
+Tout est **composé en code** (numpy/scipy, déterministe, graines fixes) avec le moteur de synthèse de la chaîne AIFE Factory
+(`engine.py` et `common.py` sont des copies de `aife-factory/audio-bank/service/synth/`). Aucune IA, aucun échantillon tiers.
 
 ```bash
-tools/music/build.sh            # tout régénérer (wav dans tools/music/out/, MP3 dans apps/web/app/assets/audio/music/)
-tools/music/build.sh eyes demon # certaines pistes seulement
+tools/music/build.sh                 # tout régénérer (wav dans tools/music/out/, MP3 dans apps/web/app/assets/audio/)
+tools/music/build.sh sfx ambience    # une partie seulement : music | more | ambience | sfx
 ```
 
-## Les pistes — une par chapitre du parcours, de la pureté au démon
+| Fichier | Rôle |
+|---|---|
+| `loop.py` | aides « boucle de jeu » : repli de la queue de réverb (boucle sans couture), niveau commun −19 dBFS RMS, textures bouclables |
+| `t_<chapitre>.py` | les 7 pistes d'origine, écrites à la main (une par chapitre du parcours) |
+| `gen.py` + `t_more.py` | générateur à recettes (tonalité, gamme, progression, couches) : 9 variantes de chapitre + 3 pistes de carte |
+| `a_ambience.py` | 3 textures d'ambiance sans tonalité (air · grondement · souffles) |
+| `s_sfx.py` | 15 sons de jeu et d'interface |
+| `analyze.py` | contrôle objectif : niveau, crête, brillance, couture de boucle |
 
-| Piste | Chapitre | Tonalité · BPM · durée | Ce qu'on entend | Où elle joue |
-|---|---|---|---|---|
-| `awakening` | L'Éveil | Do · 72 · 53 s | plucks ronds, nappe claire, un tic de bois ; aucune batterie | parcours ch. 1 ; partie libre, corruption « pure » |
-| `whisper` | Le Murmure | La m · 76 · 51 s | plucks rares, souffles filtrés qui passent d'une oreille à l'autre | ch. 2 ; libre, « calm » |
-| `eyes` | Les Yeux | Ré m · 84 · 46 s | bourdon, deux notes aiguës qui « clignent » gauche/droite, cœur lointain, demi-ton Mib | ch. 3 ; libre, « uneasy » |
-| `pack` | La Meute | Mi dorien · 96 · 40 s | pulsation sourde, cordes pincées/bois/métal en cycles de 5, 7 et 3 pas contre la grille de 16 | ch. 4 |
-| `threshold` | Le Seuil | Sol m · 80 · 48 s | cœur à deux battements, bourdon dont le filtre respire, frottement aigu | ch. 5 |
-| `bite` | La Morsure | Ré m · 104 · 37 s | basse « voyelle » (formants), kick rond, plucks graves en contre-temps | ch. 6 ; libre, « dark » |
-| `demon` | Le Démon | Ré m · 118 · 33 s | kick, arpège de plucks, nappe sombre ; une seule ligne de 303 en 2ᵉ moitié (signature rare) | ch. 7 (boss) |
+## Musiques (19 pistes, 8 « familles »)
 
-Règles tenues (leçons de la Factory L-A19, L-A26, L-A39) : ≤ 4 couches simultanées, de l'espace, aucune cloche FM, pas de
-« synthé cheap », timbres variés d'une piste à l'autre, 16 mesures avec une variation à mi-parcours pour que la boucle ne lasse pas.
-Les pistes `threshold` et `demon` ne servent qu'au parcours ; en partie libre, la musique suit la corruption (voir `domain/music.ts`).
+Une famille = une ambiance. Le jeu joue la piste de la famille du chapitre (parcours) ou de la corruption (partie libre) ; en revenant
+dans une famille il prend une autre variante que la dernière jouée, et ne change jamais de piste en pleine partie.
 
-## Réglages à l'oreille
-Niveau de jeu : `LEVEL` (0,32) et `DUCKED_LEVEL` (0,10, pendant l'écran de victoire) dans `composables/useMusic.ts`.
-Les wav ne sont pas versionnés ; seuls les MP3 le sont.
+| Famille | Pistes | Où |
+|---|---|---|
+| `awakening` L'Éveil | `awakening` · `-b` · `-c` | ch. 1 ; partie libre « pure » |
+| `whisper` Le Murmure | `whisper` · `-b` · `-c` | ch. 2 ; libre « calm » |
+| `eyes` Les Yeux | `eyes` · `-b` | ch. 3 ; libre « uneasy » |
+| `pack` La Meute | `pack` · `-b` | ch. 4 |
+| `threshold` Le Seuil | `threshold` · `-b` | ch. 5 |
+| `bite` La Morsure | `bite` · `-b` | ch. 6 ; libre « dark » |
+| `demon` Le Démon | `demon` · `-b` | ch. 7 (boss) |
+| `map` Carte | `map-a` · `-b` · `-c` | parcours (la carte) et accueil : calmes, sans batterie |
+
+Règles tenues (leçons de la Factory L-A19, L-A26, L-A39) : ≤ 4 couches simultanées, de l'espace, aucune cloche FM, pas de « synthé cheap »,
+timbres variés d'une piste à l'autre, 16 mesures avec une variation à mi-parcours. Progression pureté → démon par la densité (aucune batterie →
+cœur lointain → pulsation → kick franc), pas par le volume.
+
+## Ambiance
+Trois textures bouclées (40 s) jouées ensemble sur le bus « ambiance » ; leurs niveaux glissent avec la corruption (`domain/ambience.ts`). Sans
+hauteur reconnaissable, elles ne se disputent jamais la tonalité avec la musique.
+
+## Effets
+Tonals ceux-là sont accordés sur do pentatonique : `fill` est une seule note que le jeu transpose (tracer une ligne joue un petit arpège qui monte puis
+redescend), `line` (ligne ou colonne faite), `hint`, `win1/2/3` (une phrase de plus par étoile), `boss`. Les autres : `cross`, `clear`, `undo`, `undo2`,
+`error` (grave et doux, il ne punit pas), `tap`, `open`, `close` (interface).
+
+## Mixage (côté jeu : `domain/mix.ts`, `utils/audioMixer.ts`)
+Quatre bus (musique, ambiance, effets, interface) + volume général, chacun réglable de 0 à 100 dans les réglages (0 = muet, courbe perceptive).
+Par défaut : effets > interface > musique > ambiance. Chaque effet creuse brièvement la musique et l'ambiance (ducking), la victoire beaucoup plus ;
+la musique a un léger creux à 2,6 kHz où tombent les effets ; un limiteur doux protège la sortie.
+Les wav ne sont pas versionnés, seuls les MP3 le sont. Les fichiers audio ne sont jamais inlinés par Vite (CSP `connect-src 'self'`).
