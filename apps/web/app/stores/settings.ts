@@ -1,6 +1,7 @@
 import { usePreferredDark } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
+import { sanitizeVolumes, VOLUME_DEFAULTS, type Volumes, type VolumeName } from '@/domain/mix';
 
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type AssistMode = 'off' | 'simple' | 'assisted';
@@ -14,8 +15,22 @@ const COOKIE = { maxAge: 60 * 60 * 24 * 365, sameSite: 'lax', path: '/' } as con
  */
 export const useSettingsStore = defineStore('settings', () => {
   const theme = useCookie<ThemeChoice>('picross_theme', { ...COOKIE, default: () => 'system' });
-  const sound = useCookie<boolean>('picross_sound', { ...COOKIE, default: () => true });
-  const music = useCookie<boolean>('picross_music', { ...COOKIE, default: () => true });
+  /** Anciens réglages « tout ou rien » : repris une fois comme volumes à 0. */
+  const legacySound = useCookie<boolean | undefined>('picross_sound', COOKIE);
+  const legacyMusic = useCookie<boolean | undefined>('picross_music', COOKIE);
+  /** Volumes de chaque bus sonore (0 à 100, 0 = muet) : voir `domain/mix.ts`. */
+  const rawVolumes = useCookie<Volumes>('picross_volumes', {
+    ...COOKIE,
+    default: () => ({
+      ...VOLUME_DEFAULTS,
+      ...(legacySound.value === false ? { sfx: 0, ui: 0 } : {}),
+      ...(legacyMusic.value === false ? { music: 0 } : {}),
+    }),
+  });
+  const volumes = computed(() => sanitizeVolumes(rawVolumes.value));
+  function setVolume(name: VolumeName, value: number) {
+    rawVolumes.value = { ...volumes.value, [name]: value };
+  }
   const corruption = useCookie<boolean>('picross_corruption_on', {
     ...COOKIE,
     default: () => true,
@@ -40,5 +55,5 @@ export const useSettingsStore = defineStore('settings', () => {
     () => theme.value === 'dark' || (theme.value === 'system' && prefersDark.value),
   );
 
-  return { theme, sound, music, corruption, showStats, haptics, leftHanded, assist, isDark };
+  return { theme, volumes, setVolume, corruption, showStats, haptics, leftHanded, assist, isDark };
 });

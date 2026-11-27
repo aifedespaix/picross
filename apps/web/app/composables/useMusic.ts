@@ -1,7 +1,6 @@
 import { useEventListener } from '@vueuse/core';
-import { watch } from 'vue';
 import type { MusicTrack } from '@/domain/music';
-import { useSettingsStore } from '@/stores/settings';
+import { getMixer } from '@/utils/audioMixer';
 import { getAudioContext } from '@/utils/audioContext';
 import awakeningUrl from '@/assets/audio/music/awakening.mp3';
 import biteUrl from '@/assets/audio/music/bite.mp3';
@@ -21,10 +20,6 @@ const URLS: Record<MusicTrack, string> = {
   demon: demonUrl,
 };
 
-/** Fond discret : les boucles sont calées à −19 dB RMS, ce gain les place sous les effets sonores. */
-const LEVEL = 0.32;
-/** Pendant l'écran de victoire, la musique s'efface devant la fanfare. */
-const DUCKED_LEVEL = 0.1;
 const FADE_S = 1.8;
 
 interface Playing {
@@ -38,7 +33,6 @@ const loading = new Map<MusicTrack, Promise<AudioBuffer | null>>();
 let playing: Playing | null = null;
 /** Piste demandée par la page (la musique peut être coupée sans que la demande disparaisse). */
 let wanted: MusicTrack | null = null;
-let ducked = false;
 let unlockArmed = false;
 
 function load(ctx: AudioContext, track: MusicTrack): Promise<AudioBuffer | null> {
@@ -83,15 +77,11 @@ function armUnlock(ctx: AudioContext) {
   window.addEventListener('keydown', unlock, { once: true, capture: true });
 }
 
-async function sync(enabled: boolean) {
+async function sync() {
   const ctx = getAudioContext();
   if (!ctx) return;
-  const target = enabled ? wanted : null;
-  if (playing && playing.track === target) {
-    // Même piste : on ne fait qu'ajuster le niveau (effacement de victoire).
-    playing.gain.gain.setTargetAtTime(ducked ? DUCKED_LEVEL : LEVEL, ctx.currentTime, 0.4);
-    return;
-  }
+  const target = wanted;
+  if (playing && playing.track === target) return;
   if (playing) {
     fadeOut(playing, ctx);
     playing = null;
@@ -100,14 +90,15 @@ async function sync(enabled: boolean) {
   armUnlock(ctx);
   const buffer = await load(ctx, target);
   // La demande a pu changer pendant le chargement.
-  if (!buffer || wanted !== target || !enabled || playing) return;
+  if (!buffer || wanted !== target || playing) return;
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   source.loop = true;
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(ducked ? DUCKED_LEVEL : LEVEL, ctx.currentTime + FADE_S);
-  source.connect(gain).connect(ctx.destination);
+  gain.gain.linearRampToValueAtTime(1, ctx.currentTime + FADE_S);
+  // Le niveau final dépend du bus « musique » (réglage du joueur, ducking, filtre) : voir utils/audioMixer.ts.
+  source.connect(gain).connect(getMixer()?.input.music ?? ctx.destination);
   source.start();
   playing = { track: target, source, gain };
   void ctx.resume().catch(() => {});
@@ -118,14 +109,8 @@ async function sync(enabled: boolean) {
  * fondu. Rien n'est téléchargé tant qu'aucune piste n'est demandée, et seule la piste en cours est chargée.
  */
 export function useMusic() {
-  const settings = useSettingsStore();
-
-  watch(
-    () => settings.music,
-    (enabled) => void sync(enabled),
-  );
-  // Onglet masqué : silence (et le contexte se repose) ; au retour, la musique reprend.
   if (import.meta.client) {
+    // Onglet masqué : silence (et le contexte se repose) ; au retour, la musique reprend.
     useEventListener(document, 'visibilitychange', () => {
       const ctx = getAudioContext();
       if (!ctx) return;
@@ -136,18 +121,12 @@ export function useMusic() {
   /** Demande une piste (ou `null` pour le silence) ; la même piste deux fois de suite ne redémarre pas. */
   function setTrack(track: MusicTrack | null) {
     wanted = track;
-    ducked = false;
-    void sync(settings.music);
-  }
-  /** Baisse la musique pendant l'écran de victoire. */
-  function duck(on = true) {
-    ducked = on;
-    void sync(settings.music);
+    void sync();
   }
   /** Quitte le jeu : fondu puis silence. */
   function stop() {
     setTrack(null);
   }
 
-  return { setTrack, duck, stop };
+  return { setTrack, stop };
 }

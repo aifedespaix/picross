@@ -1,5 +1,6 @@
-import { useSettingsStore } from '@/stores/settings';
 import { getAudioContext } from '@/utils/audioContext';
+import { getMixer } from '@/utils/audioMixer';
+import type { BusName, DuckName } from '@/domain/mix';
 import closeUrl from '@/assets/audio/close.mp3';
 import emptyUrl from '@/assets/audio/empty.mp3';
 import valueUrl from '@/assets/audio/value.mp3';
@@ -17,6 +18,25 @@ const URLS = {
 } as const;
 
 export type SoundName = keyof typeof URLS;
+
+/** Bus de chaque son : les gestes de jeu sur « effets », le reste (fanfare comprise) aussi pour l'instant. */
+const BUS: Record<SoundName, BusName> = {
+  fill: 'sfx',
+  cross: 'sfx',
+  clear: 'sfx',
+  undo: 'sfx',
+  undo2: 'sfx',
+  win: 'sfx',
+};
+/** Creux que le son fait dans la musique et l'ambiance. */
+const DUCK: Record<SoundName, DuckName> = {
+  fill: 'sfx',
+  cross: 'sfx',
+  clear: 'sfx',
+  undo: 'sfx',
+  undo2: 'sfx',
+  win: 'win',
+};
 
 /** Écart entre deux sons d'une même rafale : assez court pour rester fluide, assez long pour les compter. */
 const BURST_STEP_S = 0.035;
@@ -51,8 +71,6 @@ function load(ctx: AudioContext, name: SoundName): Promise<AudioBuffer | null> {
  * la première lecture.
  */
 export function useSound() {
-  const settings = useSettingsStore();
-
   function start(name: SoundName, delay: number) {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -64,18 +82,18 @@ export function useSound() {
     }
     const source = ctx.createBufferSource();
     source.buffer = buffer;
-    source.connect(ctx.destination);
+    const mixer = getMixer();
+    source.connect(mixer ? mixer.input[BUS[name]] : ctx.destination);
+    if (delay === 0) mixer?.duck(DUCK[name]);
     source.start(ctx.currentTime + delay);
   }
 
   function play(name: SoundName) {
-    if (!settings.sound) return;
     start(name, 0);
   }
 
   /** Joue `count` fois le son, en cascade : on entend chaque case posée ou retirée. */
   function playBurst(name: SoundName, count: number) {
-    if (!settings.sound) return;
     const total = Math.min(count, BURST_MAX);
     for (let i = 0; i < total; i++) start(name, i * BURST_STEP_S);
   }

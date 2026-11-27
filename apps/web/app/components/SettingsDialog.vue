@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { VOLUME_NAMES } from '@/domain/mix';
 import { ASSIST_MODES, useSettingsStore, type ThemeChoice } from '@/stores/settings';
 import { hasVibration } from '@/utils/haptics';
 import BaseDialog from './BaseDialog.vue';
@@ -9,6 +10,7 @@ defineEmits<{ close: [] }>();
 
 const { t, locale, locales, setLocale } = useI18n();
 const settings = useSettingsStore();
+const volumeText = (value: number) => (value === 0 ? t('settings.volume.muted') : `${value} %`);
 const canVibrate = ref(false);
 onMounted(() => {
   canVibrate.value = hasVibration();
@@ -71,14 +73,31 @@ const THEMES: ThemeChoice[] = ['system', 'light', 'dark'];
         </div>
       </fieldset>
 
-      <label class="flex cursor-pointer items-center gap-3">
-        <input v-model="settings.sound" type="checkbox" class="size-5 accent-demon" />
-        <span class="text-sm font-medium">{{ t('settings.sound') }}</span>
-      </label>
-      <label class="flex cursor-pointer items-center gap-3">
-        <input v-model="settings.music" type="checkbox" class="size-5 accent-demon" />
-        <span class="text-sm font-medium">{{ t('settings.music') }}</span>
-      </label>
+      <fieldset class="grid gap-2.5">
+        <legend class="mb-1 text-sm font-medium">{{ t('settings.audio') }}</legend>
+        <label
+          v-for="name in VOLUME_NAMES"
+          :key="name"
+          class="grid grid-cols-[6.5rem_1fr_2.75rem] items-center gap-3 text-sm"
+        >
+          <span :class="name === 'master' ? 'font-medium' : ''">{{
+            t(`settings.volume.${name}`)
+          }}</span>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            :value="settings.volumes[name]"
+            :aria-valuetext="volumeText(settings.volumes[name])"
+            class="w-full accent-ink dark:accent-pearl"
+            @input="settings.setVolume(name, Number(($event.target as HTMLInputElement).value))"
+          />
+          <span class="text-right text-xs text-slate-500 tabular-nums dark:text-slate-400">{{
+            volumeText(settings.volumes[name])
+          }}</span>
+        </label>
+      </fieldset>
       <label class="flex cursor-pointer items-center gap-3">
         <input v-model="settings.showStats" type="checkbox" class="size-5 accent-demon" />
         <span class="text-sm font-medium">{{ t('settings.stats') }}</span>

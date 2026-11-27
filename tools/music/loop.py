@@ -92,3 +92,22 @@ def sidechain(sig, times, depth=0.5, rel=0.14):
         m = min(n - s, int(rel * SR * 4))
         env[s:s + m] = np.minimum(env[s:s + m], 1 - depth * np.exp(-np.arange(m) / (rel * SR * 0.4)))
     return sig * env
+
+
+def loopable(x, fade_s=3.0):
+    """Rend une texture bouclable : la fin (longueur `fade_s`) est fondue en équi-puissance dans le début, puis coupée."""
+    f = int(fade_s * SR)
+    head, tail = x[:, :f], x[:, -f:]
+    t = np.linspace(0, np.pi / 2, f)
+    body = x[:, :-f].copy()
+    body[:, :f] = head * np.sin(t) + tail * np.cos(t)
+    return body
+
+
+def noise_stereo(rng, n):
+    return np.stack([rng.standard_normal(n), rng.standard_normal(n)])
+
+
+def swell(n, cycles, phase=0.0, depth=0.5):
+    """Enveloppe lente périodique (nombre ENTIER de cycles : la boucle retombe sur elle-même)."""
+    return 1 - depth + depth * (0.5 - 0.5 * np.cos(2 * np.pi * cycles * np.arange(n) / n + phase))

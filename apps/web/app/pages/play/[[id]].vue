@@ -8,6 +8,7 @@ import Icon from '@/components/Icon.vue';
 import StarRating from '@/components/StarRating.vue';
 import WinReveal from '@/components/WinReveal.vue';
 import { useJourney, getChapters } from '@/composables/useJourney';
+import { useAmbience } from '@/composables/useAmbience';
 import { useMusic } from '@/composables/useMusic';
 import {
   localPuzzle,
@@ -44,6 +45,7 @@ const liking = ref(false);
 
 const journey = useJourney();
 const music = useMusic();
+const ambience = useAmbience();
 const puzzle = computed(() => game.puzzle.value);
 /** Parcours : la grille jouée compte pour la progression (et propose la suite). */
 const journeyMode = computed(() => route.query.parcours === '1');
@@ -127,9 +129,13 @@ watch(
   () => puzzle.value?.id,
   () => puzzle.value && music.setTrack(chosenTrack()),
 );
-onBeforeUnmount(() => music.stop());
+onBeforeUnmount(() => {
+  music.stop();
+  ambience.stop();
+});
 
 onMounted(async () => {
+  void ambience.start();
   if (puzzle.value) music.setTrack(chosenTrack());
   if (journeyMode.value) journey.load();
   // Reprise de la partie et de l'outil mémorisés : après l'hydratation, pour rester identique au HTML serveur.
@@ -153,7 +159,6 @@ const next = () => load(undefined, puzzle.value?.id);
 watch(
   () => game.won.value,
   (won) => {
-    music.duck(won);
     const current = puzzle.value;
     if (!won || !journeyMode.value || !current?.local) {
       earned.value = null;

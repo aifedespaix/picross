@@ -145,8 +145,15 @@
     "light": "Clair",
     "dark": "Sombre",
     "language": "Langue",
-    "sound": "Effets sonores",
-    "music": "Musique de fond",
+    "audio": "Audio",
+    "volume": {
+      "master": "Général",
+      "music": "Musique",
+      "ambience": "Ambiance",
+      "sfx": "Effets",
+      "ui": "Interface",
+      "muted": "Coupé"
+    },
     "corruption": "Ambiance : le démon",
     "corruptionHint": "Le fond rougit à mesure que vous faites des erreurs. Il les sent, sans vous dire où.",
     "stats": "Afficher le temps et les cases",
