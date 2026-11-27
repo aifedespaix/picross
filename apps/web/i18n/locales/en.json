@@ -145,6 +145,7 @@
     "dark": "Dark",
     "language": "Language",
     "sound": "Sound effects",
+    "music": "Background music",
     "corruption": "Mood: the demon",
     "corruptionHint": "The background reddens as you make mistakes. It senses them, without telling you where.",
     "stats": "Show time and filled cells",

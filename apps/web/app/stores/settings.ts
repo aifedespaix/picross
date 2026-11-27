@@ -15,6 +15,7 @@ const COOKIE = { maxAge: 60 * 60 * 24 * 365, sameSite: 'lax', path: '/' } as con
 export const useSettingsStore = defineStore('settings', () => {
   const theme = useCookie<ThemeChoice>('picross_theme', { ...COOKIE, default: () => 'system' });
   const sound = useCookie<boolean>('picross_sound', { ...COOKIE, default: () => true });
+  const music = useCookie<boolean>('picross_music', { ...COOKIE, default: () => true });
   const corruption = useCookie<boolean>('picross_corruption_on', {
     ...COOKIE,
     default: () => true,
@@ -39,5 +40,5 @@ export const useSettingsStore = defineStore('settings', () => {
     () => theme.value === 'dark' || (theme.value === 'system' && prefersDark.value),
   );
 
-  return { theme, sound, corruption, showStats, haptics, leftHanded, assist, isDark };
+  return { theme, sound, music, corruption, showStats, haptics, leftHanded, assist, isDark };
 });

@@ -23,3 +23,6 @@ data/
 .idea
 .vscode
 *.swp
+# rendus intermédiaires (wav, ~80 Mo) : se refont avec tools/music/build.sh
+tools/music/out/
+__pycache__/

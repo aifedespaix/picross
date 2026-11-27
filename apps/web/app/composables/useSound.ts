@@ -1,4 +1,5 @@
 import { useSettingsStore } from '@/stores/settings';
+import { getAudioContext } from '@/utils/audioContext';
 import closeUrl from '@/assets/audio/close.mp3';
 import emptyUrl from '@/assets/audio/empty.mp3';
 import valueUrl from '@/assets/audio/value.mp3';
@@ -22,16 +23,8 @@ const BURST_STEP_S = 0.035;
 /** Au-delà, la rafale n'ajoute plus de son (une grille entière ne doit pas devenir un bruit blanc). */
 const BURST_MAX = 24;
 
-let context: AudioContext | null = null;
 const buffers = new Map<SoundName, AudioBuffer>();
 const loading = new Map<SoundName, Promise<AudioBuffer | null>>();
-
-function getContext(): AudioContext | null {
-  if (context) return context;
-  if (typeof AudioContext === 'undefined') return null;
-  context = new AudioContext();
-  return context;
-}
 
 /** Charge et décode un son (une seule fois). Les erreurs réseau/décodage ne sont pas applicatives. */
 function load(ctx: AudioContext, name: SoundName): Promise<AudioBuffer | null> {
@@ -61,7 +54,7 @@ export function useSound() {
   const settings = useSettingsStore();
 
   function start(name: SoundName, delay: number) {
-    const ctx = getContext();
+    const ctx = getAudioContext();
     if (!ctx) return;
     void ctx.resume().catch(() => {});
     const buffer = buffers.get(name);

@@ -7,7 +7,8 @@ import Board from '@/components/Board.vue';
 import Icon from '@/components/Icon.vue';
 import StarRating from '@/components/StarRating.vue';
 import WinReveal from '@/components/WinReveal.vue';
-import { useJourney } from '@/composables/useJourney';
+import { useJourney, getChapters } from '@/composables/useJourney';
+import { useMusic } from '@/composables/useMusic';
 import {
   localPuzzle,
   localPuzzleById,
@@ -15,6 +16,7 @@ import {
   type PlayablePuzzle,
 } from '@/composables/usePlayableGame';
 import { findStep, starsFor, type Stars } from '@/domain/journey';
+import { chapterIdOfSlug, trackForChapter, trackForStage, type MusicTrack } from '@/domain/music';
 import { useAuthStore } from '@/stores/auth';
 import { useCorruptionStore } from '@/stores/corruption';
 import { useSettingsStore } from '@/stores/settings';
@@ -41,6 +43,7 @@ const settingsOpen = useState('settings-open', () => false);
 const liking = ref(false);
 
 const journey = useJourney();
+const music = useMusic();
 const puzzle = computed(() => game.puzzle.value);
 /** Parcours : la grille jouée compte pour la progression (et propose la suite). */
 const journeyMode = computed(() => route.query.parcours === '1');
@@ -107,7 +110,27 @@ const { data: initial } = await useAsyncData(`puzzle:${routeId.value ?? 'random'
 );
 if (initial.value) apply(initial.value);
 
+/**
+ * Musique de la grille : en parcours, celle de son chapitre ; en partie libre, celle que la corruption
+ * du moment inspire. Choisie au début de la grille (pas de changement de piste en pleine partie).
+ */
+function chosenTrack(): MusicTrack {
+  const current = puzzle.value;
+  if (journeyMode.value && current?.local) {
+    const chapter = chapterIdOfSlug(getChapters(), current.id.slice('local-'.length));
+    const track = chapter ? trackForChapter(chapter) : null;
+    if (track) return track;
+  }
+  return trackForStage(corruption.stage);
+}
+watch(
+  () => puzzle.value?.id,
+  () => puzzle.value && music.setTrack(chosenTrack()),
+);
+onBeforeUnmount(() => music.stop());
+
 onMounted(async () => {
+  if (puzzle.value) music.setTrack(chosenTrack());
   if (journeyMode.value) journey.load();
   // Reprise de la partie et de l'outil mémorisés : après l'hydratation, pour rester identique au HTML serveur.
   game.restore();
@@ -130,6 +153,7 @@ const next = () => load(undefined, puzzle.value?.id);
 watch(
   () => game.won.value,
   (won) => {
+    music.duck(won);
     const current = puzzle.value;
     if (!won || !journeyMode.value || !current?.local) {
       earned.value = null;
