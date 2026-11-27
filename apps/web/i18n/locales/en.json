@@ -15,6 +15,7 @@
     "settings": "Settings",
     "main": "Main navigation",
     "account": "Account",
+    "home": "Home",
     "journey": "Journey"
   },
   "common": {

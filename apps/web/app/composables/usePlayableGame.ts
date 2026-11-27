@@ -66,6 +66,7 @@ export function usePlayableGame() {
   const { play, playBurst } = useSound();
   const corruption = useCorruptionStore();
   const settings = useSettingsStore();
+  const played = usePlayedFlag();
   const puzzle = shallowRef<PlayablePuzzle | null>(null);
   const won = ref(false);
   const startedAt = ref<number | null>(null);
@@ -125,6 +126,7 @@ export function usePlayableGame() {
       wrongNow = wrong;
       if (isSolved(grid, clues.value)) {
         won.value = true;
+        played.value = true;
         corruption.purify(mistakes.value + hints.value === 0);
         timer.pause();
         elapsed.value = Date.now() - (startedAt.value ?? Date.now());

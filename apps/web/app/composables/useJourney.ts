@@ -22,6 +22,7 @@ export const getChapters = (): Chapter[] => (chapters ??= buildJourney(STARTER_P
 export function useJourney() {
   const progress = useState<Progress>('journey-progress', () => ({}));
   const ready = useState('journey-ready', () => false);
+  const played = usePlayedFlag();
 
   const views = computed(() => stepViews(getChapters(), progress.value));
   const current = computed(() => currentStep(views.value));
@@ -29,10 +30,13 @@ export function useJourney() {
 
   function load() {
     progress.value = loadProgress();
+    // Joueurs d'avant le cookie : on le pose dès qu'une progression existe.
+    if (Object.keys(progress.value).length > 0) played.value = true;
     ready.value = true;
   }
   function complete(slug: string, stars: Stars, time: number) {
     progress.value = recordResult(slug, stars, time);
+    played.value = true;
   }
   function reset() {
     clearProgress();

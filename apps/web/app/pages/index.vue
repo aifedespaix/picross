@@ -13,6 +13,8 @@ interface Faq {
   a: string;
 }
 
+definePageMeta({ middleware: 'returning' });
+
 const { t, tm, rt, locale } = useI18n();
 const localePath = useLocalePath();
 const site = useSiteConfig();

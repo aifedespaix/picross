@@ -15,6 +15,7 @@ const switchLocalePath = useSwitchLocalePath();
     >
       <p>© {{ new Date().getFullYear() }} {{ t('app.name') }} — {{ t('footer.tagline') }}</p>
       <nav :aria-label="t('footer.nav')" class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <NuxtLink :to="localePath('index')" class="hover:underline">{{ t('nav.home') }}</NuxtLink>
         <NuxtLink :to="localePath('journey')" class="hover:underline">{{
           t('nav.journey')
         }}</NuxtLink>
