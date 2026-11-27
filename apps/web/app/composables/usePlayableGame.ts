@@ -92,13 +92,16 @@ export function usePlayableGame() {
     timer.resume();
   }
 
+  /** Croix automatiques selon le réglage ; aussi appliquées après un indice. */
+  function autoMark(grid: Grid): Grid {
+    if (settings.assist === 'off') return grid;
+    const crossed = autoCross(grid, clues.value);
+    return settings.assist === 'assisted' ? assist.value(crossed) : crossed;
+  }
+
   const board = useBoard(createGrid(1, 1), {
     locked: won,
-    transform: (grid) => {
-      if (settings.assist === 'off') return grid;
-      const crossed = autoCross(grid, clues.value);
-      return settings.assist === 'assisted' ? assist.value(crossed) : crossed;
-    },
+    transform: autoMark,
     onPaint(states: CellState[]) {
       startTimer();
       // Un son par case modifiée : une ligne de 6 cases d'un coup s'entend comme 6 cases.
@@ -236,7 +239,7 @@ export function usePlayableGame() {
     if (hint.value) {
       const shown = hint.value;
       board.checkpoint();
-      board.load(applyHint(board.cells.value, shown), { keepHistory: true });
+      board.load(autoMark(applyHint(board.cells.value, shown)), { keepHistory: true });
       startTimer();
       play(shown.cells.some((cell) => cell.state === 'filled') ? 'fill' : 'cross');
       if (settings.haptics) vibrate(12);
